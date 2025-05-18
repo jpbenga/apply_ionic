@@ -1,0 +1,42 @@
+<!-- src/app/pages/login/login.page.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Connexion</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="ion-padding">
+    @if (loginForm) {
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <ion-item>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input type="email" formControlName="email"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="floating">Mot de passe</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
+        
+        <ion-button expand="block" type="submit" [disabled]="!loginForm.valid" class="ion-margin-top">
+          Se connecter
+        </ion-button>
+      </form>
+    }
+    
+    <ion-button expand="block" (click)="signInWithGoogle()" color="danger" class="ion-margin-top">
+      <ion-icon name="logo-google" slot="start"></ion-icon>
+      Se connecter avec Google
+    </ion-button>
+    
+    @if (errorMessage) {
+      <ion-text color="danger" class="ion-text-center ion-padding">
+        {{ errorMessage }}
+      </ion-text>
+    }
+    
+    <div class="ion-text-center ion-margin-top">
+      <ion-button routerLink="/signup" fill="clear">Créer un compte</ion-button>
+    </div>
+  </div>
+</ion-content>

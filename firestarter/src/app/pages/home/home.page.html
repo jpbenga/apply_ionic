@@ -1,0 +1,23 @@
+<!-- src/app/pages/home/home.page.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Accueil</ion-title>
+    <ion-button slot="end" fill="clear" (click)="logout()">
+      Déconnexion
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Bienvenue dans Firestarter</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      @if (user) {
+        <p>Vous êtes connecté avec : {{ user.email }}</p>
+      }
+      <p>Votre application Ionic/Firebase est prête à être développée !</p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

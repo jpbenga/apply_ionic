@@ -1,0 +1,7 @@
+{
+  "name": "firestarter",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

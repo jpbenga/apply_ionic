@@ -1,0 +1,61 @@
+<!-- src/app/pages/signup/signup.page.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Inscription</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="ion-padding">
+    @if (signupForm) {
+      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
+        <ion-item>
+          <ion-label position="floating">Email</ion-label>
+          <ion-input type="email" formControlName="email"></ion-input>
+        </ion-item>
+        
+        @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
+          <ion-text color="danger" class="ion-padding-start">
+            Veuillez entrer une adresse email valide
+          </ion-text>
+        }
+
+        <ion-item>
+          <ion-label position="floating">Mot de passe</ion-label>
+          <ion-input type="password" formControlName="password"></ion-input>
+        </ion-item>
+        
+        @if (signupForm.get('password')?.invalid && signupForm.get('password')?.touched) {
+          <ion-text color="danger" class="ion-padding-start">
+            Le mot de passe doit contenir au moins 6 caractères
+          </ion-text>
+        }
+
+        <ion-item>
+          <ion-label position="floating">Confirmer le mot de passe</ion-label>
+          <ion-input type="password" formControlName="confirmPassword"></ion-input>
+        </ion-item>
+        
+        @if (signupForm.hasError('mismatch') && signupForm.get('confirmPassword')?.touched) {
+          <ion-text color="danger" class="ion-padding-start">
+            Les mots de passe ne correspondent pas
+          </ion-text>
+        }
+        
+        <ion-button expand="block" type="submit" [disabled]="!signupForm.valid" class="ion-margin-top">
+          S'inscrire
+        </ion-button>
+      </form>
+    }
+    
+    @if (errorMessage) {
+      <ion-text color="danger" class="ion-text-center ion-padding">
+        {{ errorMessage }}
+      </ion-text>
+    }
+    
+    <div class="ion-text-center ion-margin-top">
+      <ion-button routerLink="/login" fill="clear">Déjà inscrit ? Se connecter</ion-button>
+    </div>
+  </div>
+</ion-content>

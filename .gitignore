@@ -1,0 +1,84 @@
+# Ionic & Capacitor
+/.ionic/
+/.sass-cache/
+/.sourcemaps/
+/.versions/
+/coverage/
+/dist/
+/node_modules/
+/platforms/
+/plugins/
+/www/
+.DS_Store
+Thumbs.db
+UserInterfaceState.xcuserstate
+
+# Capacitor specific
+/android/app/src/main/assets/capacitor.config.json
+/android/app/build/
+/ios/App/App/capacitor.config.json
+/ios/App/build/
+/ios/DerivedData/
+/ios/Pods/
+
+# IDE & Editors
+/.idea/
+/.vscode/
+/.project
+/.metadata/
+/.classpath
+*.sublime-project
+*.sublime-workspace
+.settings/
+
+# Angular
+/.angular/
+*.js.map
+*.d.ts
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment Variables - Ne pas commenter si vous avez des valeurs par défaut dans le repo
+# Décommentez si vous ne voulez pas partager vos config Firebase
+# /src/environments/*.ts
+
+# Firebase cache
+.firebase/
+
+# Firebase config
+# Pour ne pas partager vos identifiants Firebase - décommentez si nécessaire
+# firebase-debug.log
+# firebaserc
+# firebase.json
+
+# Système
+Thumbs.db
+.DS_Store
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+._*
+*~
+*.swp
+
+# Résultats de tests
+/coverage
+/reports
+/cypress/screenshots
+/cypress/videos
+
+# Compilé
+*.js.map
+*.ngfactory.ts
+*.css.shim.ts
+*.ngsummary.json
+*.metadata.json
+
+# Déploiement
+/tmp/
+/.tmp/
