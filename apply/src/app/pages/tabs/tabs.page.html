@@ -1,0 +1,27 @@
+<!-- src/app/pages/tabs/tabs.page.html -->
+<ion-header>
+  <app-user-header></app-user-header>
+</ion-header>
+
+<ion-content>
+  <ion-tabs>
+    <ion-router-outlet></ion-router-outlet>
+    
+    <ion-tab-bar slot="bottom">
+      <ion-tab-button tab="dashboard" href="/tabs/dashboard">
+        <ion-icon name="home"></ion-icon>
+        <ion-label>Candidatures</ion-label>
+      </ion-tab-button>
+      
+      <ion-tab-button tab="postuler" href="/tabs/postuler">
+        <ion-icon name="add"></ion-icon>
+        <ion-label>Postuler</ion-label>
+      </ion-tab-button>
+      
+      <ion-tab-button tab="stats" href="/tabs/stats">
+        <ion-icon name="stats-chart"></ion-icon>
+        <ion-label>Statistiques</ion-label>
+      </ion-tab-button>
+    </ion-tab-bar>
+  </ion-tabs>
+</ion-content>

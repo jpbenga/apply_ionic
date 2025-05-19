@@ -1,0 +1,10 @@
+// src/app/pages/tabs/tabs.page.scss
+ion-tab-bar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+  
+  ion-content {
+    --padding-bottom: 56px; // Ajuster selon la hauteur de la barre d'onglets
+  }

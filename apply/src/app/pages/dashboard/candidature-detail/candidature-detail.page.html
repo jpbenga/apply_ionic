@@ -1,0 +1,71 @@
+<!-- src/app/pages/dashboard/candidature-detail/candidature-detail.page.html -->
+<app-user-header></app-user-header>
+
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ candidature.entreprise }}</ion-card-title>
+      <ion-chip [color]="candidature.status === 'pending' ? 'warning' : 
+                 candidature.status === 'interview' ? 'primary' : 
+                 candidature.status === 'accepted' ? 'success' : 'danger'">
+        {{ candidature.status === 'pending' ? 'En attente' : 
+           candidature.status === 'interview' ? 'Entretien' : 
+           candidature.status === 'accepted' ? 'Acceptée' : 'Refusée' }}
+      </ion-chip>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-label>
+          <h2>{{ candidature.poste }}</h2>
+          <p>Postulé le {{ candidature.datePostulation | date:'dd/MM/yyyy' }}</p>
+        </ion-label>
+      </ion-item>
+      
+      <ion-item lines="none">
+        <ion-label>
+          <h3>Description</h3>
+          <p>{{ candidature.description }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Suivi</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let suivi of candidature.suivis">
+          <ion-icon name="{{ 
+            suivi.type === 'email' ? 'mail' : 
+            suivi.type === 'appel' ? 'call' : 'calendar' 
+          }}" slot="start"></ion-icon>
+          <ion-label>
+            <h2>{{ suivi.type === 'email' ? 'Email' : 
+                  suivi.type === 'appel' ? 'Appel téléphonique' : 
+                  suivi.type === 'entretien' ? 'Entretien' : 
+                  suivi.type === 'test' ? 'Test technique' : 'Autre' }}</h2>
+            <p>{{ suivi.date | date:'dd/MM/yyyy' }}</p>
+            <p>{{ suivi.notes }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+      
+      <ion-button expand="block" class="ion-margin-top">
+        Ajouter un suivi
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <div class="ion-padding">
+    <ion-button expand="block" color="primary">
+      <ion-icon name="mail" slot="start"></ion-icon>
+      Envoyer un email de relance
+    </ion-button>
+    <ion-button expand="block" color="secondary" class="ion-margin-top">
+      <ion-icon name="document-text" slot="start"></ion-icon>
+      Voir CV et lettre
+    </ion-button>
+  </div>
+</ion-content>

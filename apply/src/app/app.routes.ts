@@ -1,10 +1,10 @@
-// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { authState } from '@angular/fire/auth';
 import { Auth } from '@angular/fire/auth';
 import { inject } from '@angular/core';
 
+// Guard pour rediriger les utilisateurs non connectés vers la page de login
 const redirectUnauthorizedToLogin = () => {
   const auth = inject(Auth);
   return authState(auth).pipe(
@@ -12,32 +12,63 @@ const redirectUnauthorizedToLogin = () => {
   );
 };
 
+// Guard pour rediriger les utilisateurs déjà connectés vers la page d'accueil (tabs/dashboard)
 const redirectLoggedInToHome = () => {
   const auth = inject(Auth);
   return authState(auth).pipe(
-    map(user => !user ? true : ['home'])
+    map(user => !user ? true : ['tabs', 'dashboard'])
   );
 };
 
+// Configuration des routes
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'login',
     pathMatch: 'full',
   },
   {
     path: 'login',
-    loadComponent: () => import('./pages/login/login.page').then(m => m.LoginPage),
+    loadComponent: () => import('./pages/auth/login/login.page').then(m => m.LoginPage),
     canActivate: [redirectLoggedInToHome]
   },
   {
     path: 'signup',
-    loadComponent: () => import('./pages/signup/signup.page').then(m => m.SignupPage),
+    loadComponent: () => import('./pages/auth/signup/signup.page').then(m => m.SignupPage),
     canActivate: [redirectLoggedInToHome]
   },
   {
-    path: 'home',
-    loadComponent: () => import('./pages/home/home.page').then(m => m.HomePage),
+    path: 'tabs',
+    loadComponent: () => import('./pages/tabs/tabs.page').then(m => m.TabsPage),
+    canActivate: [redirectUnauthorizedToLogin],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
+      },
+      {
+        path: 'postuler',
+        loadComponent: () => import('./pages/postuler/postuler.page').then(m => m.PostulerPage)
+      },
+      {
+        path: 'stats',
+        loadComponent: () => import('./pages/stats/stats.page').then(m => m.StatsPage)
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      }
+    ]
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage),
     canActivate: [redirectUnauthorizedToLogin]
   },
+  {
+    path: 'candidature/:id',
+    loadComponent: () => import('./pages/dashboard/candidature-detail/candidature-detail.page').then(m => m.CandidatureDetailPage),
+    canActivate: [redirectUnauthorizedToLogin]
+  }
 ];

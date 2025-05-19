@@ -1,0 +1,205 @@
+<!-- src/app/pages/stats/stats.page.html -->
+<ion-content class="ion-padding page-content">
+  <!-- Sélecteur de période -->
+  <ion-segment [(ngModel)]="selectedPeriod" (ionChange)="segmentChanged($event)">
+    <ion-segment-button value="week">
+      <ion-label>Semaine</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="month">
+      <ion-label>Mois</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="year">
+      <ion-label>Année</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Statistiques générales -->
+  <ion-grid class="stats-grid">
+    <ion-row>
+      <ion-col size="6">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-number">12</div>
+            <div class="stat-label">Candidatures</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-number">4</div>
+            <div class="stat-label">Entretiens</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-number">33%</div>
+            <div class="stat-label">Taux de conversion</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-number">1</div>
+            <div class="stat-label">Offres reçues</div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Graphique (à remplacer par un vrai graphique) -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Activité de recherche</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="chart-placeholder">
+        <!-- Emplacement pour un graphique -->
+        <div class="chart-bars">
+          <div class="bar" style="height: 30%"></div>
+          <div class="bar" style="height: 50%"></div>
+          <div class="bar" style="height: 20%"></div>
+          <div class="bar" style="height: 80%"></div>
+          <div class="bar" style="height: 60%"></div>
+          <div class="bar" style="height: 40%"></div>
+          <div class="bar" style="height: 90%"></div>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Réalisations -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Réalisations</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item>
+          <ion-icon name="trophy" slot="start" color="warning"></ion-icon>
+          <ion-label>
+            <h2>Premier entretien obtenu</h2>
+            <p>Vous avez décroché votre premier entretien !</p>
+          </ion-label>
+          <ion-badge color="warning" slot="end">+50 pts</ion-badge>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="flame" slot="start" color="danger"></ion-icon>
+          <ion-label>
+            <h2>Candidature streak</h2>
+            <p>5 jours consécutifs d'activité</p>
+          </ion-label>
+          <ion-badge color="danger" slot="end">+30 pts</ion-badge>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="trending-up" slot="start" color="success"></ion-icon>
+          <ion-label>
+            <h2>Progrès constant</h2>
+            <p>10 candidatures en un mois</p>
+          </ion-label>
+          <ion-badge color="success" slot="end">+25 pts</ion-badge>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Objectifs -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Objectifs</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-label>
+          <h2>Candidatures hebdomadaires</h2>
+          <p>5 candidatures par semaine</p>
+          <div class="progress-bar">
+            <div class="progress" style="width: 80%"></div>
+          </div>
+          <p class="progress-text">4/5 cette semaine</p>
+        </ion-label>
+      </ion-item>
+      <ion-item lines="none">
+        <ion-label>
+          <h2>Suivi des réponses</h2>
+          <p>Relancer après 7 jours sans réponse</p>
+          <div class="progress-bar">
+            <div class="progress" style="width: 50%"></div>
+          </div>
+          <p class="progress-text">1/2 relances effectuées</p>
+        </ion-label>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+
+<style>
+.stats-grid {
+  margin-top: 16px;
+}
+
+.stat-card {
+  text-align: center;
+  margin: 0;
+}
+
+.stat-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--ion-color-primary);
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+}
+
+.chart-placeholder {
+  height: 200px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 10px;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  justify-content: space-around;
+}
+
+.bar {
+  width: 10%;
+  background-color: var(--ion-color-primary);
+  border-radius: 4px 4px 0 0;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.progress {
+  height: 100%;
+  background-color: var(--ion-color-success);
+  border-radius: 4px;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  margin-top: 4px;
+}
+</style>

@@ -35,3 +35,13 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* Solution minimale pour l'espacement du contenu sous le header */
+ion-content {
+    padding-top: 70px !important;
+}
+
+ion-popover {
+    --offset-y: 5px;
+    --max-width: 90%;
+  }

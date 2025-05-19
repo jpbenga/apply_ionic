@@ -1,0 +1,82 @@
+<!-- src/app/pages/dashboard/dashboard.page.html -->
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Mes candidatures</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Liste des candidatures en cours...</p>
+      
+      <!-- Exemple de liste de candidatures -->
+      <ion-list>
+        <ion-item button [routerLink]="['/candidature', '1']">
+          <ion-label>
+            <h2>Développeur Full Stack</h2>
+            <p>Entreprise XYZ</p>
+          </ion-label>
+          <ion-badge slot="end" color="primary">Entretien</ion-badge>
+        </ion-item>
+        
+        <ion-item button [routerLink]="['/candidature', '2']">
+          <ion-label>
+            <h2>Développeur Mobile</h2>
+            <p>Startup ABC</p>
+          </ion-label>
+          <ion-badge slot="end" color="warning">En attente</ion-badge>
+        </ion-item>
+        
+        <ion-item button [routerLink]="['/candidature', '3']">
+          <ion-label>
+            <h2>Ingénieur DevOps</h2>
+            <p>Tech Company</p>
+          </ion-label>
+          <ion-badge slot="end" color="success">Acceptée</ion-badge>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+  
+  <!-- Statistiques rapides -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Aperçu rapide</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="stats-container">
+        <div class="stat-item">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Candidatures</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">1</div>
+          <div class="stat-label">Entretiens</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">1</div>
+          <div class="stat-label">Acceptées</div>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>
+
+<style>
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin-top: 10px;
+}
+.stat-item {
+  padding: 10px;
+}
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--ion-color-primary);
+}
+.stat-label {
+  font-size: 14px;
+  color: var(--ion-color-medium);
+}
+</style>

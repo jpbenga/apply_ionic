@@ -1,0 +1,66 @@
+<!-- src/app/pages/postuler/postuler.page.html -->
+<ion-content class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Nouvelle candidature</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="floating">Nom de l'entreprise</ion-label>
+        <ion-input type="text"></ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="floating">Poste</ion-label>
+        <ion-input type="text"></ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="floating">Lien vers l'offre</ion-label>
+        <ion-input type="url"></ion-input>
+      </ion-item>
+      
+      <ion-item lines="none">
+        <ion-label position="stacked">Description du poste</ion-label>
+        <ion-textarea rows="6" placeholder="Collez ici le contenu de l'offre d'emploi..."></ion-textarea>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+  
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Génération intelligente</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Générez un CV et une lettre de motivation personnalisés pour cette offre d'emploi.</p>
+      
+      <ion-segment value="template1">
+        <ion-segment-button value="template1">
+          <ion-label>Template 1</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="template2">
+          <ion-label>Template 2</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="template3">
+          <ion-label>Template 3</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+      
+      <ion-button expand="block" class="ion-margin-top">
+        Générer CV et lettre
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+  
+  <div class="submit-container">
+    <ion-button expand="block" color="primary">
+      Enregistrer la candidature
+    </ion-button>
+  </div>
+</ion-content>
+
+<style>
+.submit-container {
+  margin: 20px 0;
+}
+</style>
