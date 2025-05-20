@@ -1,61 +1,90 @@
-<!-- src/app/pages/signup/signup.page.html -->
+<!-- src/app/pages/auth/signup/signup.page.html -->
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Inscription</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login" text="Retour"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Créer un compte</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <div class="ion-padding">
-    @if (signupForm) {
-      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()">
-        <ion-item>
-          <ion-label position="floating">Email</ion-label>
-          <ion-input type="email" formControlName="email"></ion-input>
-        </ion-item>
-        
-        @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
-          <ion-text color="danger" class="ion-padding-start">
-            Veuillez entrer une adresse email valide
-          </ion-text>
-        }
+<ion-content class="ion-padding">
+  <div class="signup-container">
+    <h2 class="ion-text-center">Rejoignez Apply</h2>
+    <p class="ion-text-center">Créez un compte pour gérer vos candidatures</p>
 
-        <ion-item>
-          <ion-label position="floating">Mot de passe</ion-label>
-          <ion-input type="password" formControlName="password"></ion-input>
-        </ion-item>
-        
-        @if (signupForm.get('password')?.invalid && signupForm.get('password')?.touched) {
-          <ion-text color="danger" class="ion-padding-start">
-            Le mot de passe doit contenir au moins 6 caractères
-          </ion-text>
-        }
+    <!-- Message de succès -->
+    <ion-card *ngIf="successMessage" color="success" class="success-card">
+      <ion-card-content>
+        <ion-icon name="checkmark-circle-outline" size="large"></ion-icon>
+        <p>{{ successMessage }}</p>
+        <p>Redirection en cours...</p>
+      </ion-card-content>
+    </ion-card>
 
-        <ion-item>
-          <ion-label position="floating">Confirmer le mot de passe</ion-label>
-          <ion-input type="password" formControlName="confirmPassword"></ion-input>
-        </ion-item>
-        
-        @if (signupForm.hasError('mismatch') && signupForm.get('confirmPassword')?.touched) {
-          <ion-text color="danger" class="ion-padding-start">
-            Les mots de passe ne correspondent pas
-          </ion-text>
-        }
-        
-        <ion-button expand="block" type="submit" [disabled]="!signupForm.valid" class="ion-margin-top">
-          S'inscrire
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" *ngIf="!successMessage">
+      <!-- Champs du formulaire... -->
+      <ion-item>
+        <ion-label position="floating">Nom complet</ion-label>
+        <ion-input type="text" formControlName="displayName"></ion-input>
+      </ion-item>
+      <div *ngIf="signupForm.get('displayName')?.invalid && signupForm.get('displayName')?.touched" class="error-message">
+        <ion-text color="danger">
+          Veuillez saisir votre nom (3 caractères minimum)
+        </ion-text>
+      </div>
+      
+      <ion-item>
+        <ion-label position="floating">Email</ion-label>
+        <ion-input type="email" formControlName="email"></ion-input>
+      </ion-item>
+      <div *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched" class="error-message">
+        <ion-text color="danger">
+          Veuillez saisir un email valide
+        </ion-text>
+      </div>
+      
+      <ion-item>
+        <ion-label position="floating">Mot de passe</ion-label>
+        <ion-input type="password" formControlName="password"></ion-input>
+      </ion-item>
+      <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched" class="error-message">
+        <ion-text color="danger">
+          Le mot de passe doit contenir au moins 6 caractères
+        </ion-text>
+      </div>
+      
+      <ion-item>
+        <ion-label position="floating">Confirmer le mot de passe</ion-label>
+        <ion-input type="password" formControlName="confirmPassword"></ion-input>
+      </ion-item>
+      <div *ngIf="signupForm.hasError('mismatch') && signupForm.get('confirmPassword')?.touched" class="error-message">
+        <ion-text color="danger">
+          Les mots de passe ne correspondent pas
+        </ion-text>
+      </div>
+      
+      <div class="button-container">
+        <ion-button expand="block" type="submit" [disabled]="!signupForm.valid || isLoading" class="ion-margin-top">
+          <ion-spinner *ngIf="isLoading" name="dots"></ion-spinner>
+          <span *ngIf="!isLoading">Créer mon compte</span>
         </ion-button>
-      </form>
-    }
+        
+        <ion-button expand="block" fill="outline" routerLink="/login" [disabled]="isLoading" class="ion-margin-top">
+          Annuler
+        </ion-button>
+      </div>
+    </form>
     
-    @if (errorMessage) {
-      <ion-text color="danger" class="ion-text-center ion-padding">
+    <div *ngIf="errorMessage" class="error-container">
+      <ion-text color="danger">
         {{ errorMessage }}
       </ion-text>
-    }
+    </div>
     
-    <div class="ion-text-center ion-margin-top">
-      <ion-button routerLink="/login" fill="clear">Déjà inscrit ? Se connecter</ion-button>
+    <div class="ion-text-center ion-margin-top" *ngIf="!successMessage">
+      <p>Vous avez déjà un compte ?</p>
+      <ion-button routerLink="/login" fill="clear">Se connecter</ion-button>
     </div>
   </div>
 </ion-content>

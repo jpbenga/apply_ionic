@@ -1,8 +1,7 @@
-// src/app/pages/auth/login/login.page.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router'; // Ajoutez RouterModule ici
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, 
   IonItem, IonLabel, IonInput, IonButton, 
@@ -20,6 +19,7 @@ import { logoGoogle } from 'ionicons/icons';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterModule, // Ajoutez cette ligne
     IonHeader, 
     IonToolbar, 
     IonTitle, 

@@ -1,0 +1,43 @@
+// src/app/pages/auth/signup/signup.page.scss
+.signup-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .error-message {
+    font-size: 0.8rem;
+    margin-left: 16px;
+    margin-top: 5px;
+  }
+  
+  .error-container {
+    text-align: center;
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 5px;
+    background-color: rgba(var(--ion-color-danger-rgb), 0.1);
+  }
+  
+  .success-card {
+    text-align: center;
+    margin: 20px 0;
+    
+    ion-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    
+    p {
+      margin: 5px 0;
+    }
+  }
+  
+  ion-item {
+    margin-bottom: 10px;
+    --border-radius: 5px;
+  }
+  
+  .button-container {
+    margin-top: 20px;
+  }
