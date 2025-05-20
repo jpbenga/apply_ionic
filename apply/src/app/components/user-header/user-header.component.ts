@@ -3,9 +3,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { 
-  IonHeader, IonToolbar, IonTitle, IonButtons, 
+  IonToolbar, IonTitle, IonButtons, 
   IonButton, IonIcon, IonPopover, IonContent,
-  IonItem, IonLabel, IonList, IonAvatar, IonBackButton
+  IonItem, IonLabel, IonList, IonAvatar
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../services/auth/auth.service';
 import { Router } from '@angular/router';
@@ -21,8 +21,7 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
-    IonHeader, 
+    RouterModule, 
     IonToolbar, 
     IonTitle, 
     IonButtons, 
@@ -34,7 +33,6 @@ import { Subscription } from 'rxjs';
     IonLabel,
     IonList,
     IonAvatar,
-    IonBackButton
   ]
 })
 export class UserHeaderComponent implements OnInit, OnDestroy {

@@ -4,10 +4,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { 
-  IonContent, IonHeader, IonTitle, IonToolbar, 
+  IonContent, 
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonItem, IonLabel, IonList, IonButton, 
-  IonIcon, IonBadge, IonChip
+  IonIcon, IonChip
 } from '@ionic/angular/standalone';
 import { HeaderService } from '../../../services/header/header.service';
 import { UserHeaderComponent } from '../../../components/user-header/user-header.component';
@@ -23,9 +23,6 @@ import { documentText, mail, call, calendar } from 'ionicons/icons';
     CommonModule, 
     FormsModule,
     IonContent, 
-    IonHeader, 
-    IonTitle, 
-    IonToolbar,
     IonCard, 
     IonCardHeader, 
     IonCardTitle, 
@@ -34,8 +31,7 @@ import { documentText, mail, call, calendar } from 'ionicons/icons';
     IonLabel, 
     IonList, 
     IonButton,
-    IonIcon, 
-    IonBadge, 
+    IonIcon,  
     IonChip,
     UserHeaderComponent
   ]
