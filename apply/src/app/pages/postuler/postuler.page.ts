@@ -1,57 +1,36 @@
-// src/app/pages/postuler/postuler.page.ts
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { 
-  IonContent, 
-  IonCard, 
-  IonCardHeader, 
-  IonCardTitle, 
-  IonCardContent, 
-  IonItem, 
-  IonLabel, 
-  IonInput, 
-  IonTextarea, 
-  IonButton, 
-  IonSegment, 
-  IonSegmentButton 
+import {
+  IonContent, IonHeader, IonToolbar, IonTitle,
+  IonButton, IonIcon, IonLabel // IonLabel pour le bouton si besoin, IonIcon pour les icônes des boutons
 } from '@ionic/angular/standalone';
-import { HeaderService } from 'src/app/services/header/header.service';
+import { HeaderService } from 'src/app/services/header/header.service'; // Tu peux garder HeaderService
 
 @Component({
   selector: 'app-postuler',
   templateUrl: './postuler.page.html',
-  styleUrls: ['./postuler.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule,
-    IonContent, 
-    IonCard, 
-    IonCardHeader, 
-    IonCardTitle, 
-    IonCardContent, 
-    IonItem, 
-    IonLabel, 
-    IonInput, 
-    IonTextarea, 
-    IonButton, 
-    IonSegment, 
-    IonSegmentButton
+    CommonModule, IonContent, IonHeader, IonToolbar, IonTitle,
+    IonButton, IonIcon, IonLabel // Assure-toi que les imports correspondent à ton HTML minimal
   ]
 })
-export class PostulerPage implements OnInit {
+export class PostulerPage {
+  constructor(private headerService: HeaderService) { } // HeaderService peut être utilisé si UserHeaderComponent est ajouté ici plus tard
 
-  constructor(private headerService: HeaderService) { }
-
-  ngOnInit() {
-    // Initialisation de base
+  ionViewWillEnter() {
+    // Si tu utilises UserHeaderComponent DANS CETTE PAGE, tu mettrais à jour le titre ici
+    // this.headerService.updateTitle('Postuler');
+    // this.headerService.setShowBackButton(false); // Typique pour une page racine d'onglet
   }
 
-  // Cet événement est appelé CHAQUE FOIS que la page devient visible
-  ionViewWillEnter() {
-    console.log('Postuler: ionViewWillEnter');
-    this.headerService.updateTitle('Postuler');
-    this.headerService.setShowBackButton(false);
+  selectCv() {
+    console.log('Clic sur Bouton Test "Choisir CV" dans PostulerPage');
+    alert('Clic sur Bouton Test "Choisir CV" dans PostulerPage');
+  }
+
+  generateApplication() {
+    console.log('Clic sur Bouton Test "Générer" dans PostulerPage');
+    alert('Clic sur Bouton Test "Générer" dans PostulerPage');
   }
 }
