@@ -23,7 +23,7 @@
 
   <ion-item lines="full" class="ion-margin-top">
     <ion-label>Votre CV</ion-label>
-    <ion-button slot="end" fill="outline" (click)="triggerFileInput()">
+    <ion-button slot="end" fill="outline" (click)="triggerFileInput()" [disabled]="isExtractingText">
       <ion-icon slot="start" name="document-attach-outline"></ion-icon>
       Choisir un CV (DOCX/PDF)
     </ion-button>
@@ -35,22 +35,24 @@
   <ion-item *ngIf="selectedFileName && !isExtractingText" lines="none">
     <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
     <ion-label color="medium"><small>{{ selectedFileName }}</small></ion-label>
-    <ion-button fill="clear" slot="end" (click)="clearFileSelection()" color="danger">
+    <ion-button fill="clear" slot="end" (click)="clearFileSelection()" color="danger" [disabled]="isExtractingText">
       <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
     </ion-button>
   </ion-item>
 
   <ion-item *ngIf="isExtractingText" lines="none">
     <ion-spinner name="crescent" slot="start"></ion-spinner>
-    <ion-label>Extraction du texte en cours...</ion-label>
+    <ion-label>Traitement du CV en cours...</ion-label>
   </ion-item>
-  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText !== null && (selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.name.toLowerCase().endsWith('.docx'))" lines="none">
+
+  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText !== null && (selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.name.toLowerCase().endsWith('.docx') || selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf'))" lines="none">
     <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
-    <ion-label color="success"><small>Texte du DOCX extrait.</small></ion-label>
+    <ion-label color="success"><small>Texte du CV ({{ selectedFile.name.toLowerCase().endsWith('.docx') ? 'DOCX' : 'PDF' }}) extrait.</small></ion-label>
   </ion-item>
-  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText === null && (selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.name.toLowerCase().endsWith('.docx')) && selectedFileName" lines="none">
+
+  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText === null && (selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.name.toLowerCase().endsWith('.docx') || selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf')) && selectedFileName" lines="none">
     <ion-icon name="warning" slot="start" color="danger"></ion-icon>
-    <ion-label color="danger"><small>Échec de l'extraction du texte du DOCX.</small></ion-label>
+    <ion-label color="danger"><small>Échec de l'extraction du texte du CV ({{ selectedFile.name.toLowerCase().endsWith('.docx') ? 'DOCX' : 'PDF' }}).</small></ion-label>
   </ion-item>
 
   <div class="ion-margin-top">
@@ -70,7 +72,7 @@
     </ion-grid>
   </div>
 
-  <ion-button expand="block" class="ion-margin-top" (click)="generateApplication()">
+  <ion-button expand="block" class="ion-margin-top" (click)="generateApplication()" [disabled]="isExtractingText">
     <ion-icon slot="start" name="sparkles-outline"></ion-icon>
     Générer CV et Lettre avec l'IA
   </ion-button>
