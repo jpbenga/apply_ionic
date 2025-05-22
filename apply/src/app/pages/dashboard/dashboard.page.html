@@ -1,11 +1,44 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Tableau de Bord (Test)</ion-title>
+    <ion-title>Tableau de Bord</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="goToPostulerPage()">
+        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <p>Contenu minimal pour le Tableau de Bord.</p>
-  <p>Ce texte est-il sélectionnable ?</p>
-  <ion-button (click)="testDashboardClick()">Test Clic Dashboard</ion-button>
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Chargement des candidatures...</p>
+  </div>
+
+  <div *ngIf="errorLoading && !isLoading" class="ion-text-center ion-padding">
+    <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
+    <p style="color: var(--ion-color-danger);">{{ errorLoading }}</p>
+    <ion-button fill="outline" (click)="loadCandidatures()">Réessayer</ion-button>
+  </div>
+
+  <div *ngIf="!(candidatures$ | async)?.length && !isLoading && !errorLoading" class="ion-text-center ion-padding">
+    <ion-icon name="file-tray-outline" size="large" color="medium"></ion-icon>
+    <p>Aucune candidature pour le moment.</p>
+    <ion-button fill="outline" (click)="goToPostulerPage()">Créer une candidature</ion-button>
+  </div>
+
+  <ion-list *ngIf="(candidatures$ | async)?.length && !isLoading && !errorLoading">
+    <ion-item *ngFor="let candidature of (candidatures$ | async)" (click)="viewCandidatureDetail(candidature.id)" detail="true">
+      <ion-label>
+        <h2>{{ candidature.poste || 'Poste non défini' }}</h2>
+        <p>{{ candidature.entreprise || 'Entreprise non définie' }}</p>
+        <p><ion-text color="medium" *ngIf="candidature.dateCandidature">Postulé le: {{ candidature.dateCandidature.toDate() | date:'dd/MM/yyyy' }}</ion-text></p>
+      </ion-label>
+      <ion-badge slot="end" [color]="candidature.statut === 'acceptee' ? 'success' : (candidature.statut === 'entretien_planifie' ? 'primary' : 'medium')">{{ candidature.statut }}</ion-badge>
+    </ion-item>
+  </ion-list>
 </ion-content>
