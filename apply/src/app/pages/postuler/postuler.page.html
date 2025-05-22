@@ -1,4 +1,4 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
     <ion-title>Postuler</ion-title>
   </ion-toolbar>
@@ -18,13 +18,13 @@
       placeholder="Entrez ou collez la description complète de l'offre d'emploi..."
       aria-label="Offre d'emploi"
       [(ngModel)]="jobOfferText"
-      [disabled]="isExtractingText || isGeneratingAIContent">
+      [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
     </ion-textarea>
   </ion-item>
 
   <ion-item lines="full" class="ion-margin-top">
     <ion-label>Votre CV</ion-label>
-    <ion-button slot="end" fill="outline" (click)="triggerFileInput()" [disabled]="isExtractingText || isGeneratingAIContent">
+    <ion-button slot="end" fill="outline" (click)="triggerFileInput()" [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
       <ion-icon slot="start" name="document-attach-outline"></ion-icon>
       Choisir un CV (DOCX/PDF)
     </ion-button>
@@ -36,7 +36,7 @@
   <ion-item *ngIf="selectedFileName && !isExtractingText" lines="none">
     <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
     <ion-label color="medium"><small>{{ selectedFileName }}</small></ion-label>
-    <ion-button fill="clear" slot="end" (click)="clearFileSelection()" color="danger" [disabled]="isExtractingText || isGeneratingAIContent">
+    <ion-button fill="clear" slot="end" (click)="clearFileSelection()" color="danger" [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
       <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
     </ion-button>
   </ion-item>
@@ -46,12 +46,12 @@
     <ion-label>Traitement du CV en cours...</ion-label>
   </ion-item>
 
-  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText !== null && (selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.name.toLowerCase().endsWith('.docx') || selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf'))" lines="none">
+  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText !== null" lines="none">
     <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
     <ion-label color="success"><small>Texte du CV ({{ getFileTypeLabel(selectedFile) }}) extrait.</small></ion-label>
   </ion-item>
 
-  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText === null && (selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.name.toLowerCase().endsWith('.docx') || selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf')) && selectedFileName" lines="none">
+  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText === null && selectedFileName" lines="none">
     <ion-icon name="warning" slot="start" color="danger"></ion-icon>
     <ion-label color="danger"><small>Échec de l'extraction du texte du CV ({{ getFileTypeLabel(selectedFile) }}).</small></ion-label>
   </ion-item>
@@ -73,17 +73,17 @@
     </ion-grid>
   </div>
 
-  <ion-button expand="block" class="ion-margin-top" (click)="generateApplication()" [disabled]="!jobOfferText || !extractedCvText || isGeneratingAIContent || isExtractingText">
+  <ion-button expand="block" class="ion-margin-top" (click)="generateApplication()" [disabled]="!jobOfferText || !extractedCvText || isGeneratingAIContent || isExtractingText || isSavingCandidature">
     <ion-spinner *ngIf="isGeneratingAIContent" name="crescent" slot="start"></ion-spinner>
     <ion-icon *ngIf="!isGeneratingAIContent" slot="start" name="sparkles-outline"></ion-icon>
-    {{ isGeneratingAIContent ? 'Génération en cours...' : 'Générer CV et Lettre avec l\'IA' }}
+    {{ isGeneratingAIContent ? 'Génération IA en cours...' : 'Générer Analyse & Lettre' }}
   </ion-button>
 
   <div *ngIf="aiError" class="ion-padding ion-text-center" style="color: var(--ion-color-danger);">
     <p>{{ aiError }}</p>
   </div>
 
-  <div *ngIf="atsAnalysisResult && !isGeneratingAIContent" class="ion-margin-top">
+  <div *ngIf="atsAnalysisResult && !isGeneratingAIContent && !isSavingCandidature" class="ion-margin-top">
     <ion-card>
       <ion-card-header>
         <ion-card-title>Analyse ATS</ion-card-title>
@@ -96,7 +96,7 @@
     </ion-card>
   </div>
 
-  <div *ngIf="generatedCoverLetter && !isGeneratingAIContent" class="ion-margin-top">
+  <div *ngIf="generatedCoverLetter && !isGeneratingAIContent && !isSavingCandidature" class="ion-margin-top">
     <ion-card>
       <ion-card-header>
         <ion-card-title>Lettre de Motivation Générée</ion-card-title>
@@ -107,11 +107,19 @@
     </ion-card>
   </div>
   
-  <div *ngIf="!isGeneratingAIContent && (atsAnalysisResult || generatedCoverLetter)" class="ion-margin-top results-placeholder">
+  <ion-button expand="block" color="success" class="ion-margin-top" 
+              (click)="saveCandidature()" 
+              [disabled]="!atsAnalysisResult || !generatedCoverLetter || isSavingCandidature || isGeneratingAIContent || isExtractingText">
+    <ion-spinner *ngIf="isSavingCandidature" name="crescent" slot="start"></ion-spinner>
+    <ion-icon *ngIf="!isSavingCandidature" name="save-outline" slot="start"></ion-icon>
+    {{ isSavingCandidature ? 'Sauvegarde en cours...' : 'Sauvegarder la Candidature' }}
+  </ion-button>
+
+  <div *ngIf="!isGeneratingAIContent && !isSavingCandidature && (atsAnalysisResult || generatedCoverLetter)" class="ion-margin-top results-placeholder">
     <ion-label class="ion-padding-start">Aperçu CV Final (Éditable)</ion-label>
     <div class="document-preview-placeholder">CV Éditable</div>
   </div>
-  <div *ngIf="!isGeneratingAIContent && (atsAnalysisResult || generatedCoverLetter)" class="ion-margin-top results-placeholder">
+  <div *ngIf="!isGeneratingAIContent && !isSavingCandidature && (atsAnalysisResult || generatedCoverLetter)" class="ion-margin-top results-placeholder">
     <ion-label class="ion-padding-start">Aperçu Lettre Finale (Éditable)</ion-label>
     <div class="document-preview-placeholder">Lettre Éditable</div>
   </div>
