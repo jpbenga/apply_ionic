@@ -1,16 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common'; // DatePipe n'est plus importé ici car utilisé dans la carte
+import { RouterModule, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel,
-  IonSpinner, IonText, IonIcon, IonButton, IonButtons, IonRefresher, IonRefresherContent, IonBadge
+  IonHeader, IonToolbar, IonTitle, IonContent,
+  IonSpinner, IonIcon, IonButton, IonButtons, IonRefresher, IonRefresherContent
 } from '@ionic/angular/standalone';
 import { HeaderService } from 'src/app/services/header/header.service';
 import { CandidatureService } from 'src/app/services/candidature/candidature.service';
 import { Candidature } from 'src/app/models/candidature.model';
-import { Router } from '@angular/router';
+import { CandidatureCardComponent } from '../../components/candidature-card/candidature-card.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,10 +20,9 @@ import { Router } from '@angular/router';
   imports: [
     CommonModule,
     RouterModule,
-    DatePipe,
-    IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel,
-    IonSpinner, IonText, IonIcon, IonButton, IonButtons, IonRefresher, IonRefresherContent,
-    IonBadge
+    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonSpinner, IonIcon, IonButton, IonButtons, IonRefresher, IonRefresherContent,
+    CandidatureCardComponent
   ]
 })
 export class DashboardPage implements OnInit {
@@ -58,6 +57,7 @@ export class DashboardPage implements OnInit {
         }
       }),
       catchError(error => {
+        this.isLoading = false;
         this.errorLoading = 'Impossible de charger les candidatures.';
         console.error('Erreur chargement candidatures:', error);
         return of([]);
@@ -70,7 +70,10 @@ export class DashboardPage implements OnInit {
   }
 
   viewCandidatureDetail(candidatureId: string | undefined) {
-    if (!candidatureId) return;
+    if (!candidatureId) {
+      console.error('ID de candidature non défini, navigation annulée.');
+      return;
+    }
     this.router.navigate(['/candidature', candidatureId]);
   }
 

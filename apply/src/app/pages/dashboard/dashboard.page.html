@@ -31,14 +31,11 @@
     <ion-button fill="outline" (click)="goToPostulerPage()">Créer une candidature</ion-button>
   </div>
 
-  <ion-list *ngIf="(candidatures$ | async)?.length && !isLoading && !errorLoading">
-    <ion-item *ngFor="let candidature of (candidatures$ | async)" (click)="viewCandidatureDetail(candidature.id)" detail="true">
-      <ion-label>
-        <h2>{{ candidature.poste || 'Poste non défini' }}</h2>
-        <p>{{ candidature.entreprise || 'Entreprise non définie' }}</p>
-        <p><ion-text color="medium" *ngIf="candidature.dateCandidature">Postulé le: {{ candidature.dateCandidature.toDate() | date:'dd/MM/yyyy' }}</ion-text></p>
-      </ion-label>
-      <ion-badge slot="end" [color]="candidature.statut === 'acceptee' ? 'success' : (candidature.statut === 'entretien_planifie' ? 'primary' : 'medium')">{{ candidature.statut }}</ion-badge>
-    </ion-item>
-  </ion-list>
+  <div *ngIf="(candidatures$ | async)?.length && !isLoading && !errorLoading">
+    <app-candidature-card
+      *ngFor="let candidature of (candidatures$ | async)"
+      [candidature]="candidature"
+      (viewDetails)="viewCandidatureDetail($event)">
+    </app-candidature-card>
+  </div>
 </ion-content>
