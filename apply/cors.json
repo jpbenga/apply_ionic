@@ -1,0 +1,7 @@
+[
+    {
+      "origin": ["https://4200-firebase-starterionicgit-1747524639689.cluster-6frnii43o5blcu522sivebzpii.cloudworkstations.dev", "http://localhost:8100"],
+      "method": ["GET"],
+      "maxAgeSeconds": 3600
+    }
+  ]

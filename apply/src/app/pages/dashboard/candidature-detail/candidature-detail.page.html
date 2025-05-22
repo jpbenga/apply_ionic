@@ -1,71 +1,103 @@
-<!-- src/app/pages/dashboard/candidature-detail/candidature-detail.page.html -->
-<app-user-header></app-user-header>
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ (candidature$ | async)?.poste || 'Détail candidature' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
 
 <ion-content class="ion-padding">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>{{ candidature.entreprise }}</ion-card-title>
-      <ion-chip [color]="candidature.status === 'pending' ? 'warning' : 
-                 candidature.status === 'interview' ? 'primary' : 
-                 candidature.status === 'accepted' ? 'success' : 'danger'">
-        {{ candidature.status === 'pending' ? 'En attente' : 
-           candidature.status === 'interview' ? 'Entretien' : 
-           candidature.status === 'accepted' ? 'Acceptée' : 'Refusée' }}
-      </ion-chip>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-item lines="none">
-        <ion-label>
-          <h2>{{ candidature.poste }}</h2>
-          <p>Postulé le {{ candidature.datePostulation | date:'dd/MM/yyyy' }}</p>
-        </ion-label>
-      </ion-item>
-      
-      <ion-item lines="none">
-        <ion-label>
-          <h3>Description</h3>
-          <p>{{ candidature.description }}</p>
-        </ion-label>
-      </ion-item>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Suivi</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-list>
-        <ion-item *ngFor="let suivi of candidature.suivis">
-          <ion-icon name="{{ 
-            suivi.type === 'email' ? 'mail' : 
-            suivi.type === 'appel' ? 'call' : 'calendar' 
-          }}" slot="start"></ion-icon>
-          <ion-label>
-            <h2>{{ suivi.type === 'email' ? 'Email' : 
-                  suivi.type === 'appel' ? 'Appel téléphonique' : 
-                  suivi.type === 'entretien' ? 'Entretien' : 
-                  suivi.type === 'test' ? 'Test technique' : 'Autre' }}</h2>
-            <p>{{ suivi.date | date:'dd/MM/yyyy' }}</p>
-            <p>{{ suivi.notes }}</p>
-          </ion-label>
-        </ion-item>
-      </ion-list>
-      
-      <ion-button expand="block" class="ion-margin-top">
-        Ajouter un suivi
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
-
-  <div class="ion-padding">
-    <ion-button expand="block" color="primary">
-      <ion-icon name="mail" slot="start"></ion-icon>
-      Envoyer un email de relance
-    </ion-button>
-    <ion-button expand="block" color="secondary" class="ion-margin-top">
-      <ion-icon name="document-text" slot="start"></ion-icon>
-      Voir CV et lettre
-    </ion-button>
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Chargement...</p>
   </div>
+
+  <div *ngIf="errorMessage && !isLoading" class="ion-text-center ion-padding">
+    <p style="color: var(--ion-color-danger);">{{ errorMessage }}</p>
+  </div>
+
+  <ng-container *ngIf="(candidature$ | async) as cand; else noCandidature">
+    <ion-card>
+      <ion-card-content>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <h1>{{ cand.entreprise }}</h1>
+            <p>{{ cand.poste }}</p>
+            <p *ngIf="cand.dateCandidature"><small>Postulé le {{ cand.dateCandidature.toDate() | date:'dd/MM/yyyy' }}</small></p>
+          </div>
+          <ion-badge [color]="cand.statut === 'entretien_planifie' ? 'primary' : (cand.statut === 'acceptee' ? 'success' : 'medium')">{{ cand.statut }}</ion-badge>
+        </div>
+        <p *ngIf="cand.offreTexteComplet" style="margin-top: 10px;">
+          <strong>Description (Offre) :</strong><br>
+          <span style="white-space: pre-wrap;">{{ cand.offreTexteComplet | slice:0:200 }}{{ cand.offreTexteComplet && cand.offreTexteComplet.length > 200 ? '...' : '' }}</span>
+        </p>
+        <p *ngIf="cand.notesPersonnelles" style="margin-top: 10px;">
+          <strong>Mes Notes :</strong><br>
+          <span style="white-space: pre-wrap;">{{ cand.notesPersonnelles }}</span>
+        </p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-list-header>Suivi</ion-list-header>
+    <ion-list *ngIf="cand.suivi && cand.suivi.length > 0; else noSuivi">
+      <ion-item *ngFor="let itemSuivi of cand.suivi">
+        <ion-icon [name]="itemSuivi.type === 'email_envoye' ? 'mail-outline' : (itemSuivi.type === 'appel_effectue' ? 'call-outline' : 'chatbubble-ellipses-outline')" slot="start" color="medium"></ion-icon>
+        <ion-label>
+          <h2>{{ itemSuivi.type | titlecase }}</h2>
+          <p>{{ itemSuivi.date.toDate() | date:'dd/MM/yyyy HH:mm' }}</p>
+          <p style="white-space: pre-wrap;">{{ itemSuivi.notes }}</p>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+    <ng-template #noSuivi>
+      <ion-item lines="none">
+        <ion-label class="ion-text-center" color="medium">Aucun suivi enregistré.</ion-label>
+      </ion-item>
+    </ng-template>
+
+    <ion-button expand="block" (click)="openAddSuiviModal(true)" class="ion-margin-top">Ajouter un Suivi</ion-button>
+    
+    <ion-button expand="block" fill="outline" (click)="envoyerEmailRelance()" class="ion-margin-top">
+      <ion-icon name="mail-unread-outline" slot="start"></ion-icon>
+      Envoyer un Email de Relance
+    </ion-button>
+    <ion-button expand="block" fill="outline" (click)="voirCvEtLettre()" class="ion-margin-top">
+      <ion-icon name="document-text-outline" slot="start"></ion-icon>
+      Voir CV et Lettre (Textes)
+    </ion-button>
+
+  </ng-container>
+  <ng-template #noCandidature>
+    <p *ngIf="!isLoading && !errorMessage" class="ion-text-center">Aucune donnée de candidature à afficher.</p>
+  </ng-template>
+
+  <ion-modal [isOpen]="isAddSuiviModalOpen" (didDismiss)="openAddSuiviModal(false)">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Ajouter un Suivi</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="openAddSuiviModal(false)">Annuler</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-label position="stacked">Type de suivi</ion-label>
+          <ion-select [(ngModel)]="nouveauSuiviType" interface="popover">
+            <ion-select-option *ngFor="let type of typesDeSuivi" [value]="type.value">{{ type.label }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Notes</ion-label>
+          <ion-textarea [(ngModel)]="nouveauSuiviNotes" rows="5" placeholder="Détails du suivi..."></ion-textarea>
+        </ion-item>
+        <ion-button expand="block" (click)="handleAjouterSuivi()" class="ion-margin-top">
+          Enregistrer le Suivi
+        </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
 </ion-content>

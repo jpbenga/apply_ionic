@@ -1,0 +1,87 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Visualiseur de Documents</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar *ngIf="hasCvContent && hasLetterContent">
+    <ion-segment [(ngModel)]="currentView" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="cv">
+        <ion-label>CV</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="letter">
+        <ion-label>Lettre</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div *ngIf="currentView === 'cv'" class="document-view ion-padding-start ion-padding-end ion-padding-bottom">
+    <h3 *ngIf="cvOriginalFileName && !isCvPdf && !isCvDocx && !cvTexteExtrait" class="ion-text-center ion-padding-top">{{ cvOriginalFileName }}</h3>
+
+    <div *ngIf="isCvPdf && cvOriginalUrl" class="pdf-viewer-container">
+      <ngx-extended-pdf-viewer
+          [src]="cvOriginalUrl"
+          height="calc(100vh - 180px)" 
+          delayFirstView="200"
+          [showToolbar]="true"
+          [showSidebarButton]="false" 
+          [showFindButton]="true"
+          [showPagingButtons]="true"
+          [showZoomButtons]="true"
+          [showDownloadButton]="true" 
+          [showPrintButton]="false"
+          [showPresentationModeButton]="false"
+          [showOpenFileButton]="false"
+          [showSecondaryToolbarButton]="false"
+          [showRotateButton]="true"
+          [showHandToolButton]="false"
+          [showSpreadButton]="false">
+      </ngx-extended-pdf-viewer>
+      </div>
+
+    <div *ngIf="isCvDocx" class="preview-container docx-preview">
+      <div *ngIf="isLoadingCvPreview" class="ion-text-center ion-padding">
+        <ion-spinner name="crescent"></ion-spinner><p>Chargement de l'aperçu DOCX...</p>
+      </div>
+      <div *ngIf="!isLoadingCvPreview && docxHtmlContent" [innerHTML]="docxHtmlContent"></div>
+      <div *ngIf="!isLoadingCvPreview && !docxHtmlContent && cvOriginalUrl" class="ion-text-center ion-padding">
+        <p>Aperçu DOCX indisponible.</p>
+        <ion-button fill="outline" size="small" [href]="cvOriginalUrl" target="_blank">
+          Télécharger {{ cvOriginalFileName || 'CV Original' }}
+        </ion-button>
+      </div>
+    </div>
+    
+    <div *ngIf="cvTexteExtrait && !isCvPdf && !isCvDocx">
+      <h3>Texte Extrait du CV :</h3>
+      <pre class="text-display">{{ cvTexteExtrait }}</pre>
+    </div>
+
+    <div *ngIf="!hasCvContent" class="ion-text-center ion-padding">
+      <p>Aucun contenu de CV à afficher.</p>
+    </div>
+  </div>
+
+  <div *ngIf="currentView === 'letter'" class="document-view ion-padding">
+    <h3>Lettre de Motivation Générée</h3>
+    <div *ngIf="lettreMotivationGeneree">
+      <pre class="text-display">{{ lettreMotivationGeneree }}</pre>
+    </div>
+    <div *ngIf="!lettreMotivationGeneree" class="ion-text-center ion-padding">
+      <p>Aucune lettre de motivation à afficher.</p>
+    </div>
+  </div>
+
+  <div class="ion-padding ion-text-center action-buttons-footer">
+      <ion-button (click)="copyContent()" fill="outline" size="small" 
+                  *ngIf="(currentView === 'cv' && cvTexteExtrait) || (currentView === 'letter' && lettreMotivationGeneree)">
+        <ion-icon name="copy-outline" slot="start"></ion-icon>
+        Copier Texte {{ currentView === 'cv' ? 'Extrait CV' : 'Lettre' }}
+      </ion-button>
+  </div>
+</ion-content>
