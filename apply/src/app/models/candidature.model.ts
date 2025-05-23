@@ -14,10 +14,24 @@ export type TypeSuivi =
 
 export interface SuiviCandidature {
   id?: string;
-  date: any; // Sera un Firebase Timestamp
-  type: TypeSuivi; // Utilise maintenant le type exporté
+  date: any; 
+  type: TypeSuivi;
   notes: string;
 }
+
+export type StatutCandidature = 
+  'brouillon' | 
+  'envoyee' | 
+  'en_cours_rh' | 
+  'entretien_planifie' | 
+  'test_technique' | 
+  'entretien_final' | 
+  'offre_recue' | 
+  'acceptee' | 
+  'refusee_candidat' | 
+  'refusee_entreprise' | 
+  'archivee' | 
+  'standby';
 
 export interface Candidature {
   id?: string;
@@ -34,7 +48,7 @@ export interface Candidature {
   analyseATS?: string;
   lettreMotivationGeneree?: string;
   dateCandidature: any; 
-  statut: 'brouillon' | 'envoyee' | 'en_cours_rh' | 'entretien_planifie' | 'test_technique' | 'entretien_final' | 'offre_recue' | 'acceptee' | 'refusee_candidat' | 'refusee_entreprise' | 'archivee' | 'standby';
+  statut: StatutCandidature; // Utilise le type StatutCandidature ici
   sourceCandidature?: string;
   notesPersonnelles?: string;
   contacts?: { nom?: string; email?: string; telephone?: string; role?: string }[];

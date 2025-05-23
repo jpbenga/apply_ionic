@@ -4,6 +4,11 @@
       <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
     </ion-buttons>
     <ion-title>{{ (candidature$ | async)?.poste || 'Détail candidature' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleEditMode()">
+        <ion-icon slot="icon-only" [name]="isEditing ? 'close-circle-outline' : 'create-outline'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -17,7 +22,7 @@
     <p style="color: var(--ion-color-danger);">{{ errorMessage }}</p>
   </div>
 
-  <ng-container *ngIf="(candidature$ | async) as cand; else noCandidature">
+  <ng-container *ngIf="(candidature$ | async) as cand; else noCandidatureData">
     <ion-card>
       <ion-card-content>
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -26,15 +31,36 @@
             <p>{{ cand.poste }}</p>
             <p *ngIf="cand.dateCandidature"><small>Postulé le {{ cand.dateCandidature.toDate() | date:'dd/MM/yyyy' }}</small></p>
           </div>
-          <ion-badge [color]="cand.statut === 'entretien_planifie' ? 'primary' : (cand.statut === 'acceptee' ? 'success' : 'medium')">{{ cand.statut }}</ion-badge>
+          <ion-badge *ngIf="!isEditing" [color]="cand.statut === 'entretien_planifie' ? 'primary' : (cand.statut === 'acceptee' ? 'success' : 'medium')">{{ cand.statut | titlecase }}</ion-badge>
         </div>
+        
+        <div *ngIf="isEditing" class="ion-margin-top">
+          <ion-item>
+            <ion-label position="stacked">Statut de la candidature</ion-label>
+            <ion-select [(ngModel)]="editableStatut" interface="popover">
+              <ion-select-option *ngFor="let statutOpt of statutsCandidature" [value]="statutOpt.value">{{ statutOpt.label }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item class="ion-margin-top">
+            <ion-label position="stacked">Notes Personnelles</ion-label>
+            <ion-textarea [(ngModel)]="editableNotesPersonnelles" rows="4" placeholder="Vos notes ici..."></ion-textarea>
+          </ion-item>
+          <ion-button expand="block" (click)="saveCandidatureChanges()" class="ion-margin-top">
+            Enregistrer les Modifications
+          </ion-button>
+        </div>
+
+        <p *ngIf="!isEditing && cand.notesPersonnelles" style="margin-top: 10px;">
+          <strong>Mes Notes :</strong><br>
+          <span style="white-space: pre-wrap;">{{ cand.notesPersonnelles }}</span>
+        </p>
+        <p *ngIf="!isEditing && !cand.notesPersonnelles" style="margin-top: 10px;">
+          <ion-text color="medium"><small>Aucune note personnelle.</small></ion-text>
+        </p>
+
         <p *ngIf="cand.offreTexteComplet" style="margin-top: 10px;">
           <strong>Description (Offre) :</strong><br>
           <span style="white-space: pre-wrap;">{{ cand.offreTexteComplet | slice:0:200 }}{{ cand.offreTexteComplet && cand.offreTexteComplet.length > 200 ? '...' : '' }}</span>
-        </p>
-        <p *ngIf="cand.notesPersonnelles" style="margin-top: 10px;">
-          <strong>Mes Notes :</strong><br>
-          <span style="white-space: pre-wrap;">{{ cand.notesPersonnelles }}</span>
         </p>
       </ion-card-content>
     </ion-card>
@@ -68,7 +94,7 @@
     </ion-button>
 
   </ng-container>
-  <ng-template #noCandidature>
+  <ng-template #noCandidatureData>
     <p *ngIf="!isLoading && !errorMessage" class="ion-text-center">Aucune donnée de candidature à afficher.</p>
   </ng-template>
 
@@ -99,5 +125,4 @@
       </ion-content>
     </ng-template>
   </ion-modal>
-
 </ion-content>
