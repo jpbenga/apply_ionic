@@ -1,16 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common'; // DatePipe n'est plus importé ici car utilisé dans la carte
+import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent,
-  IonSpinner, IonIcon, IonButton, IonButtons, IonRefresher, IonRefresherContent
+  IonHeader, IonContent, IonSpinner, IonIcon, IonButton,
+  IonRefresher, IonRefresherContent, IonItem, IonLabel, IonSelect, IonSelectOption,
+  IonFab, IonFabButton
 } from '@ionic/angular/standalone';
 import { HeaderService } from 'src/app/services/header/header.service';
-import { CandidatureService } from 'src/app/services/candidature/candidature.service';
+import { CandidatureService, GetCandidaturesOptions } from 'src/app/services/candidature/candidature.service';
 import { Candidature } from 'src/app/models/candidature.model';
 import { CandidatureCardComponent } from '../../components/candidature-card/candidature-card.component';
+import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
+import { addIcons } from 'ionicons';
+import { addCircleOutline, cloudOfflineOutline, fileTrayOutline, add } from 'ionicons/icons';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,8 +25,11 @@ import { CandidatureCardComponent } from '../../components/candidature-card/cand
   imports: [
     CommonModule,
     RouterModule,
-    IonHeader, IonToolbar, IonTitle, IonContent,
-    IonSpinner, IonIcon, IonButton, IonButtons, IonRefresher, IonRefresherContent,
+    FormsModule,
+    IonHeader, IonContent, IonSpinner, IonIcon, IonButton,
+    IonRefresher, IonRefresherContent, IonItem, IonLabel, IonSelect, IonSelectOption,
+    IonFab, IonFabButton,
+    UserHeaderComponent,
     CandidatureCardComponent
   ]
 })
@@ -30,26 +38,40 @@ export class DashboardPage implements OnInit {
   public isLoading: boolean = true;
   public errorLoading: string | null = null;
 
+  public sortByDate: 'asc' | 'desc' = 'desc';
+
+  public optionsDeTri: { value: 'asc' | 'desc', label: string }[] = [
+    { value: 'desc', label: 'Plus récentes d\'abord' },
+    { value: 'asc', label: 'Plus anciennes d\'abord' }
+  ];
+
   constructor(
-    private headerService: HeaderService,
+    public headerService: HeaderService,
     private candidatureService: CandidatureService,
     private router: Router
-  ) {}
+  ) {
+    addIcons({ addCircleOutline, cloudOfflineOutline, fileTrayOutline, add });
+  }
 
   ngOnInit() {
-    this.loadCandidatures();
+    // this.loadCandidatures();
   }
 
   ionViewWillEnter() {
     this.headerService.updateTitle('Tableau de Bord');
     this.headerService.setShowBackButton(false);
-    this.loadCandidatures(); 
+    this.loadCandidatures();
   }
 
   loadCandidatures(event?: any) {
     this.isLoading = true;
     this.errorLoading = null;
-    this.candidatures$ = this.candidatureService.getCandidatures().pipe(
+
+    const options: GetCandidaturesOptions = {
+      sortByDate: this.sortByDate
+    };
+
+    this.candidatures$ = this.candidatureService.getCandidatures(options).pipe(
       finalize(() => {
         this.isLoading = false;
         if (event && event.target && typeof event.target.complete === 'function') {
@@ -59,10 +81,17 @@ export class DashboardPage implements OnInit {
       catchError(error => {
         this.isLoading = false;
         this.errorLoading = 'Impossible de charger les candidatures.';
+        if (event && event.target && typeof event.target.complete === 'function') {
+          event.target.complete();
+        }
         console.error('Erreur chargement candidatures:', error);
         return of([]);
       })
     );
+  }
+
+  onSortChange() {
+    this.loadCandidatures();
   }
 
   handleRefresh(event: any) {

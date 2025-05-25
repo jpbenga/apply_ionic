@@ -3,20 +3,20 @@ import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Observable, of, Subscription, BehaviorSubject } from 'rxjs';
-import { switchMap, tap, first, catchError } from 'rxjs/operators'; // Ajout de catchError
+import { switchMap, tap, first, catchError } from 'rxjs/operators';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardContent, 
-  IonLabel, IonBadge, IonItem, IonIcon, IonButtons, IonBackButton,
-  IonList, IonListHeader, IonSpinner, IonButton, IonModal, IonTextarea,
-  IonSelect, IonSelectOption,
-  ModalController, // Importé depuis @ionic/angular/standalone
-  ToastController, // ToastController est déjà là et correctement importé
-  IonText // Ajout de IonText
+  IonHeader, IonContent, IonCard, IonCardContent, IonLabel, IonBadge, 
+  IonItem, IonIcon, IonList, IonListHeader, IonSpinner, IonButton, 
+  IonModal, IonTextarea, IonSelect, IonSelectOption, IonToolbar, IonTitle, IonButtons, // Pour le Modal
+  IonText,
+  ModalController
 } from '@ionic/angular/standalone';
 import { Candidature, SuiviCandidature, TypeSuivi, StatutCandidature } from 'src/app/models/candidature.model';
 import { CandidatureService } from 'src/app/services/candidature/candidature.service';
 import { HeaderService } from 'src/app/services/header/header.service';
+import { ToastController } from '@ionic/angular/standalone';
 import { TextViewerModalComponent } from 'src/app/components/text-viewer-modal/text-viewer-modal.component';
+import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
 import { addIcons } from 'ionicons';
 import {
   createOutline, closeCircleOutline, saveOutline, mailOutline, callOutline,
@@ -30,26 +30,22 @@ import {
   standalone: true,
   imports: [
     CommonModule, DatePipe, RouterModule, FormsModule, TitleCasePipe,
-    IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonCardContent,
-    IonLabel, IonBadge, IonItem, IonIcon, IonButtons, IonBackButton,
+    IonHeader, IonContent, IonCard, IonCardContent, IonLabel, IonBadge, IonItem, IonIcon,
     IonList, IonListHeader, IonSpinner, IonButton, IonModal, IonTextarea,
-    IonSelect, IonSelectOption, IonText // IonText ajouté ici
+    IonSelect, IonSelectOption, IonToolbar, IonTitle, IonButtons, IonText, // Pour le Modal et ion-text
+    UserHeaderComponent
   ]
 })
 export class CandidatureDetailPage implements OnInit, OnDestroy {
-  
   private candidatureSubscription: Subscription | undefined;
   private candidatureSubject = new BehaviorSubject<Candidature | undefined>(undefined);
   candidature$: Observable<Candidature | undefined> = this.candidatureSubject.asObservable();
-  
   isLoading: boolean = true;
   errorMessage: string | null = null;
   candidatureId: string | null = null;
-
   isAddSuiviModalOpen: boolean = false;
   nouveauSuiviType: TypeSuivi = 'email_envoye';
   nouveauSuiviNotes: string = '';
-  
   typesDeSuivi: { value: TypeSuivi, label: string }[] = [
     { value: 'email_envoye', label: 'Email envoyé' }, { value: 'email_recu', label: 'Email reçu' },
     { value: 'appel_effectue', label: 'Appel effectué' }, { value: 'appel_recu', label: 'Appel reçu' },
@@ -57,7 +53,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     { value: 'test_technique_recu', label: 'Test technique reçu' }, { value: 'test_technique_complete', label: 'Test technique complété' },
     { value: 'relance', label: 'Relance' }, { value: 'autre', label: 'Autre' }
   ];
-
   isEditing: boolean = false;
   editableStatut: StatutCandidature | undefined;
   editableNotesPersonnelles: string | undefined = '';
@@ -73,8 +68,8 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private candidatureService: CandidatureService,
-    private headerService: HeaderService,
-    private modalController: ModalController, // ModalController est utilisé, l'import est en haut
+    public headerService: HeaderService,
+    private modalController: ModalController,
     private toastController: ToastController,
     private router: Router
   ) {
@@ -100,8 +95,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
         this.isLoading = false;
         if (candidature) {
           this.candidatureSubject.next(candidature);
-          this.headerService.updateTitle(candidature.poste || 'Détail Candidature');
-          this.headerService.setShowBackButton(true);
           this.editableStatut = candidature.statut;
           this.editableNotesPersonnelles = candidature.notesPersonnelles || '';
         } else if (this.candidatureId) {
@@ -111,7 +104,7 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
             this.candidatureSubject.next(undefined);
         }
       }),
-      catchError((err: any) => { // err typé en any ou Error
+      catchError((err: any) => {
         this.isLoading = false;
         this.errorMessage = "Erreur lors du chargement de la candidature.";
         this.candidatureSubject.next(undefined);
@@ -142,7 +135,9 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   }
 
   ionViewWillLeave() {
-    this.headerService.setShowBackButton(false);
+    // UserHeaderComponent s'abonne à HeaderService, donc pas besoin de réinitialiser le titre ici.
+    // On s'assure juste que le bouton retour est caché pour les pages racines d'onglets.
+    // this.headerService.setShowBackButton(false); // Géré par la page qui devient active
   }
 
   toggleEditMode() {
@@ -165,12 +160,10 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       this.presentToast('Veuillez sélectionner un statut.', 'warning');
       return;
     }
-
     const dataToUpdate: Partial<Candidature> = {
       statut: this.editableStatut,
       notesPersonnelles: this.editableNotesPersonnelles || ''
     };
-
     try {
       await this.candidatureService.updateCandidature(this.candidatureId, dataToUpdate);
       this.presentToast('Candidature mise à jour avec succès !', 'success');
@@ -196,12 +189,10 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       this.presentToast('Veuillez sélectionner un type et ajouter des notes pour le suivi.', 'warning');
       return;
     }
-
     const suiviData: Omit<SuiviCandidature, 'id' | 'date'> = {
       type: this.nouveauSuiviType,
       notes: this.nouveauSuiviNotes
     };
-
     try {
       await this.candidatureService.addSuiviToCandidature(this.candidatureId, suiviData);
       this.presentToast('Suivi ajouté avec succès !', 'success');
@@ -222,19 +213,14 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       this.presentToast('Données de candidature non disponibles pour l\'email de relance.', 'warning');
       return;
     }
-
     const subject = `Relance candidature - ${candidature.poste || 'un poste'} chez ${candidature.entreprise || 'votre entreprise'}`;
     const body = `Bonjour,\n\nJe me permets de revenir vers vous concernant ma candidature pour le poste de ${candidature.poste || '[Nom du Poste]'}.\nPourriez-vous s'il vous plaît me donner une mise à jour sur l'état de ma candidature ?\n\nJe vous remercie pour votre temps et votre considération.\n\nCordialement,\n[Votre Nom Complet]`;
-            
     const contactEmail = (candidature.contacts && candidature.contacts.length > 0 && candidature.contacts[0].email) ? candidature.contacts[0].email : '';
     const mailtoLink = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
     window.location.href = mailtoLink;
-    
     if (!contactEmail) {
         this.presentToast('Adresse email du contact non trouvée. L\'email s\'ouvrira sans destinataire.', 'light');
     }
-    
     const suiviData: Omit<SuiviCandidature, 'id' | 'date'> = {
       type: 'relance',
       notes: `Email de relance (tentative d'ouverture client mail) pour le poste: ${candidature.poste}.`
@@ -257,12 +243,10 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       this.presentToast('Données de candidature non disponibles.', 'warning');
       return;
     }
-
     if (!candidature.cvTexteExtrait && !candidature.cvOriginalUrl && !candidature.lettreMotivationGeneree) {
       this.presentToast('Aucun document ou texte à visualiser.', 'light');
       return;
     }
-
     const modal = await this.modalController.create({
       component: TextViewerModalComponent,
       componentProps: {

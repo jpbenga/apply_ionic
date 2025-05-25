@@ -12,6 +12,7 @@ import { AIService, ATSAnalysisResult } from 'src/app/services/ai/ai.service';
 import { CandidatureService } from 'src/app/services/candidature/candidature.service';
 import { Candidature } from 'src/app/models/candidature.model';
 import { Router } from '@angular/router';
+import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
 
 @Component({
   selector: 'app-postuler',
@@ -20,7 +21,7 @@ import { Router } from '@angular/router';
   imports: [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
     IonItem, IonLabel, IonTextarea, IonButton, IonIcon, IonGrid, IonRow, IonCol,
-    IonSpinner, IonCard, IonCardHeader, IonCardTitle, IonCardContent
+    IonSpinner, IonCard, IonCardHeader, IonCardTitle, IonCardContent, UserHeaderComponent
   ]
 })
 export class PostulerPage {

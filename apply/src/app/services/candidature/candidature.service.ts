@@ -1,25 +1,31 @@
 import { Injectable } from '@angular/core';
-import { 
-  Firestore, 
-  collection, 
-  addDoc, 
-  serverTimestamp, 
-  doc, 
-  updateDoc, 
-  deleteDoc, 
-  collectionData, 
-  Timestamp, 
-  query, 
+import {
+  Firestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
+  deleteDoc,
+  collectionData,
+  Timestamp,
+  query,
   where,
   docData,
   DocumentReference,
-  arrayUnion
+  arrayUnion,
+  orderBy,
+  QueryConstraint
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { Candidature, SuiviCandidature } from 'src/app/models/candidature.model';
+import { Candidature, SuiviCandidature, StatutCandidature } from 'src/app/models/candidature.model';
 import { StorageService } from '../storage/storage.service';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+
+export interface GetCandidaturesOptions {
+  sortByDate?: 'asc' | 'desc';
+}
 
 @Injectable({
   providedIn: 'root'
@@ -70,13 +76,22 @@ export class CandidatureService {
     }
   }
 
-  getCandidatures(): Observable<Candidature[]> {
+  getCandidatures(options?: GetCandidaturesOptions): Observable<Candidature[]> {
     const user = this.auth.currentUser;
     if (!user) {
       return of([]);
     }
-    const candidaturesCollection = collection(this.firestore, this.basePath);
-    const q = query(candidaturesCollection, where('userId', '==', user.uid));
+
+    const candidaturesCollectionRef = collection(this.firestore, this.basePath);
+    const queryConstraints: QueryConstraint[] = [where('userId', '==', user.uid)];
+
+    if (options?.sortByDate) {
+      queryConstraints.push(orderBy('dateCandidature', options.sortByDate));
+    } else {
+      queryConstraints.push(orderBy('dateCandidature', 'desc'));
+    }
+    
+    const q = query(candidaturesCollectionRef, ...queryConstraints);
     return collectionData(q, { idField: 'id' }) as Observable<Candidature[]>;
   }
 
@@ -132,7 +147,7 @@ export class CandidatureService {
     }
 
     const candidatureDocRef = doc(this.firestore, `${this.basePath}/${candidatureId}`);
-    
+        
     const nouveauSuivi: SuiviCandidature = {
       ...suiviItemData,
       id: doc(collection(this.firestore, '_')).id, 

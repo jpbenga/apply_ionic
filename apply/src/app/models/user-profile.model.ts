@@ -7,10 +7,15 @@ export interface UserProfile {
     email: string;
     telephone?: string;
     adresse?: string;
-    cvBase?: string; // URL du CV de base stocké
+    cvBase?: string;
+    titrePoste?: string;
+    resumePersonnel?: string;
     competences?: string[];
     experiences?: Experience[];
     formations?: Formation[];
+    photoURL?: string;
+    createdAt?: any;
+    updatedAt?: any;
   }
   
   export interface Experience {

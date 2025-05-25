@@ -1,18 +1,20 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Tableau de Bord</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="goToPostulerPage()">
-        <ion-icon slot="icon-only" name="add-circle-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
+  <app-user-header></app-user-header>
 </ion-header>
 
 <ion-content class="ion-padding">
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
+
+  <ion-item lines="full">
+    <ion-label position="stacked">Trier par date</ion-label>
+    <ion-select [(ngModel)]="sortByDate" (ionChange)="onSortChange()" interface="popover">
+      <ion-select-option *ngFor="let sortOpt of optionsDeTri" [value]="sortOpt.value">
+        {{ sortOpt.label }}
+      </ion-select-option>
+    </ion-select>
+  </ion-item>
 
   <div *ngIf="isLoading" class="ion-text-center ion-padding">
     <ion-spinner name="crescent"></ion-spinner>
@@ -31,11 +33,17 @@
     <ion-button fill="outline" (click)="goToPostulerPage()">Créer une candidature</ion-button>
   </div>
 
-  <div *ngIf="(candidatures$ | async)?.length && !isLoading && !errorLoading">
+  <div *ngIf="(candidatures$ | async)?.length && !isLoading && !errorLoading" class="ion-margin-top">
     <app-candidature-card
       *ngFor="let candidature of (candidatures$ | async)"
       [candidature]="candidature"
       (viewDetails)="viewCandidatureDetail($event)">
     </app-candidature-card>
   </div>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="goToPostulerPage()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

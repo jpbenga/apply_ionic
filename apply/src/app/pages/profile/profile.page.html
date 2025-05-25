@@ -1,106 +1,70 @@
-<!-- src/app/pages/profile/profile.page.html -->
 <ion-header>
   <app-user-header></app-user-header>
 </ion-header>
+
 <ion-content class="ion-padding">
-  <ion-card>
-    <ion-card-header>
-      <div class="profile-header">
-        <ion-avatar class="large-avatar">
-          <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="Photo de profil">
-        </ion-avatar>
-        <ion-button size="small" fill="clear">
-          Modifier
-        </ion-button>
-      </div>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-list>
-        <ion-item>
-          <ion-label position="stacked">Prénom</ion-label>
-          <ion-input value="John"></ion-input>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="stacked">Nom</ion-label>
-          <ion-input value="Doe"></ion-input>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="stacked">Email</ion-label>
-          <ion-input value="john.doe@example.com" disabled></ion-input>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="stacked">Téléphone</ion-label>
-          <ion-input value="+33 6 12 34 56 78" type="tel"></ion-input>
-        </ion-item>
-        
-        <ion-item lines="none">
-          <ion-label position="stacked">Adresse</ion-label>
-          <ion-textarea rows="3" value="123 Rue Exemple, 75000 Paris, France"></ion-textarea>
-        </ion-item>
-      </ion-list>
-    </ion-card-content>
-  </ion-card>
-  
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Mon CV</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-button expand="block">
-        <ion-icon name="document-text" slot="start"></ion-icon>
-        Voir mon CV de base
-      </ion-button>
-      
-      <ion-button expand="block" class="ion-margin-top">
-        <ion-icon name="cloud-upload" slot="start"></ion-icon>
-        Télécharger un nouveau CV
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
-  
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Préférences</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-item>
-        <ion-label>Notifications</ion-label>
-        <ion-toggle checked></ion-toggle>
-      </ion-item>
-      
-      <ion-item>
-        <ion-label>Mode sombre</ion-label>
-        <ion-toggle></ion-toggle>
-      </ion-item>
-    </ion-card-content>
-  </ion-card>
-  
-  <div class="logout-container">
-    <ion-button expand="block" color="danger" fill="outline">
-      <ion-icon name="log-out" slot="start"></ion-icon>
-      Déconnexion
-    </ion-button>
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Chargement du profil...</p>
   </div>
+
+  <div *ngIf="errorMessage && !isLoading" class="ion-text-center ion-padding">
+    <p style="color: var(--ion-color-danger);">{{ errorMessage }}</p>
+    <ion-button fill="outline" (click)="loadProfile()">Réessayer</ion-button>
+  </div>
+
+  <ng-container *ngIf="(userProfile$ | async) as profile; else noProfileData">
+    <ion-list lines="inset">
+      <ion-item class="ion-text-center ion-margin-bottom">
+        <ion-avatar slot="start" style="width: 80px; height: 80px; margin: auto;">
+          <img *ngIf="profile.photoURL" [src]="profile.photoURL" alt="Avatar" />
+          <ion-icon *ngIf="!profile.photoURL" name="person-circle-outline" style="font-size: 80px;"></ion-icon>
+        </ion-avatar>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Prénom</ion-label>
+        <ion-input [value]="profile.prenom" readonly></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Nom</ion-label>
+        <ion-input [value]="profile.nom" readonly></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Email</ion-label>
+        <ion-input [value]="profile.email" readonly></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Téléphone</ion-label>
+        <ion-input [value]="profile.telephone || '-'" readonly></ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Titre de Poste Actuel/Recherché</ion-label>
+        <ion-input [value]="profile.titrePoste || '-'" readonly></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Adresse</ion-label>
+        <ion-textarea [value]="profile.adresse || '-'" readonly autoGrow="true"></ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Résumé Personnel / Objectif</ion-label>
+        <ion-textarea [value]="profile.resumePersonnel || '-'" readonly autoGrow="true" rows="4"></ion-textarea>
+      </ion-item>
+    </ion-list>
+  </ng-container>
+
+  <ng-template #noProfileData>
+    <div *ngIf="!isLoading && !errorMessage && !(userProfile$ | async)" class="ion-text-center ion-padding">
+      <ng-container *ngIf="(currentUserAuth$ | async) as authUser; else notLoggedIn">
+        <p>Aucun profil trouvé pour {{ authUser?.email }}.</p>
+      </ng-container>
+      <ng-template #notLoggedIn><p>Veuillez vous connecter pour voir votre profil.</p></ng-template>
+    </div>
+  </ng-template>
 </ion-content>
-
-<style>
-.profile-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.large-avatar {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 16px;
-}
-
-.logout-container {
-  margin: 20px 0;
-}
-</style>
