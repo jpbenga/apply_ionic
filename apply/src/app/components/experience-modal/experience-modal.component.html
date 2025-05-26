@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ isEditMode ? 'Modifier l\'Expérience' : 'Ajouter une Expérience' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()">
+        <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="experienceForm" (ngSubmit)="save()">
+    <ion-item>
+      <ion-label position="stacked">Poste Occupé *</ion-label>
+      <ion-input formControlName="poste" type="text" placeholder="Ex: Développeur Web"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Entreprise *</ion-label>
+      <ion-input formControlName="entreprise" type="text" placeholder="Nom de l'entreprise"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Lieu</ion-label>
+      <ion-input formControlName="lieu" type="text" placeholder="Ex: Paris, France"></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-label>Poste actuel</ion-label>
+        <ion-checkbox slot="end" formControlName="enCours" (ionChange)="onCurrentJobToggle($event)"></ion-checkbox>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Date de Début *</ion-label>
+      <ion-datetime-button datetime="dateDebut"></ion-datetime-button>
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime id="dateDebut" formControlName="dateDebut" presentation="date" preferWheel="true"></ion-datetime>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+
+    <ion-item [disabled]="isCurrentJob">
+      <ion-label position="stacked">Date de Fin</ion-label>
+      <ion-datetime-button datetime="dateFin"></ion-datetime-button>
+       <ion-modal [keepContentsMounted]="true">
+         <ng-template>
+           <ion-datetime id="dateFin" formControlName="dateFin" presentation="date" preferWheel="true" [disabled]="isCurrentJob"></ion-datetime>
+         </ng-template>
+       </ion-modal>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Description des Tâches</ion-label>
+      <ion-textarea formControlName="description" rows="5" placeholder="Décrivez vos responsabilités et réalisations..."></ion-textarea>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="experienceForm.invalid">
+      <ion-icon name="save-outline" slot="start"></ion-icon>
+      Enregistrer
+    </ion-button>
+  </form>
+</ion-content>
