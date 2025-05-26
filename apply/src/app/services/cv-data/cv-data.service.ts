@@ -7,6 +7,7 @@ import { Auth } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
 import { Experience } from 'src/app/models/experience.model';
 import { Formation } from 'src/app/models/formation.model';
+import { Competence } from 'src/app/models/competence.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,7 @@ import { Formation } from 'src/app/models/formation.model';
 export class CvDataService {
   private readonly experiencesPath = 'experiences';
   private readonly formationsPath = 'formations';
+  private readonly competencesPath = 'competences';
 
   constructor(
     private firestore: Firestore,
@@ -72,11 +74,7 @@ export class CvDataService {
     );
     if (dataForFirestore.enCours === true) {
       dataForFirestore.dateFin = null;
-    } else if (dataForFirestore.hasOwnProperty('enCours') && dataForFirestore.enCours === false && !dataForFirestore.dateFin) {
-      // Si ce n'est plus en cours et que dateFin est vide, on ne la met pas à null pour ne pas l'écraser si elle existait
-      // delete dataForFirestore.dateFin; // Ou la laisser undefined si le modèle le permet
     }
-
 
     const docRef = await addDoc(experiencesCollectionRef, dataForFirestore);
     return docRef.id;
@@ -173,5 +171,48 @@ export class CvDataService {
     if (!user || !formationId) throw new Error('Utilisateur non authentifié ou ID de formation manquant.');
     const formationDocRef = doc(this.firestore, `users/${user.uid}/${this.formationsPath}/${formationId}`);
     return deleteDoc(formationDocRef);
+  }
+
+  getCompetences(): Observable<Competence[]> {
+    try {
+      const competencesCollectionRef = this.getUserSubcollectionRef(this.competencesPath);
+      const q = query(competencesCollectionRef, orderBy('nom', 'asc'));
+      return collectionData(q, { idField: 'id' }) as Observable<Competence[]>;
+    } catch (error) {
+      console.error("CvDataService: Erreur getCompetences:", error);
+      return of([]);
+    }
+  }
+
+  async addCompetence(competenceData: Omit<Competence, 'id' | 'userId'>): Promise<string> {
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('Utilisateur non authentifié.');
+    const competencesCollectionRef = this.getUserSubcollectionRef(this.competencesPath);
+    const dataToSave: any = {
+      ...competenceData,
+      userId: user.uid,
+    };
+    Object.keys(dataToSave).forEach(key => (dataToSave[key] === undefined) && delete dataToSave[key]);
+    const docRef = await addDoc(competencesCollectionRef, dataToSave);
+    return docRef.id;
+  }
+
+  async updateCompetence(competenceId: string, competenceData: Partial<Omit<Competence, 'id' | 'userId'>>): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user || !competenceId) throw new Error('Utilisateur non authentifié ou ID de compétence manquant.');
+    const dataToUpdate: any = { ...competenceData };
+    const finalDataToUpdate: any = {};
+    Object.keys(dataToUpdate).forEach(key => {
+        if (dataToUpdate[key] !== undefined) finalDataToUpdate[key] = dataToUpdate[key];
+    });
+    const competenceDocRef = doc(this.firestore, `users/${user.uid}/${this.competencesPath}/${competenceId}`);
+    return updateDoc(competenceDocRef, finalDataToUpdate);
+  }
+
+  async deleteCompetence(competenceId: string): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user || !competenceId) throw new Error('Utilisateur non authentifié ou ID de compétence manquant.');
+    const competenceDocRef = doc(this.firestore, `users/${user.uid}/${this.competencesPath}/${competenceId}`);
+    return deleteDoc(competenceDocRef);
   }
 }

@@ -1,0 +1,30 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ isEditMode ? 'Modifier Compétence' : 'Ajouter Compétence' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()">
+        <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="competenceForm" (ngSubmit)="save()">
+    <ion-item>
+      <ion-label position="stacked">Nom de la Compétence *</ion-label>
+      <ion-input formControlName="nom" type="text" placeholder="Ex: JavaScript"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Catégorie (Optionnel)</ion-label>
+      <ion-select formControlName="categorie" placeholder="Sélectionner ou laisser vide">
+        <ion-select-option value="">Aucune</ion-select-option>
+        <ion-select-option *ngFor="let cat of categories" [value]="cat">{{ cat }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="competenceForm.invalid">
+      <ion-icon name="save-outline" slot="start"></ion-icon>
+      Enregistrer
+    </ion-button>
+  </form>
+</ion-content>

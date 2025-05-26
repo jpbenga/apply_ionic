@@ -87,15 +87,48 @@
     </ng-template>
   </ion-list>
 
+  <ion-list-header class="ion-margin-top">
+    <ion-label>Mes Compétences</ion-label>
+    </ion-list-header>
+  <div *ngIf="isLoadingCompetences" class="ion-text-center ion-padding"><ion-spinner name="crescent"></ion-spinner></div>
+  <div *ngIf="errorLoadingCompetences && !isLoadingCompetences" class="ion-text-center ion-padding">
+    <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
+    <p style="color: var(--ion-color-danger);">{{ errorLoadingCompetences }}</p>
+    <ion-button fill="outline" (click)="loadCompetences()">Réessayer</ion-button>
+  </div>
+  <ion-list *ngIf="!isLoadingCompetences && (competences$ | async) as competencesArray">
+    <ng-container *ngIf="competencesArray.length > 0; else noCompetences">
+      <ion-item-sliding *ngFor="let comp of competencesArray" #slidingItemComp>
+        <ion-item button detail="false" (click)="editCompetence(comp, slidingItemComp)">
+          <ion-icon name="star-outline" slot="start" color="tertiary" aria-hidden="true"></ion-icon>
+          <ion-label>
+            <h2>{{ comp.nom }}</h2>
+            <p *ngIf="comp.categorie"><small>{{ comp.categorie }}</small></p>
+          </ion-label>
+        </ion-item>
+        <ion-item-options side="end">
+          <ion-item-option color="medium" (click)="editCompetence(comp, slidingItemComp)"><ion-icon slot="icon-only" name="create-outline"></ion-icon></ion-item-option>
+          <ion-item-option color="danger" (click)="deleteCompetence(comp.id, slidingItemComp)"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ng-container>
+    <ng-template #noCompetences>
+       <div class="ion-text-center ion-padding list-empty-placeholder"><ion-icon name="list-outline" size="large" color="medium"></ion-icon><p color="medium">Aucune compétence enregistrée.</p></div>
+    </ng-template>
+  </ion-list>
+
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button>
       <ion-icon name="add-outline"></ion-icon>
     </ion-fab-button>
     <ion-fab-list side="top">
-      <ion-fab-button (click)="addFormation()" data-desc="Ajouter Formation">
+      <ion-fab-button (click)="addCompetence()" data-desc="Compétence">
+        <ion-icon name="star-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="addFormation()" data-desc="Formation">
         <ion-icon name="school-outline"></ion-icon>
       </ion-fab-button>
-      <ion-fab-button (click)="addExperience()" data-desc="Ajouter Expérience">
+      <ion-fab-button (click)="addExperience()" data-desc="Expérience">
         <ion-icon name="business-outline"></ion-icon>
       </ion-fab-button>
     </ion-fab-list>
