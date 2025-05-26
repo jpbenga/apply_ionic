@@ -3,7 +3,7 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+  <div *ngIf="isLoading && !(userProfile$ | async)" class="ion-text-center ion-padding">
     <ion-spinner name="crescent"></ion-spinner>
     <p>Chargement du profil...</p>
   </div>
@@ -13,7 +13,7 @@
     <ion-button fill="outline" (click)="loadProfile()">Réessayer</ion-button>
   </div>
 
-  <ng-container *ngIf="(userProfile$ | async) as profile; else noProfileData">
+  <ng-container *ngIf="(userProfile$ | async) as profile; else noProfileDataOrLoading">
     <ion-list lines="inset">
       <ion-item class="ion-text-center ion-margin-bottom">
         <ion-avatar slot="start" style="width: 80px; height: 80px; margin: auto;">
@@ -24,47 +24,114 @@
 
       <ion-item>
         <ion-label position="stacked">Prénom</ion-label>
-        <ion-input [value]="profile.prenom" readonly></ion-input>
+        <div class="readonly-value">{{ profile.prenom || '-' }}</div>
       </ion-item>
 
       <ion-item>
         <ion-label position="stacked">Nom</ion-label>
-        <ion-input [value]="profile.nom" readonly></ion-input>
+        <div class="readonly-value">{{ profile.nom || '-' }}</div>
       </ion-item>
 
       <ion-item>
         <ion-label position="stacked">Email</ion-label>
-        <ion-input [value]="profile.email" readonly></ion-input>
+        <div class="readonly-value">{{ profile.email }}</div>
       </ion-item>
 
       <ion-item>
         <ion-label position="stacked">Téléphone</ion-label>
-        <ion-input [value]="profile.telephone || '-'" readonly></ion-input>
+        <div class="readonly-value">{{ profile.telephone || '-' }}</div>
       </ion-item>
       
       <ion-item>
         <ion-label position="stacked">Titre de Poste Actuel/Recherché</ion-label>
-        <ion-input [value]="profile.titrePoste || '-'" readonly></ion-input>
+        <div class="readonly-value">{{ profile.titrePoste || '-' }}</div>
       </ion-item>
 
       <ion-item>
         <ion-label position="stacked">Adresse</ion-label>
-        <ion-textarea [value]="profile.adresse || '-'" readonly autoGrow="true"></ion-textarea>
+        <div class="readonly-value-textarea">{{ profile.adresse || '-' }}</div>
       </ion-item>
 
       <ion-item>
         <ion-label position="stacked">Résumé Personnel / Objectif</ion-label>
-        <ion-textarea [value]="profile.resumePersonnel || '-'" readonly autoGrow="true" rows="4"></ion-textarea>
+        <div class="readonly-value-textarea">{{ profile.resumePersonnel || '-' }}</div>
       </ion-item>
     </ion-list>
   </ng-container>
 
-  <ng-template #noProfileData>
+  <ng-template #noProfileDataOrLoading>
     <div *ngIf="!isLoading && !errorMessage && !(userProfile$ | async)" class="ion-text-center ion-padding">
       <ng-container *ngIf="(currentUserAuth$ | async) as authUser; else notLoggedIn">
-        <p>Aucun profil trouvé pour {{ authUser?.email }}.</p>
+        <p>Profil non trouvé pour {{ authUser?.email }}.</p>
+        <ion-button (click)="openEditProfileModal(null)">Compléter mon profil</ion-button>
       </ng-container>
-      <ng-template #notLoggedIn><p>Veuillez vous connecter pour voir votre profil.</p></ng-template>
+      <ng-template #notLoggedIn><p>Veuillez vous connecter pour voir ou créer votre profil.</p></ng-template>
     </div>
   </ng-template>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end" *ngIf="(userProfile$ | async) || (currentUserAuth$ | async)">
+    <ion-fab-button (click)="openEditProfileModal(userProfileSubject.value)">
+      <ion-icon name="create-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-modal [isOpen]="isEditModalOpen" (didDismiss)="dismissEditModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Modifier mon Profil</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="dismissEditModal()">
+              <ion-icon name="close" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div class="ion-text-center ion-margin-bottom">
+          <ion-avatar style="width: 100px; height: 100px; margin: auto; border: 2px dashed var(--ion-color-medium); cursor: pointer;" 
+                      (click)="avatarFileInput.click()">
+            <img *ngIf="editableProfileInModal.photoURL" [src]="editableProfileInModal.photoURL" alt="Avatar" />
+            <ion-icon *ngIf="!editableProfileInModal.photoURL" name="person-add-outline" style="font-size: 50px; padding-top: 25px;"></ion-icon>
+          </ion-avatar>
+          <input type="file" #avatarFileInput hidden (change)="handleAvatarSelected($event)" accept="image/png, image/jpeg, image/gif" />
+          <ion-label *ngIf="isUploadingAvatar" color="primary"><small>Upload en cours...</small></ion-label>
+        </div>
+
+        <ion-item>
+          <ion-label position="stacked">Prénom</ion-label>
+          <ion-input type="text" [(ngModel)]="editableProfileInModal.prenom" placeholder="Votre prénom"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Nom</ion-label>
+          <ion-input type="text" [(ngModel)]="editableProfileInModal.nom" placeholder="Votre nom"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Email</ion-label>
+          <ion-input type="email" [value]="editableProfileInModal.email" readonly placeholder="Email (non modifiable)"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Téléphone</ion-label>
+          <ion-input type="tel" [(ngModel)]="editableProfileInModal.telephone" placeholder="Numéro de téléphone"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Titre de Poste Actuel/Recherché</ion-label>
+          <ion-input type="text" [(ngModel)]="editableProfileInModal.titrePoste" placeholder="Ex: Développeur Web"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Adresse</ion-label>
+          <ion-textarea [(ngModel)]="editableProfileInModal.adresse" autoGrow="true" rows="3" placeholder="Votre adresse"></ion-textarea>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Résumé Personnel / Objectif</ion-label>
+          <ion-textarea [(ngModel)]="editableProfileInModal.resumePersonnel" autoGrow="true" rows="4" placeholder="Parlez un peu de vous..."></ion-textarea>
+        </ion-item>
+        <ion-button expand="block" (click)="handleSaveProfileFromModal()" class="ion-margin-top" [disabled]="isSaving || isUploadingAvatar">
+          <ion-spinner *ngIf="isSaving || isUploadingAvatar" name="crescent" slot="start"></ion-spinner>
+          <ion-icon *ngIf="!isSaving && !isUploadingAvatar" name="save-outline" slot="start"></ion-icon>
+          Enregistrer
+        </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
