@@ -1,0 +1,27 @@
+<ion-header>
+  <app-user-header></app-user-header>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list-header>
+    <ion-label>Mes Expériences Professionnelles</ion-label>
+  </ion-list-header>
+
+  <div *ngIf="isLoadingExperiences" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+  </div>
+
+  <ion-list *ngIf="!isLoadingExperiences">
+    <ion-item lines="none">
+        <ion-icon name="list-outline" slot="start" color="medium"></ion-icon>
+        <ion-label class="ion-text-wrap" color="medium">
+            Aucune expérience enregistrée pour le moment. Cliquez sur le bouton '+' pour en ajouter une.
+        </ion-label>
+    </ion-item>
+  </ion-list>
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="addExperience()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

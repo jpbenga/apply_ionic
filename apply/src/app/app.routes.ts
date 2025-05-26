@@ -4,7 +4,6 @@ import { authState } from '@angular/fire/auth';
 import { Auth } from '@angular/fire/auth';
 import { inject } from '@angular/core';
 
-// Guard pour rediriger les utilisateurs non connectés vers la page de login
 const redirectUnauthorizedToLogin = () => {
   const auth = inject(Auth);
   return authState(auth).pipe(
@@ -12,7 +11,6 @@ const redirectUnauthorizedToLogin = () => {
   );
 };
 
-// Guard pour rediriger les utilisateurs déjà connectés vers la page d'accueil (tabs/dashboard)
 const redirectLoggedInToHome = () => {
   const auth = inject(Auth);
   return authState(auth).pipe(
@@ -20,7 +18,6 @@ const redirectLoggedInToHome = () => {
   );
 };
 
-// Configuration des routes
 export const routes: Routes = [
   {
     path: '',
@@ -70,5 +67,14 @@ export const routes: Routes = [
     path: 'candidature/:id',
     loadComponent: () => import('./pages/dashboard/candidature-detail/candidature-detail.page').then(m => m.CandidatureDetailPage),
     canActivate: [redirectUnauthorizedToLogin]
+  },
+  {
+    path: 'my-cv', // Nouvelle route pour le CV structuré
+    loadComponent: () => import('./pages/my-cv/my-cv.page').then(m => m.MyCvPage),
+    canActivate: [redirectUnauthorizedToLogin] // Protéger cette route
+  },
+  {
+    path: 'my-cv',
+    loadComponent: () => import('./pages/my-cv/my-cv.page').then( m => m.MyCvPage)
   }
 ];
