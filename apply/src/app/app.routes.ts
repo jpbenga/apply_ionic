@@ -27,12 +27,14 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () => import('./pages/auth/login/login.page').then(m => m.LoginPage),
-    canActivate: [redirectLoggedInToHome]
+    canActivate: [redirectLoggedInToHome],
+    data: { title: 'Connexion', showBackButton: false }
   },
   {
     path: 'signup',
     loadComponent: () => import('./pages/auth/signup/signup.page').then(m => m.SignupPage),
-    canActivate: [redirectLoggedInToHome]
+    canActivate: [redirectLoggedInToHome],
+    data: { title: 'Inscription', showBackButton: true }
   },
   {
     path: 'tabs',
@@ -41,15 +43,18 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage)
+        loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
+        data: { title: 'Tableau de Bord', showBackButton: false }
       },
       {
         path: 'postuler',
-        loadComponent: () => import('./pages/postuler/postuler.page').then(m => m.PostulerPage)
+        loadComponent: () => import('./pages/postuler/postuler.page').then(m => m.PostulerPage),
+        data: { title: 'Postuler', showBackButton: false }
       },
       {
         path: 'stats',
-        loadComponent: () => import('./pages/stats/stats.page').then(m => m.StatsPage)
+        loadComponent: () => import('./pages/stats/stats.page').then(m => m.StatsPage),
+        data: { title: 'Statistiques', showBackButton: false }
       },
       {
         path: '',
@@ -61,20 +66,19 @@ export const routes: Routes = [
   {
     path: 'profile',
     loadComponent: () => import('./pages/profile/profile.page').then(m => m.ProfilePage),
-    canActivate: [redirectUnauthorizedToLogin]
+    canActivate: [redirectUnauthorizedToLogin],
+    data: { title: 'Mon Profil', showBackButton: true }
   },
   {
     path: 'candidature/:id',
     loadComponent: () => import('./pages/dashboard/candidature-detail/candidature-detail.page').then(m => m.CandidatureDetailPage),
-    canActivate: [redirectUnauthorizedToLogin]
-  },
-  {
-    path: 'my-cv', // Nouvelle route pour le CV structuré
-    loadComponent: () => import('./pages/my-cv/my-cv.page').then(m => m.MyCvPage),
-    canActivate: [redirectUnauthorizedToLogin] // Protéger cette route
+    canActivate: [redirectUnauthorizedToLogin],
+    data: { title: 'Détail Candidature', showBackButton: true } 
   },
   {
     path: 'my-cv',
-    loadComponent: () => import('./pages/my-cv/my-cv.page').then( m => m.MyCvPage)
+    loadComponent: () => import('./pages/my-cv/my-cv.page').then(m => m.MyCvPage),
+    canActivate: [redirectUnauthorizedToLogin],
+    data: { title: 'Mon CV Structuré', showBackButton: true }
   }
 ];

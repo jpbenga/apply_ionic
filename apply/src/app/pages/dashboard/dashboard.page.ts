@@ -5,17 +5,18 @@ import { FormsModule } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize, first } from 'rxjs/operators';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner, IonIcon,
-  IonButton, IonButtons, IonRefresher, IonRefresherContent,
+  IonHeader, IonContent, IonSpinner, IonIcon,
+  IonButton, IonRefresher, IonRefresherContent,
   IonItem, IonLabel, IonSelect, IonSelectOption, IonFab, IonFabButton
+  // IonToolbar, IonTitle, IonButtons ont été retirés car UserHeaderComponent les gère
 } from '@ionic/angular/standalone';
 import { HeaderService } from 'src/app/services/header/header.service';
 import { CandidatureService, GetCandidaturesOptions } from 'src/app/services/candidature/candidature.service';
-import { Candidature, StatutCandidature } from 'src/app/models/candidature.model';
+import { Candidature } from 'src/app/models/candidature.model'; // StatutCandidature n'est plus utilisé ici
 import { CandidatureCardComponent } from '../../components/candidature-card/candidature-card.component';
+import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component'; // Importe UserHeaderComponent
 import { addIcons } from 'ionicons';
 import { addCircleOutline, cloudOfflineOutline, fileTrayOutline, add } from 'ionicons/icons';
-import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,7 +30,7 @@ import { UserHeaderComponent } from 'src/app/components/user-header/user-header.
     IonHeader, IonContent, IonSpinner, IonIcon, IonButton,
     IonRefresher, IonRefresherContent, IonItem, IonLabel, IonSelect, IonSelectOption,
     IonFab, IonFabButton,
-    UserHeaderComponent,
+    UserHeaderComponent, // Assure-toi qu'il est ici
     CandidatureCardComponent
   ]
 })
@@ -46,7 +47,7 @@ export class DashboardPage implements OnInit {
   ];
 
   constructor(
-    public headerService: HeaderService,
+    private headerService: HeaderService, // Changé en private si non utilisé dans le template
     private candidatureService: CandidatureService,
     private router: Router
   ) {
@@ -54,14 +55,13 @@ export class DashboardPage implements OnInit {
   }
 
   ngOnInit() {
-    // Initial load moved to ionViewWillEnter for consistency with refresh
   }
 
-  ionViewWillEnter() {
-    this.headerService.updateTitle('Tableau de Bord');
-    this.headerService.setShowBackButton(false);
-    this.loadCandidatures(); 
-  }
+ionViewWillEnter() {
+  this.headerService.updateTitle('Tableau de Bord');
+  this.headerService.setShowBackButton(false);
+  this.loadCandidatures(); 
+}
 
   loadCandidatures(event?: any) {
     this.isLoading = true;

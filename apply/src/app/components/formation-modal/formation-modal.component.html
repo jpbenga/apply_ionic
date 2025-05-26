@@ -1,0 +1,62 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{ isEditMode ? 'Modifier la Formation' : 'Ajouter une Formation' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()">
+        <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="formationForm" (ngSubmit)="save()">
+    <ion-item>
+      <ion-label position="stacked">Diplôme / Titre Obtenu *</ion-label>
+      <ion-input formControlName="diplome" type="text" placeholder="Ex: Master Informatique"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Établissement *</ion-label>
+      <ion-input formControlName="etablissement" type="text" placeholder="Nom de l'école/université"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="stacked">Ville</ion-label>
+      <ion-input formControlName="ville" type="text" placeholder="Ex: Lyon"></ion-input>
+    </ion-item>
+
+    <ion-item>
+        <ion-label>En cours</ion-label>
+        <ion-checkbox slot="end" formControlName="enCours" (ionChange)="onCurrentFormationToggle($event)"></ion-checkbox>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Date de Début *</ion-label>
+      <ion-datetime-button datetime="formationDateDebut"></ion-datetime-button>
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime id="formationDateDebut" formControlName="dateDebut" presentation="date" preferWheel="true"></ion-datetime>
+        </ng-template>
+      </ion-modal>
+    </ion-item>
+
+    <ion-item [disabled]="isCurrentFormation">
+      <ion-label position="stacked">Date de Fin</ion-label>
+      <ion-datetime-button datetime="formationDateFin"></ion-datetime-button>
+       <ion-modal [keepContentsMounted]="true">
+         <ng-template>
+           <ion-datetime id="formationDateFin" formControlName="dateFin" presentation="date" preferWheel="true" [disabled]="isCurrentFormation"></ion-datetime>
+         </ng-template>
+       </ion-modal>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Description (Optionnel)</ion-label>
+      <ion-textarea formControlName="description" rows="3" placeholder="Détails, matières principales, mention..."></ion-textarea>
+    </ion-item>
+
+    <ion-button expand="block" type="submit" class="ion-margin-top" [disabled]="formationForm.invalid">
+      <ion-icon name="save-outline" slot="start"></ion-icon>
+      Enregistrer
+    </ion-button>
+  </form>
+</ion-content>

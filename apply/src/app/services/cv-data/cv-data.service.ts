@@ -1,17 +1,19 @@
 import { Injectable } from '@angular/core';
 import { 
   Firestore, collection, collectionData, doc, addDoc, 
-  updateDoc, deleteDoc, query, where, orderBy, Timestamp 
+  updateDoc, deleteDoc, query, orderBy, Timestamp 
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
 import { Experience } from 'src/app/models/experience.model';
+import { Formation } from 'src/app/models/formation.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CvDataService {
   private readonly experiencesPath = 'experiences';
+  private readonly formationsPath = 'formations';
 
   constructor(
     private firestore: Firestore,
@@ -24,6 +26,22 @@ export class CvDataService {
       throw new Error('Utilisateur non authentifié.');
     }
     return collection(this.firestore, `users/${user.uid}/${subcollectionPath}`);
+  }
+
+  private convertToTimestampIfDateOrString(dateValue: Date | string | Timestamp | undefined | null): Timestamp | null {
+    if (dateValue instanceof Timestamp) {
+      return dateValue;
+    }
+    if (dateValue instanceof Date) {
+      return Timestamp.fromDate(dateValue);
+    }
+    if (typeof dateValue === 'string') {
+      const date = new Date(dateValue);
+      if (!isNaN(date.getTime())) {
+        return Timestamp.fromDate(date);
+      }
+    }
+    return null;
   }
 
   getExperiences(): Observable<Experience[]> {
@@ -39,45 +57,121 @@ export class CvDataService {
 
   async addExperience(experienceData: Omit<Experience, 'id' | 'userId'>): Promise<string> {
     const user = this.auth.currentUser;
-    if (!user) {
-      throw new Error('Utilisateur non authentifié.');
-    }
+    if (!user) throw new Error('Utilisateur non authentifié.');
     const experiencesCollectionRef = this.getUserSubcollectionRef(this.experiencesPath);
     
-    const dataToSave: Omit<Experience, 'id'> = {
+    const dataForFirestore: any = {
       ...experienceData,
       userId: user.uid,
-      dateDebut: experienceData.dateDebut ? Timestamp.fromDate(new Date(experienceData.dateDebut as string | Date)) : Timestamp.now(),
-      dateFin: experienceData.dateFin ? Timestamp.fromDate(new Date(experienceData.dateFin as string | Date)) : null,
+      dateDebut: this.convertToTimestampIfDateOrString(experienceData.dateDebut) || Timestamp.now(),
+      dateFin: experienceData.enCours ? null : this.convertToTimestampIfDateOrString(experienceData.dateFin),
     };
-    const docRef = await addDoc(experiencesCollectionRef, dataToSave);
+    
+    Object.keys(dataForFirestore).forEach(key => 
+      (dataForFirestore[key] === undefined) && delete dataForFirestore[key]
+    );
+    if (dataForFirestore.enCours === true) {
+      dataForFirestore.dateFin = null;
+    } else if (dataForFirestore.hasOwnProperty('enCours') && dataForFirestore.enCours === false && !dataForFirestore.dateFin) {
+      // Si ce n'est plus en cours et que dateFin est vide, on ne la met pas à null pour ne pas l'écraser si elle existait
+      // delete dataForFirestore.dateFin; // Ou la laisser undefined si le modèle le permet
+    }
+
+
+    const docRef = await addDoc(experiencesCollectionRef, dataForFirestore);
     return docRef.id;
   }
 
   async updateExperience(experienceId: string, experienceData: Partial<Omit<Experience, 'id' | 'userId'>>): Promise<void> {
     const user = this.auth.currentUser;
-    if (!user || !experienceId) {
-      throw new Error('Utilisateur non authentifié ou ID d\'expérience manquant.');
+    if (!user || !experienceId) throw new Error('Utilisateur non authentifié ou ID d\'expérience manquant.');
+    
+    const dataForFirestore: any = { ...experienceData };
+
+    if (dataForFirestore.hasOwnProperty('dateDebut')) { 
+      dataForFirestore.dateDebut = this.convertToTimestampIfDateOrString(dataForFirestore.dateDebut); 
+    }
+    if (dataForFirestore.hasOwnProperty('dateFin')) { 
+      dataForFirestore.dateFin = dataForFirestore.enCours ? null : this.convertToTimestampIfDateOrString(dataForFirestore.dateFin);
+    }
+    if (dataForFirestore.hasOwnProperty('enCours') && dataForFirestore.enCours === true) {
+        dataForFirestore.dateFin = null;
     }
     
-    const dataToUpdate = { ...experienceData };
-    if (dataToUpdate.dateDebut) { 
-      dataToUpdate.dateDebut = Timestamp.fromDate(new Date(dataToUpdate.dateDebut as string | Date)); 
-    }
-    if (dataToUpdate.hasOwnProperty('dateFin')) { 
-      dataToUpdate.dateFin = dataToUpdate.dateFin ? Timestamp.fromDate(new Date(dataToUpdate.dateFin as string | Date)) : null;
-    }
+    const finalDataToUpdate: any = {};
+    Object.keys(dataForFirestore).forEach(key => {
+        if (dataForFirestore[key] !== undefined) finalDataToUpdate[key] = dataForFirestore[key];
+    });
 
     const experienceDocRef = doc(this.firestore, `users/${user.uid}/${this.experiencesPath}/${experienceId}`);
-    return updateDoc(experienceDocRef, dataToUpdate);
+    return updateDoc(experienceDocRef, finalDataToUpdate);
   }
 
   async deleteExperience(experienceId: string): Promise<void> {
     const user = this.auth.currentUser;
-    if (!user || !experienceId) {
-      throw new Error('Utilisateur non authentifié ou ID d\'expérience manquant.');
-    }
+    if (!user || !experienceId) throw new Error('Utilisateur non authentifié ou ID d\'expérience manquant.');
     const experienceDocRef = doc(this.firestore, `users/${user.uid}/${this.experiencesPath}/${experienceId}`);
     return deleteDoc(experienceDocRef);
+  }
+
+  getFormations(): Observable<Formation[]> {
+    try {
+      const formationsCollectionRef = this.getUserSubcollectionRef(this.formationsPath);
+      const q = query(formationsCollectionRef, orderBy('dateDebut', 'desc'));
+      return collectionData(q, { idField: 'id' }) as Observable<Formation[]>;
+    } catch (error) {
+      console.error("CvDataService: Erreur getFormations:", error);
+      return of([]);
+    }
+  }
+
+  async addFormation(formationData: Omit<Formation, 'id' | 'userId'>): Promise<string> {
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('Utilisateur non authentifié.');
+    const formationsCollectionRef = this.getUserSubcollectionRef(this.formationsPath);
+    const dataForFirestore: any = {
+      ...formationData,
+      userId: user.uid,
+      dateDebut: this.convertToTimestampIfDateOrString(formationData.dateDebut) || Timestamp.now(),
+      dateFin: formationData.enCours ? null : this.convertToTimestampIfDateOrString(formationData.dateFin),
+    };
+    Object.keys(dataForFirestore).forEach(key => 
+      (dataForFirestore[key] === undefined) && delete dataForFirestore[key]
+    );
+    if (dataForFirestore.enCours === true) {
+        dataForFirestore.dateFin = null;
+    }
+    const docRef = await addDoc(formationsCollectionRef, dataForFirestore);
+    return docRef.id;
+  }
+
+  async updateFormation(formationId: string, formationData: Partial<Omit<Formation, 'id' | 'userId'>>): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user || !formationId) throw new Error('Utilisateur non authentifié ou ID de formation manquant.');
+    const dataForFirestore: any = { ...formationData };
+
+    if (dataForFirestore.hasOwnProperty('dateDebut')) { 
+      dataForFirestore.dateDebut = this.convertToTimestampIfDateOrString(dataForFirestore.dateDebut); 
+    }
+    if (dataForFirestore.hasOwnProperty('dateFin')) { 
+      dataForFirestore.dateFin = dataForFirestore.enCours ? null : this.convertToTimestampIfDateOrString(dataForFirestore.dateFin);
+    }
+     if (dataForFirestore.hasOwnProperty('enCours') && dataForFirestore.enCours === true) {
+        dataForFirestore.dateFin = null;
+    }
+
+    const finalDataToUpdate: any = {};
+    Object.keys(dataForFirestore).forEach(key => {
+        if (dataForFirestore[key] !== undefined) finalDataToUpdate[key] = dataForFirestore[key];
+    });
+    const formationDocRef = doc(this.firestore, `users/${user.uid}/${this.formationsPath}/${formationId}`);
+    return updateDoc(formationDocRef, finalDataToUpdate);
+  }
+
+  async deleteFormation(formationId: string): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user || !formationId) throw new Error('Utilisateur non authentifié ou ID de formation manquant.');
+    const formationDocRef = doc(this.firestore, `users/${user.uid}/${this.formationsPath}/${formationId}`);
+    return deleteDoc(formationDocRef);
   }
 }
