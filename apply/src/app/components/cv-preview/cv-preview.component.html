@@ -1,0 +1,142 @@
+<!-- src/app/components/cv-preview/cv-preview.component.html -->
+<div class="cv-preview-container" [class]="'mode-' + previewMode">
+  
+  <!-- Header avec contrôles -->
+  <div class="preview-header" *ngIf="previewMode !== 'mini'">
+    <div class="preview-info">
+      <h4 class="preview-title">Aperçu du CV</h4>
+      <span class="template-name" *ngIf="template">{{ template.name }}</span>
+    </div>
+    
+    <div class="preview-controls">
+      <button 
+        class="control-button refresh-btn"
+        (click)="refresh()"
+        [disabled]="isLoading || isRendering"
+        title="Actualiser l'aperçu"
+        aria-label="Actualiser l'aperçu"
+      >
+        <span class="icon">🔄</span>
+      </button>
+      
+      <div class="zoom-controls" *ngIf="previewMode === 'full'">
+        <span class="zoom-label">Zoom:</span>
+        <button class="zoom-btn" title="Zoom adapté">📐</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zone de contenu principal -->
+  <div class="preview-content">
+    
+    <!-- État de chargement -->
+    <div *ngIf="isLoading" class="state-container loading-state">
+      <div class="loading-animation">
+        <div class="loading-spinner"></div>
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+      <p class="state-message">Chargement des données CV...</p>
+    </div>
+
+    <!-- État de rendu -->
+    <div *ngIf="isRendering && !isLoading" class="state-container rendering-state">
+      <div class="rendering-animation">
+        <div class="rendering-pulse"></div>
+      </div>
+      <p class="state-message">Génération de l'aperçu...</p>
+    </div>
+
+    <!-- État d'erreur -->
+    <div *ngIf="error && !isLoading && !isRendering" class="state-container error-state">
+      <div class="error-content">
+        <div class="error-icon">⚠️</div>
+        <h5 class="error-title">Erreur d'affichage</h5>
+        <p class="error-message">{{ error }}</p>
+        
+        <div class="error-actions">
+          <button 
+            *ngIf="showRetryButton"
+            class="retry-button primary"
+            (click)="retry()"
+          >
+            Réessayer ({{ maxRetries - retryCount }} tentatives restantes)
+          </button>
+          
+          <button 
+            class="retry-button secondary"
+            (click)="refresh()"
+          >
+            Actualiser
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- État vide - Aucun template -->
+    <div *ngIf="showEmptyTemplate" class="state-container empty-state">
+      <div class="empty-content">
+        <div class="empty-icon">📄</div>
+        <h5 class="empty-title">Sélectionnez un template</h5>
+        <p class="empty-message">Choisissez un template ci-dessus pour voir l'aperçu de votre CV</p>
+      </div>
+    </div>
+
+    <!-- État vide - Aucune donnée -->
+    <div *ngIf="showEmptyData" class="state-container empty-state">
+      <div class="empty-content">
+        <div class="empty-icon">📝</div>
+        <h5 class="empty-title">Données CV manquantes</h5>
+        <p class="empty-message">Ajoutez vos expériences, formations et compétences pour voir l'aperçu</p>
+        
+        <div class="empty-actions">
+          <button class="action-button" (click)="retry()">
+            Recharger les données
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone de rendu du template -->
+    <div 
+      *ngIf="!isLoading && !isRendering && !error && hasTemplate && hasCvData"
+      class="template-viewport"
+      [class.viewport-mini]="previewMode === 'mini'"
+      [class.viewport-normal]="previewMode === 'normal'"
+      [class.viewport-full]="previewMode === 'full'"
+    >
+      <div class="template-container" #templateContainer></div>
+      
+      <!-- Overlay d'interaction pour le mode mini -->
+      <div *ngIf="previewMode === 'mini'" class="mini-overlay">
+        <span class="mini-label">Aperçu</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer avec informations -->
+  <div class="preview-footer" *ngIf="previewMode === 'full' && template">
+    <div class="footer-info">
+      <span class="template-info">
+        Template: <strong>{{ template.name }}</strong>
+      </span>
+      <span class="theme-info" *ngIf="theme">
+        Couleur: <span class="color-sample" [style.background-color]="theme"></span>
+      </span>
+    </div>
+    
+    <div class="footer-actions">
+      <button class="footer-button" title="Exporter en PDF">
+        📥 Exporter
+      </button>
+      <button class="footer-button" title="Partager">
+        🔗 Partager
+      </button>
+    </div>
+  </div>
+
+</div>

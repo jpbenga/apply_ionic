@@ -1,0 +1,269 @@
+/* src/app/components/cv-template-selector/cv-template-selector.component.scss */
+.template-selector-container {
+  width: 100%;
+
+  // États de chargement, erreur et vide
+  .loading-state,
+  .error-state,
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e0e0e0;
+      border-top: 3px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    .error-icon,
+    .empty-icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: #666;
+      margin: 0 0 16px 0;
+      font-size: 0.9rem;
+    }
+
+    .retry-button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background: #0056b3;
+      }
+    }
+  }
+
+  // Container principal des templates
+  .template-scroll-container {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding: 16px 0;
+    scroll-behavior: smooth;
+
+    // Personnalisation de la scrollbar
+    &::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+
+      &:hover {
+        background: #a8a8a8;
+      }
+    }
+
+    .template-item {
+      min-width: 280px;
+      max-width: 280px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #ffffff;
+      overflow: hidden;
+      position: relative;
+
+      // États d'interaction
+      &:hover {
+        border-color: #007bff;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+        transform: translateY(-2px);
+      }
+
+      &:focus {
+        outline: 2px solid #007bff;
+        outline-offset: 2px;
+      }
+
+      &.selected {
+        border-color: #007bff;
+        box-shadow: 0 4px 16px rgba(0, 123, 255, 0.25);
+        background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+
+        .template-preview {
+          .template-name {
+            color: #007bff;
+          }
+
+          .template-category {
+            background: #007bff;
+            color: white;
+          }
+        }
+      }
+
+      .template-preview {
+        padding: 20px;
+        height: 140px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+
+        .template-icon {
+          font-size: 2rem;
+          margin-bottom: 12px;
+          text-align: center;
+        }
+
+        .template-info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+
+          .template-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #333;
+            transition: color 0.3s ease;
+          }
+
+          .template-description {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+            margin: 0 0 12px 0;
+            flex: 1;
+          }
+
+          .template-category {
+            font-size: 0.75rem;
+            background: #f0f0f0;
+            color: #666;
+            padding: 4px 8px;
+            border-radius: 12px;
+            align-self: flex-start;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+          }
+        }
+
+        .selection-indicator {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          width: 24px;
+          height: 24px;
+          background: #007bff;
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.8rem;
+          font-weight: bold;
+          animation: bounceIn 0.3s ease;
+        }
+      }
+    }
+  }
+}
+
+// Animation pour l'indicateur de sélection
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Animation pour le spinner
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .template-selector-container {
+    .template-scroll-container {
+      gap: 12px;
+      padding: 12px 0;
+
+      .template-item {
+        min-width: 240px;
+        max-width: 240px;
+
+        .template-preview {
+          padding: 16px;
+          height: 120px;
+
+          .template-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+          }
+
+          .template-info {
+            .template-name {
+              font-size: 1rem;
+              margin-bottom: 6px;
+            }
+
+            .template-description {
+              font-size: 0.8rem;
+              margin-bottom: 10px;
+            }
+
+            .template-category {
+              font-size: 0.7rem;
+              padding: 3px 6px;
+            }
+          }
+
+          .selection-indicator {
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .template-selector-container {
+    .template-scroll-container {
+      .template-item {
+        min-width: 200px;
+        max-width: 200px;
+      }
+    }
+  }
+}

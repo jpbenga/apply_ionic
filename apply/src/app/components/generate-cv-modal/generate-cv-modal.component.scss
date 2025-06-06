@@ -1,0 +1,72 @@
+ion-header.modal-header {
+    ion-toolbar {
+      --background: #ffffff;
+      --padding-top: 5px;
+      --padding-bottom: 5px;
+      padding-left: 0;
+      padding-right: 0;
+      box-shadow: none;
+      border-bottom: 1px solid #e0e0e0;
+    }
+  
+    .drag-handle-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 20px; /* Approx h-5 */
+      padding-top: 5px;
+    }
+  
+    .drag-handle {
+      width: 36px; /* Approx w-9 */
+      height: 4px; /* Approx h-1 */
+      background-color: #dde1e3;
+      border-radius: 9999px; /* rounded-full */
+    }
+  
+    ion-title.modal-main-title {
+      color: #121416;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: -0.015em;
+      text-align: left;
+      padding-left: 16px; /* px-4 */
+      padding-top: 5px; /* pt-5 (adjusted for overall layout) */
+      padding-bottom: 12px; /* pb-3 */
+    }
+  }
+  
+  ion-content {
+    --background: #ffffff;
+    --padding-start: 16px;
+    --padding-end: 16px;
+  
+    .section-title {
+      color: #121416;
+      font-size: 18px; /* text-lg */
+      font-weight: bold;
+      letter-spacing: -0.015em;
+      margin-top: 16px; /* pt-4 */
+      margin-bottom: 8px; /* pb-2 */
+    }
+  }
+  
+  ion-footer.modal-footer {
+    background: #ffffff;
+    padding-top: 12px; /* py-3 */
+    padding-bottom: 20px; /* h-5 for bottom spacing + py-3 */
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+  
+    .generate-button {
+      --background: #dce8f3; /* bg-[#dce8f3] */
+      --color: #121416; /* text-[#121416] */
+      font-size: 16px; /* text-base */
+      font-weight: bold; /* font-bold */
+      letter-spacing: 0.015em; /* tracking-[0.015em] */
+      height: 48px; /* h-12 */
+      border-radius: 12px; /* rounded-xl */
+      margin: 0; /* Ensure it takes full width with expand="block" */
+      text-transform: none;
+    }
+  }

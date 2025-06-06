@@ -1,0 +1,22 @@
+<!-- src/app/components/cv-theme-picker/cv-theme-picker.component.html -->
+<div class="theme-picker-container">
+  <label
+    *ngFor="let theme of themes"
+    class="color-option"
+    [style.background-color]="theme.color"
+    [class.selected]="theme.color === selectedThemeColor"
+    (click)="selectTheme(theme.color)"
+    [title]="theme.name"
+  >
+    <input 
+      type="radio" 
+      name="themeColor" 
+      [value]="theme.color" 
+      [(ngModel)]="selectedThemeColor" 
+      class="invisible-radio" 
+    />
+    <div class="selection-indicator" *ngIf="theme.color === selectedThemeColor">
+      ✓
+    </div>
+  </label>
+</div>

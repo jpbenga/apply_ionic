@@ -1,0 +1,58 @@
+<!-- src/app/components/cv-template-selector/cv-template-selector.component.html -->
+<div class="template-selector-container">
+  
+  <!-- État de chargement -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Chargement des templates...</p>
+  </div>
+
+  <!-- État d'erreur -->
+  <div *ngIf="error && !isLoading" class="error-state">
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button class="retry-button" (click)="retryLoad()">Réessayer</button>
+  </div>
+
+  <!-- Liste des templates -->
+  <div *ngIf="!isLoading && !error" class="template-scroll-container">
+    <div
+      *ngFor="let template of templates; trackBy: trackByTemplateId"
+      class="template-item"
+      (click)="selectTemplate(template)"
+      [class.selected]="template.id === selectedTemplateId"
+      [attr.aria-label]="'Sélectionner le template ' + template.name"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="selectTemplate(template)"
+      (keydown.space)="selectTemplate(template)"
+    >
+      <div class="template-preview">
+        <div class="template-icon">
+          <span *ngIf="template.category === 'modern'">🎨</span>
+          <span *ngIf="template.category === 'classic'">📄</span>
+          <span *ngIf="template.category === 'creative'">✨</span>
+          <span *ngIf="template.category === 'minimalist'">⚪</span>
+        </div>
+        
+        <div class="template-info">
+          <h3 class="template-name">{{ template.name }}</h3>
+          <p class="template-description">{{ template.description }}</p>
+          <span class="template-category">{{ getCategoryLabel(template.category) }}</span>
+        </div>
+
+        <div class="selection-indicator" *ngIf="template.id === selectedTemplateId">
+          ✓
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div *ngIf="!isLoading && !error && templates.length === 0" class="empty-state">
+    <div class="empty-icon">📄</div>
+    <p>Aucun template disponible</p>
+    <button class="retry-button" (click)="retryLoad()">Actualiser</button>
+  </div>
+
+</div>

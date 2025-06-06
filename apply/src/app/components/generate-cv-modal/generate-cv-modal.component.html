@@ -1,0 +1,30 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <div class="drag-handle-container">
+      <div class="drag-handle"></div>
+    </div>
+    <ion-title class="modal-main-title">Generate CV</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismissModal()" fill="clear" color="dark">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding-start ion-padding-end">
+  <h3 class="section-title">Template</h3>
+  <app-cv-template-selector (templateSelected)="onTemplateSelected($event)"></app-cv-template-selector>
+
+  <h3 class="section-title">Theme</h3>
+  <app-cv-theme-picker (themeSelected)="onThemeSelected($event)"></app-cv-theme-picker>
+
+  <h3 class="section-title">Preview</h3>
+  <app-cv-preview [template]="selectedTemplate" [theme]="selectedTheme"></app-cv-preview>
+</ion-content>
+
+<ion-footer class="ion-padding modal-footer">
+  <ion-button expand="block" (click)="handleGenerate()" class="generate-button">
+    Generate
+  </ion-button>
+</ion-footer>

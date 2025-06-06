@@ -1,10 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { 
-  IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon, 
-  IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding, 
-  IonItemOptions, IonItemOption, IonButton 
+import {
+  IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
+  IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
+  IonItemOptions, IonItemOption, IonButton
 } from '@ionic/angular/standalone';
 import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
 import { HeaderService } from 'src/app/services/header/header.service';
@@ -21,7 +21,11 @@ import { Observable, of, Subject } from 'rxjs';
 import { catchError, finalize, takeUntil, first, timeout } from 'rxjs/operators';
 import { Timestamp } from '@angular/fire/firestore';
 import { addIcons } from 'ionicons';
-import { addOutline, listOutline, businessOutline, createOutline, trashOutline, schoolOutline, starOutline, cloudOfflineOutline } from 'ionicons/icons';
+import {
+  addOutline, listOutline, businessOutline, createOutline, trashOutline,
+  schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline
+} from 'ionicons/icons';
+import { GenerateCvModalComponent } from 'src/app/components/generate-cv-modal/generate-cv-modal.component';
 
 @Component({
   selector: 'app-my-cv',
@@ -30,9 +34,9 @@ import { addOutline, listOutline, businessOutline, createOutline, trashOutline, 
   standalone: true,
   imports: [
     CommonModule, FormsModule, DatePipe,
-    IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon, 
-    IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding, 
-    IonItemOptions, IonItemOption, IonButton, 
+    IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
+    IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
+    IonItemOptions, IonItemOption, IonButton,
     UserHeaderComponent
   ]
 })
@@ -41,14 +45,14 @@ export class MyCvPage implements OnInit, OnDestroy {
   public formations$: Observable<Formation[]> = of([]);
   public competences$: Observable<Competence[]> = of([]);
   private destroy$ = new Subject<void>();
-  
+
   public isLoadingExperiences: boolean = false;
   public isLoadingFormations: boolean = false;
   public isLoadingCompetences: boolean = false;
   public errorLoadingExperiences: string | null = null;
   public errorLoadingFormations: string | null = null;
   public errorLoadingCompetences: string | null = null;
-  
+
   private isModalOpening: boolean = false;
 
   constructor(
@@ -57,8 +61,11 @@ export class MyCvPage implements OnInit, OnDestroy {
     private authService: AuthService,
     private cvDataService: CvDataService,
     private toastCtrl: ToastController
-    ) {
-    addIcons({ addOutline, listOutline, businessOutline, createOutline, trashOutline, schoolOutline, starOutline, cloudOfflineOutline });
+  ) {
+    addIcons({
+      addOutline, listOutline, businessOutline, createOutline, trashOutline,
+      schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline
+    });
   }
 
   ngOnInit() {
@@ -66,11 +73,11 @@ export class MyCvPage implements OnInit, OnDestroy {
 
   ionViewWillEnter() {
     this.headerService.updateTitle('Mon CV Structuré');
-    this.headerService.setShowBackButton(true); 
+    this.headerService.setShowBackButton(true);
     this.loadAllCvData();
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -84,10 +91,10 @@ export class MyCvPage implements OnInit, OnDestroy {
   loadExperiences(event?: any) {
     this.isLoadingExperiences = true;
     this.errorLoadingExperiences = null;
-    this.experiences$ = of([]); 
+    this.experiences$ = of([]);
     const TIMEOUT_DURATION = 15000;
     this.cvDataService.getExperiences().pipe(
-      first(), 
+      first(),
       timeout(TIMEOUT_DURATION),
       catchError(error => {
         this.isLoadingExperiences = false;
@@ -96,12 +103,12 @@ export class MyCvPage implements OnInit, OnDestroy {
         } else {
           this.errorLoadingExperiences = 'Impossible de charger les expériences.';
         }
-        console.error('Erreur chargement expériences:', error); 
+        console.error('Erreur chargement expériences:', error);
         if (event?.target?.complete) event.target.complete();
         return of([]);
       }),
-      finalize(() => { 
-        this.isLoadingExperiences = false; 
+      finalize(() => {
+        this.isLoadingExperiences = false;
         if (event?.target?.complete) event.target.complete();
       }),
       takeUntil(this.destroy$)
@@ -114,7 +121,7 @@ export class MyCvPage implements OnInit, OnDestroy {
     this.formations$ = of([]);
     const TIMEOUT_DURATION = 15000;
     this.cvDataService.getFormations().pipe(
-      first(), 
+      first(),
       timeout(TIMEOUT_DURATION),
       catchError(error => {
         this.isLoadingFormations = false;
@@ -123,12 +130,12 @@ export class MyCvPage implements OnInit, OnDestroy {
         } else {
           this.errorLoadingFormations = 'Impossible de charger les formations.';
         }
-        console.error('Erreur chargement formations:', error); 
+        console.error('Erreur chargement formations:', error);
         if (event?.target?.complete) event.target.complete();
         return of([]);
       }),
-      finalize(() => { 
-        this.isLoadingFormations = false; 
+      finalize(() => {
+        this.isLoadingFormations = false;
         if (event?.target?.complete) event.target.complete();
       }),
       takeUntil(this.destroy$)
@@ -141,7 +148,7 @@ export class MyCvPage implements OnInit, OnDestroy {
     this.competences$ = of([]);
     const TIMEOUT_DURATION = 15000;
     this.cvDataService.getCompetences().pipe(
-      first(), 
+      first(),
       timeout(TIMEOUT_DURATION),
       catchError(error => {
         this.isLoadingCompetences = false;
@@ -150,18 +157,18 @@ export class MyCvPage implements OnInit, OnDestroy {
         } else {
           this.errorLoadingCompetences = 'Impossible de charger les compétences.';
         }
-        console.error('Erreur chargement compétences:', error); 
+        console.error('Erreur chargement compétences:', error);
         if (event?.target?.complete) event.target.complete();
         return of([]);
       }),
-      finalize(() => { 
-        this.isLoadingCompetences = false; 
+      finalize(() => {
+        this.isLoadingCompetences = false;
         if (event?.target?.complete) event.target.complete();
       }),
       takeUntil(this.destroy$)
     ).subscribe(data => this.competences$ = of(data));
   }
-  
+
   getDisplayDate(dateValue: Timestamp | Date | string | null | undefined): Date | null {
     if (!dateValue) return null;
     if (dateValue instanceof Timestamp) return dateValue.toDate();
@@ -171,37 +178,37 @@ export class MyCvPage implements OnInit, OnDestroy {
   }
 
   async addExperience() { await this.openExperienceModal(); }
-  async editExperience(exp: Experience, item?: IonItemSliding) { if(item) await item.close(); await this.openExperienceModal(exp); }
-  async deleteExperience(id?: string, item?: IonItemSliding) { 
-    if(item) await item.close(); 
-    if (!id) return; 
-    try { 
-      await this.cvDataService.deleteExperience(id); 
+  async editExperience(exp: Experience, item?: IonItemSliding) { if (item) await item.close(); await this.openExperienceModal(exp); }
+  async deleteExperience(id?: string, item?: IonItemSliding) {
+    if (item) await item.close();
+    if (!id) return;
+    try {
+      await this.cvDataService.deleteExperience(id);
       this.presentToast('Expérience supprimée.', 'success');
       this.loadExperiences();
-    } 
+    }
     catch (e) { this.presentToast("Erreur suppression expérience.", "danger"); }
   }
 
   async addFormation() { await this.openFormationModal(); }
-  async editFormation(form: Formation, item?: IonItemSliding) { if(item) await item.close(); await this.openFormationModal(form); }
+  async editFormation(form: Formation, item?: IonItemSliding) { if (item) await item.close(); await this.openFormationModal(form); }
   async deleteFormation(id?: string, item?: IonItemSliding) {
-    if(item) await item.close(); 
-    if (!id) return; 
-    try { 
-      await this.cvDataService.deleteFormation(id); 
+    if (item) await item.close();
+    if (!id) return;
+    try {
+      await this.cvDataService.deleteFormation(id);
       this.presentToast('Formation supprimée.', 'success');
       this.loadFormations();
-    } 
+    }
     catch (e) { this.presentToast("Erreur suppression formation.", "danger"); }
   }
 
   async addCompetence() { await this.openCompetenceModal(); }
-  async editCompetence(comp: Competence, item?: IonItemSliding) { if(item) await item.close(); await this.openCompetenceModal(comp); }
+  async editCompetence(comp: Competence, item?: IonItemSliding) { if (item) await item.close(); await this.openCompetenceModal(comp); }
   async deleteCompetence(id?: string, item?: IonItemSliding) {
-    if(item) await item.close(); 
-    if (!id) return; 
-    try { await this.cvDataService.deleteCompetence(id); this.presentToast('Compétence supprimée.', 'success'); this.loadCompetences(); } 
+    if (item) await item.close();
+    if (!id) return;
+    try { await this.cvDataService.deleteCompetence(id); this.presentToast('Compétence supprimée.', 'success'); this.loadCompetences(); }
     catch (e) { this.presentToast("Erreur suppression compétence.", "danger"); }
   }
 
@@ -214,7 +221,7 @@ export class MyCvPage implements OnInit, OnDestroy {
       if (role === 'save' && data && this.isPartialExperienceData(data)) {
         const currentUser = this.authService.getCurrentUser();
         if (!currentUser) { this.presentToast("Utilisateur non authentifié.", "danger"); this.isModalOpening = false; return; }
-        const dataToSave: Omit<Experience, 'id' | 'userId'> = { 
+        const dataToSave: Omit<Experience, 'id' | 'userId'> = {
           poste: data.poste || '', entreprise: data.entreprise || '', lieu: data.lieu,
           dateDebut: data.dateDebut || new Date().toISOString(), dateFin: data.dateFin,
           enCours: data.enCours, description: data.description
@@ -279,11 +286,30 @@ export class MyCvPage implements OnInit, OnDestroy {
   private isEditableExperience(exp?: Experience): exp is Experience & { id: string } { return !!(exp && exp.id); }
   private isPartialFormationData(data: any): data is Partial<Omit<Formation, 'userId'>> { return data && data.diplome && data.etablissement; }
   private isEditableFormation(form?: Formation): form is Formation & { id: string } { return !!(form && form.id); }
-  private isPartialCompetenceData(data: any): data is Partial<Omit<Competence, 'userId'>> { return data && data.nom ; }
+  private isPartialCompetenceData(data: any): data is Partial<Omit<Competence, 'userId'>> { return data && data.nom; }
   private isEditableCompetence(comp?: Competence): comp is Competence & { id: string } { return !!(comp && comp.id); }
 
   async presentToast(message: string, color: 'success' | 'danger' | 'warning') {
     const toast = await this.toastCtrl.create({ message, duration: 2000, position: 'bottom', color });
     toast.present();
+  }
+
+  async generateCv() {
+    const modal = await this.modalCtrl.create({
+      component: GenerateCvModalComponent,
+      breakpoints: [0, 0.5, 0.8, 1],
+      initialBreakpoint: 0.8,
+      handle: true,
+      backdropDismiss: true,
+    });
+    await modal.present();
+
+    const { data, role } = await modal.onWillDismiss();
+    if (role === 'generate') {
+      console.log('Modal dismissed with generate role, data:', data);
+      this.presentToast(`CV generation started with template: ${data.template?.name} and theme: ${data.theme}`, 'success');
+    } else {
+      console.log('Modal dismissed with role:', role);
+    }
   }
 }

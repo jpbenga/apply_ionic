@@ -1,0 +1,195 @@
+/* src/app/components/cv-templates/template-modern/cv-template-modern.component.scss */
+.cv-modern {
+    max-width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: var(--cv-background-color, #ffffff);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--cv-text-color, #333);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  
+    .cv-header {
+      background: linear-gradient(135deg, var(--cv-primary-color, #007bff), var(--cv-secondary-color, #0056b3));
+      color: white;
+      padding: 40px 30px;
+      position: relative;
+  
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 0;
+        right: 0;
+        height: 20px;
+        background: linear-gradient(45deg, transparent 49%, var(--cv-primary-color, #007bff) 50%);
+      }
+  
+      .personal-info {
+        .full-name {
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin: 0 0 10px 0;
+          letter-spacing: -1px;
+        }
+  
+        .title {
+          font-size: 1.2rem;
+          margin: 0 0 20px 0;
+          opacity: 0.9;
+          font-weight: 300;
+        }
+  
+        .contact-info {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+  
+          .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+  
+            .icon {
+              opacity: 0.8;
+            }
+          }
+        }
+      }
+    }
+  
+    .cv-body {
+      padding: 40px 30px 30px;
+  
+      .cv-section {
+        margin-bottom: 35px;
+  
+        .section-title {
+          font-size: 1.4rem;
+          font-weight: 600;
+          color: var(--cv-primary-color, #007bff);
+          margin: 0 0 20px 0;
+          padding-bottom: 8px;
+          border-bottom: 2px solid var(--cv-primary-color, #007bff);
+          position: relative;
+  
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--cv-secondary-color, #0056b3);
+          }
+        }
+  
+        .experience-item,
+        .formation-item {
+          margin-bottom: 25px;
+          padding-left: 20px;
+          border-left: 3px solid var(--cv-secondary-color, #0056b3);
+          position: relative;
+  
+          &::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 5px;
+            width: 9px;
+            height: 9px;
+            background: var(--cv-primary-color, #007bff);
+            border-radius: 50%;
+          }
+  
+          .experience-header,
+          .formation-header {
+            margin-bottom: 5px;
+  
+            .position,
+            .diploma {
+              font-size: 1.1rem;
+              font-weight: 600;
+              margin: 0;
+              color: var(--cv-text-color, #333);
+            }
+  
+            .company,
+            .school {
+              font-weight: 500;
+              color: var(--cv-primary-color, #007bff);
+              display: block;
+              margin-top: 2px;
+            }
+          }
+  
+          .experience-meta,
+          .formation-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #666;
+  
+            .dates {
+              font-weight: 500;
+              background: var(--cv-secondary-color, #0056b3);
+              color: white;
+              padding: 2px 8px;
+              border-radius: 12px;
+              font-size: 0.8rem;
+            }
+          }
+  
+          .description {
+            margin: 0;
+            color: #555;
+            font-size: 0.95rem;
+          }
+        }
+  
+        .skills-container {
+          .skill-category {
+            margin-bottom: 20px;
+  
+            .category-title {
+              font-size: 1rem;
+              font-weight: 600;
+              margin: 0 0 10px 0;
+              color: var(--cv-primary-color, #007bff);
+            }
+  
+            .skills-list {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px;
+  
+              .skill-tag {
+                background: var(--cv-secondary-color, #0056b3);
+                color: white;
+                padding: 4px 12px;
+                border-radius: 16px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                transition: all 0.3s ease;
+  
+                &:hover {
+                  background: var(--cv-primary-color, #007bff);
+                  transform: translateY(-1px);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  
+    // Mode preview - plus petit
+    &.preview-mode {
+      transform: scale(0.6);
+      transform-origin: top left;
+      margin-bottom: -40%;
+    }
+  }

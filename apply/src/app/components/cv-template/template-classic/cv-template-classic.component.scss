@@ -1,0 +1,171 @@
+/* src/app/components/cv-templates/template-classic/cv-template-classic.component.scss */
+.cv-classic {
+    max-width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: var(--cv-background-color, #ffffff);
+    font-family: 'Times New Roman', serif;
+    line-height: 1.5;
+    color: var(--cv-text-color, #000);
+    border: 1px solid #ddd;
+  
+    .cv-header {
+      border-bottom: 3px solid var(--cv-primary-color, #000);
+      padding: 30px;
+      
+      .header-content {
+        text-align: center;
+  
+        .full-name {
+          font-size: 2.2rem;
+          font-weight: bold;
+          margin: 0 0 10px 0;
+          color: var(--cv-primary-color, #000);
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        }
+  
+        .title {
+          font-size: 1.1rem;
+          margin: 0 0 20px 0;
+          font-style: italic;
+          color: #666;
+        }
+  
+        .contact-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          max-width: 500px;
+          margin: 0 auto;
+  
+          .contact-item {
+            font-size: 0.9rem;
+            text-align: left;
+  
+            strong {
+              color: var(--cv-primary-color, #000);
+            }
+          }
+        }
+      }
+    }
+  
+    .cv-content {
+      padding: 20px 30px;
+  
+      .section {
+        margin-bottom: 30px;
+  
+        .section-header {
+          font-size: 1.3rem;
+          font-weight: bold;
+          color: var(--cv-primary-color, #000);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin: 0 0 15px 0;
+          padding-bottom: 5px;
+          border-bottom: 1px solid var(--cv-primary-color, #000);
+        }
+  
+        .section-content {
+          .item {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+  
+            .item-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 5px;
+  
+              .item-title {
+                flex: 1;
+  
+                h3 {
+                  font-size: 1.1rem;
+                  font-weight: bold;
+                  margin: 0;
+                  color: var(--cv-text-color, #000);
+                }
+  
+                h4 {
+                  font-size: 1rem;
+                  font-weight: normal;
+                  margin: 2px 0 0 0;
+                  color: var(--cv-primary-color, #000);
+                  font-style: italic;
+                }
+              }
+  
+              .item-dates {
+                font-size: 0.9rem;
+                font-weight: bold;
+                color: #666;
+                white-space: nowrap;
+                margin-left: 20px;
+              }
+            }
+  
+            .item-location {
+              font-size: 0.9rem;
+              color: #666;
+              margin-bottom: 8px;
+            }
+  
+            .item-description {
+              font-size: 0.95rem;
+              color: var(--cv-text-color, #000);
+              text-align: justify;
+              line-height: 1.4;
+            }
+          }
+  
+          .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+  
+            .skill-category {
+              .skill-category-title {
+                font-size: 1rem;
+                font-weight: bold;
+                color: var(--cv-primary-color, #000);
+                margin: 0 0 10px 0;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              }
+  
+              .skills-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+  
+                li {
+                  font-size: 0.9rem;
+                  margin-bottom: 5px;
+                  position: relative;
+                  padding-left: 15px;
+  
+                  &::before {
+                    content: '•';
+                    color: var(--cv-primary-color, #000);
+                    position: absolute;
+                    left: 0;
+                    font-weight: bold;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  
+    // Mode preview - plus petit
+    &.preview-mode {
+      transform: scale(0.6);
+      transform-origin: top left;
+      margin-bottom: -40%;
+    }
+  }

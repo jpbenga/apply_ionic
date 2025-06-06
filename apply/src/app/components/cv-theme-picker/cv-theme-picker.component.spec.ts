@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { CvTemplateComponent } from './cv-template.component';
+import { CvThemePickerComponent } from './cv-theme-picker.component';
 
-describe('CvTemplateComponent', () => {
-  let component: CvTemplateComponent;
-  let fixture: ComponentFixture<CvTemplateComponent>;
+describe('CvThemePickerComponent', () => {
+  let component: CvThemePickerComponent;
+  let fixture: ComponentFixture<CvThemePickerComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [CvTemplateComponent],
+      imports: [CvThemePickerComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CvTemplateComponent);
+    fixture = TestBed.createComponent(CvThemePickerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

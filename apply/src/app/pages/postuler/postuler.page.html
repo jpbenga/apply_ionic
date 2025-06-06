@@ -54,23 +54,6 @@
     <ion-label color="danger"><small>Échec de l'extraction du texte du CV ({{ getFileTypeLabel(selectedFile) }}).</small></ion-label>
   </ion-item>
 
-  <div class="ion-margin-top">
-    <ion-label class="ion-padding-start">Choisir un template de CV (optionnel)</ion-label>
-    <ion-grid>
-      <ion-row>
-        <ion-col size="4">
-          <div class="template-placeholder">Template 1</div>
-        </ion-col>
-        <ion-col size="4">
-          <div class="template-placeholder">Template 2</div>
-        </ion-col>
-        <ion-col size="4">
-          <div class="template-placeholder">Template 3</div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
-  </div>
-
   <ion-button expand="block" class="ion-margin-top" (click)="generateApplication()" [disabled]="!jobOfferText || !extractedCvText || isGeneratingAIContent || isExtractingText || isSavingCandidature">
     <ion-spinner *ngIf="isGeneratingAIContent" name="crescent" slot="start"></ion-spinner>
     <ion-icon *ngIf="!isGeneratingAIContent" slot="start" name="sparkles-outline"></ion-icon>
@@ -104,9 +87,9 @@
       </ion-card-content>
     </ion-card>
   </div>
-  
-  <ion-button expand="block" color="success" class="ion-margin-top" 
-              (click)="saveCandidature()" 
+
+  <ion-button expand="block" color="success" class="ion-margin-top"
+              (click)="saveCandidature()"
               [disabled]="!atsAnalysisResult || !generatedCoverLetter || isSavingCandidature || isGeneratingAIContent || isExtractingText">
     <ion-spinner *ngIf="isSavingCandidature" name="crescent" slot="start"></ion-spinner>
     <ion-icon *ngIf="!isSavingCandidature" name="save-outline" slot="start"></ion-icon>

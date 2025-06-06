@@ -5,7 +5,7 @@
 <ion-content class="ion-padding">
   <ion-list-header>
     <ion-label>Mes Expériences Professionnelles</ion-label>
-    </ion-list-header>
+  </ion-list-header>
 
   <div *ngIf="isLoadingExperiences" class="ion-text-center ion-padding">
     <ion-spinner name="crescent"></ion-spinner>
@@ -47,12 +47,12 @@
 
   <ion-list-header class="ion-margin-top">
     <ion-label>Mes Formations</ion-label>
-    </ion-list-header>
+  </ion-list-header>
 
   <div *ngIf="isLoadingFormations" class="ion-text-center ion-padding">
     <ion-spinner name="crescent"></ion-spinner>
   </div>
-   <div *ngIf="errorLoadingFormations && !isLoadingFormations" class="ion-text-center ion-padding">
+  <div *ngIf="errorLoadingFormations && !isLoadingFormations" class="ion-text-center ion-padding">
     <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
     <p style="color: var(--ion-color-danger);">{{ errorLoadingFormations }}</p>
     <ion-button fill="outline" (click)="loadFormations()">Réessayer</ion-button>
@@ -80,7 +80,7 @@
       </ion-item-sliding>
     </ng-container>
     <ng-template #noFormations>
-       <div class="ion-text-center ion-padding list-empty-placeholder">
+      <div class="ion-text-center ion-padding list-empty-placeholder">
         <ion-icon name="list-outline" size="large" color="medium"></ion-icon>
         <p color="medium">Aucune formation enregistrée.</p>
       </div>
@@ -89,7 +89,7 @@
 
   <ion-list-header class="ion-margin-top">
     <ion-label>Mes Compétences</ion-label>
-    </ion-list-header>
+  </ion-list-header>
   <div *ngIf="isLoadingCompetences" class="ion-text-center ion-padding"><ion-spinner name="crescent"></ion-spinner></div>
   <div *ngIf="errorLoadingCompetences && !isLoadingCompetences" class="ion-text-center ion-padding">
     <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
@@ -113,7 +113,7 @@
       </ion-item-sliding>
     </ng-container>
     <ng-template #noCompetences>
-       <div class="ion-text-center ion-padding list-empty-placeholder"><ion-icon name="list-outline" size="large" color="medium"></ion-icon><p color="medium">Aucune compétence enregistrée.</p></div>
+      <div class="ion-text-center ion-padding list-empty-placeholder"><ion-icon name="list-outline" size="large" color="medium"></ion-icon><p color="medium">Aucune compétence enregistrée.</p></div>
     </ng-template>
   </ion-list>
 
@@ -133,4 +133,11 @@
       </ion-fab-button>
     </ion-fab-list>
   </ion-fab>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="start">
+    <ion-fab-button (click)="generateCv()" color="success" data-desc="Générer CV">
+      <ion-icon name="document-text-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
 </ion-content>

@@ -1,0 +1,82 @@
+<!-- src/app/components/cv-templates/template-classic/cv-template-classic.component.html -->
+<div class="cv-classic" [ngStyle]="cssVariables">
+  <div class="cv-header">
+    <div class="header-content">
+      <h1 class="full-name">{{ getFullName() }}</h1>
+      <p class="title" *ngIf="getSummary()">{{ getSummary() }}</p>
+      
+      <div class="contact-grid">
+        <div class="contact-item" *ngIf="getEmail()">
+          <strong>Email:</strong> {{ getEmail() }}
+        </div>
+        <div class="contact-item" *ngIf="getPhone()">
+          <strong>Téléphone:</strong> {{ getPhone() }}
+        </div>
+        <div class="contact-item" *ngIf="getAddress()">
+          <strong>Adresse:</strong> {{ getAddress() }}
+        </div>
+        <div class="contact-item">
+          <strong>LinkedIn:</strong> -
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cv-content">
+    <div class="section" *ngIf="cvData && cvData.experiences && cvData.experiences.length > 0">
+      <h2 class="section-header">EXPÉRIENCE PROFESSIONNELLE</h2>
+      <div class="section-content">
+        <div class="item" *ngFor="let exp of cvData.experiences">
+          <div class="item-header">
+            <div class="item-title">
+              <h3>{{ exp.poste }}</h3>
+              <h4>{{ exp.entreprise }}</h4>
+            </div>
+            <div class="item-dates">
+              {{ formatDate(exp.dateDebut) }} - {{ exp.enCours ? 'Présent' : formatDate(exp.dateFin) }}
+            </div>
+          </div>
+          <div class="item-location" *ngIf="exp.lieu">{{ exp.lieu }}</div>
+          <div class="item-description" *ngIf="exp.description">
+            {{ exp.description }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" *ngIf="cvData && cvData.formations && cvData.formations.length > 0">
+      <h2 class="section-header">FORMATION</h2>
+      <div class="section-content">
+        <div class="item" *ngFor="let form of cvData.formations">
+          <div class="item-header">
+            <div class="item-title">
+              <h3>{{ form.diplome }}</h3>
+              <h4>{{ form.etablissement }}</h4>
+            </div>
+            <div class="item-dates">
+              {{ formatDate(form.dateDebut) }} - {{ form.enCours ? 'Présent' : formatDate(form.dateFin) }}
+            </div>
+          </div>
+          <div class="item-location" *ngIf="form.ville">{{ form.ville }}</div>
+          <div class="item-description" *ngIf="form.description">
+            {{ form.description }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" *ngIf="cvData && cvData.competences && cvData.competences.length > 0">
+      <h2 class="section-header">COMPÉTENCES</h2>
+      <div class="section-content">
+        <div class="skills-grid">
+          <div class="skill-category" *ngFor="let category of getSkillsByCategory()">
+            <h4 class="skill-category-title">{{ category.name }}</h4>
+            <ul class="skills-list">
+              <li *ngFor="let skill of category.skills">{{ skill.nom }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
