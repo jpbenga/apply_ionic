@@ -20,50 +20,119 @@
     </ion-textarea>
   </ion-item>
 
-  <ion-item lines="full" class="ion-margin-top">
-    <ion-label>Votre CV</ion-label>
-    <ion-button slot="end" fill="outline" (click)="triggerFileInput()" [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
-      <ion-icon slot="start" name="document-attach-outline"></ion-icon>
-      Choisir un CV (DOCX/PDF)
-    </ion-button>
+  <!-- Section CV -->
+  <div class="ion-margin-top cv-selection-section">
+    <ion-item lines="none">
+      <ion-label>
+        <h2>Choisir votre CV</h2>
+      </ion-label>
+    </ion-item>
+
+    <!-- Spinner pendant le chargement du CV récent -->
+    <ion-item *ngIf="isLoadingRecentCv" lines="none">
+      <ion-spinner name="crescent" slot="start"></ion-spinner>
+      <ion-label>Chargement du CV le plus récent...</ion-label>
+    </ion-item>
+
+    <!-- Radio group pour choisir entre CV récent et upload -->
+    <ion-radio-group [(ngModel)]="cvSelectionMode" [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
+      
+      <!-- Option 1: CV le plus récent -->
+      <ion-item *ngIf="mostRecentCv && !isLoadingRecentCv" class="cv-info">
+        <ion-radio slot="start" value="recent"></ion-radio>
+        <ion-label>
+          <h3>Utiliser le CV le plus récent</h3>
+          <p>{{ getCvDisplayName() }}</p>
+          <p><small>Créé le {{ getCvCreationDate() }}</small></p>
+        </ion-label>
+        <ion-icon name="document-text-outline" slot="end" color="primary"></ion-icon>
+      </ion-item>
+
+      <!-- Option 2: Upload nouveau CV -->
+      <ion-item class="cv-info">
+        <ion-radio slot="start" value="upload"></ion-radio>
+        <ion-label>
+          <h3>Uploader un nouveau CV</h3>
+          <p *ngIf="!mostRecentCv && !isLoadingRecentCv"><small>Aucun CV sauvegardé trouvé</small></p>
+        </ion-label>
+        <ion-button 
+          slot="end" 
+          fill="outline" 
+          (click)="triggerFileInput()" 
+          [disabled]="cvSelectionMode !== 'upload' || isExtractingText || isGeneratingAIContent || isSavingCandidature">
+          <ion-icon slot="start" name="document-attach-outline"></ion-icon>
+          Choisir fichier
+        </ion-button>
+      </ion-item>
+    </ion-radio-group>
+
+    <!-- Input file caché -->
     <input type="file" #fileInput hidden
            (change)="handleFileSelected($event)"
            accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,application/pdf" />
-  </ion-item>
 
-  <ion-item *ngIf="selectedFileName && !isExtractingText" lines="none">
-    <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
-    <ion-label color="medium"><small>{{ selectedFileName }}</small></ion-label>
-    <ion-button fill="clear" slot="end" (click)="clearFileSelection()" color="danger" [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
-      <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
-    </ion-button>
-  </ion-item>
+    <!-- Affichage du fichier sélectionné -->
+    <ion-item *ngIf="selectedFileName && cvSelectionMode === 'upload' && !isExtractingText" lines="none" class="ion-margin-start">
+      <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
+      <ion-label color="medium">
+        <small>{{ selectedFileName }}</small>
+      </ion-label>
+      <ion-button fill="clear" slot="end" (click)="clearFileSelection()" color="danger" 
+                  [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
+        <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
 
-  <ion-item *ngIf="isExtractingText" lines="none">
-    <ion-spinner name="crescent" slot="start"></ion-spinner>
-    <ion-label>Traitement du CV en cours...</ion-label>
-  </ion-item>
+    <!-- Extraction en cours -->
+    <ion-item *ngIf="isExtractingText" lines="none" class="ion-margin-start">
+      <ion-spinner name="crescent" slot="start"></ion-spinner>
+      <ion-label>Traitement du CV en cours...</ion-label>
+    </ion-item>
 
-  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText !== null" lines="none">
-    <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
-    <ion-label color="success"><small>Texte du CV ({{ getFileTypeLabel(selectedFile) }}) extrait.</small></ion-label>
-  </ion-item>
+    <!-- Succès extraction -->
+    <ion-item *ngIf="!isExtractingText && ((cvSelectionMode === 'upload' && selectedFile && extractedCvText !== null) || (cvSelectionMode === 'recent' && mostRecentCv && mostRecentCvText))" 
+              lines="none" class="ion-margin-start">
+      <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
+      <ion-label color="success">
+        <small>
+          CV prêt à utiliser
+          <span *ngIf="cvSelectionMode === 'upload'"> ({{ getFileTypeLabel(selectedFile) }}) extrait</span>
+          <span *ngIf="cvSelectionMode === 'recent'"> (CV généré)</span>
+        </small>
+      </ion-label>
+    </ion-item>
 
-  <ion-item *ngIf="!isExtractingText && selectedFile && extractedCvText === null && selectedFileName" lines="none">
-    <ion-icon name="warning" slot="start" color="danger"></ion-icon>
-    <ion-label color="danger"><small>Échec de l'extraction du texte du CV ({{ getFileTypeLabel(selectedFile) }}).</small></ion-label>
-  </ion-item>
+    <!-- Échec extraction -->
+    <ion-item *ngIf="!isExtractingText && cvSelectionMode === 'upload' && selectedFile && extractedCvText === null && selectedFileName" 
+              lines="none" class="ion-margin-start">
+      <ion-icon name="warning" slot="start" color="danger"></ion-icon>
+      <ion-label color="danger">
+        <small>Échec de l'extraction du texte du CV ({{ getFileTypeLabel(selectedFile) }}).</small>
+      </ion-label>
+    </ion-item>
 
-  <ion-button expand="block" class="ion-margin-top" (click)="generateApplication()" [disabled]="!jobOfferText || !extractedCvText || isGeneratingAIContent || isExtractingText || isSavingCandidature">
+    <!-- Info pour sauvegarder le CV uploadé -->
+    <ion-item *ngIf="cvSelectionMode === 'upload' && extractedCvText && !isExtractingText" lines="none" class="ion-margin-start">
+      <ion-label class="ion-margin-start">
+        <p><small>💡 Pour sauvegarder un CV, utilisez la section "Mon CV Structuré"</small></p>
+      </ion-label>
+    </ion-item>
+  </div>
+
+  <!-- Bouton générer -->
+  <ion-button expand="block" class="ion-margin-top" (click)="generateApplication()" 
+              [disabled]="!jobOfferText || !isCvReady() || isGeneratingAIContent || isExtractingText || isSavingCandidature">
     <ion-spinner *ngIf="isGeneratingAIContent" name="crescent" slot="start"></ion-spinner>
     <ion-icon *ngIf="!isGeneratingAIContent" slot="start" name="sparkles-outline"></ion-icon>
     {{ isGeneratingAIContent ? 'Génération IA en cours...' : 'Générer Analyse & Lettre' }}
   </ion-button>
 
+  <!-- Erreur IA -->
   <div *ngIf="aiError" class="ion-padding ion-text-center" style="color: var(--ion-color-danger);">
     <p>{{ aiError }}</p>
   </div>
 
+  <!-- Résultats ATS -->
   <div *ngIf="atsAnalysisResult && !isGeneratingAIContent && !isSavingCandidature" class="ion-margin-top">
     <ion-card>
       <ion-card-header>
@@ -77,6 +146,7 @@
     </ion-card>
   </div>
 
+  <!-- Lettre de motivation -->
   <div *ngIf="generatedCoverLetter && !isGeneratingAIContent && !isSavingCandidature" class="ion-margin-top">
     <ion-card>
       <ion-card-header>
@@ -88,6 +158,7 @@
     </ion-card>
   </div>
 
+  <!-- Bouton sauvegarder candidature -->
   <ion-button expand="block" color="success" class="ion-margin-top"
               (click)="saveCandidature()"
               [disabled]="!atsAnalysisResult || !generatedCoverLetter || isSavingCandidature || isGeneratingAIContent || isExtractingText">
@@ -96,6 +167,7 @@
     {{ isSavingCandidature ? 'Sauvegarde en cours...' : 'Sauvegarder la Candidature' }}
   </ion-button>
 
+  <!-- Aperçus des documents -->
   <div *ngIf="!isGeneratingAIContent && !isSavingCandidature && (atsAnalysisResult || generatedCoverLetter)" class="ion-margin-top results-placeholder">
     <ion-label class="ion-padding-start">Aperçu CV Final (Éditable)</ion-label>
     <div class="document-preview-placeholder">CV Éditable</div>

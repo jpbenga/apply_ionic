@@ -1,0 +1,91 @@
+ion-content {
+    --background: #f8f9fa;
+  }
+  
+  .results-placeholder {
+    .document-preview-placeholder {
+      background: var(--ion-color-light);
+      border: 2px dashed var(--ion-color-medium);
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      color: var(--ion-color-medium);
+      font-style: italic;
+      margin-top: 8px;
+    }
+  }
+  
+  ion-radio-group {
+    ion-item {
+      --border-color: var(--ion-color-light);
+      
+      &.item-radio-checked {
+        --background: var(--ion-color-primary-tint);
+        --border-color: var(--ion-color-primary);
+      }
+    }
+  }
+  
+  ion-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    
+    ion-card-header {
+      padding-bottom: 8px;
+    }
+    
+    ion-card-title {
+      color: var(--ion-color-primary);
+      font-weight: 600;
+    }
+    
+    pre {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--ion-color-dark);
+    }
+  }
+  
+  .cv-selection-section {
+    background: white;
+    border-radius: 12px;
+    margin: 16px 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  ion-button[expand="block"] {
+    margin: 20px 0;
+    height: 48px;
+    
+    &:not([disabled]) {
+      --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+    }
+  }
+  
+  .cv-info {
+    ion-label {
+      h3 {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      
+      p {
+        margin: 2px 0;
+        color: var(--ion-color-medium);
+      }
+      
+      small {
+        color: var(--ion-color-medium);
+        font-size: 12px;
+      }
+    }
+  }
+  
+  .error-message {
+    background: var(--ion-color-danger-tint);
+    border-left: 4px solid var(--ion-color-danger);
+    padding: 12px;
+    border-radius: 4px;
+    margin: 16px 0;
+  }

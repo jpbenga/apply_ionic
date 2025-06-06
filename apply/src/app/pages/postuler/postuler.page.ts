@@ -1,32 +1,39 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel,
-  IonTextarea, IonButton, IonIcon, IonGrid, IonRow, IonCol, IonSpinner,
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  ToastController
+  IonTextarea, IonButton, IonIcon, IonSpinner,
+  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonRadioGroup,
+  IonRadio, IonCheckbox, ToastController
 } from '@ionic/angular/standalone';
 import { HeaderService } from 'src/app/services/header/header.service';
 import { AIService, ATSAnalysisResult } from 'src/app/services/ai/ai.service';
 import { CandidatureService } from 'src/app/services/candidature/candidature.service';
+import { CvGenerationService } from 'src/app/services/cv-generation/cv-generation.service';
+import { GeneratedCv } from 'src/app/models/cv-template.model';
 import { Candidature } from 'src/app/models/candidature.model';
 import { Router } from '@angular/router';
 import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
+import { Subscription } from 'rxjs';
+import { Timestamp } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-postuler',
   templateUrl: './postuler.page.html',
+  styleUrls: ['./postuler.page.scss'],
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
-    IonItem, IonLabel, IonTextarea, IonButton, IonIcon, IonGrid, IonRow, IonCol,
-    IonSpinner, IonCard, IonCardHeader, IonCardTitle, IonCardContent, UserHeaderComponent
+    IonItem, IonLabel, IonTextarea, IonButton, IonIcon, IonSpinner,
+    IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
+    IonRadioGroup, IonRadio, IonCheckbox, UserHeaderComponent
   ]
 })
-export class PostulerPage {
+export class PostulerPage implements OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
+  // Propriétés existantes
   jobOfferText: string = '';
   selectedFileName: string | null = null;
   selectedFile: File | null = null;
@@ -40,10 +47,20 @@ export class PostulerPage {
 
   isSavingCandidature: boolean = false;
 
+  // Nouvelles propriétés pour la gestion des CVs
+  cvSelectionMode: 'recent' | 'upload' = 'upload';
+  mostRecentCv: GeneratedCv | null = null;
+  mostRecentCvText: string | null = null;
+  isLoadingRecentCv: boolean = false;
+  saveUploadedCv: boolean = false;
+
+  private subscriptions: Subscription[] = [];
+
   constructor(
     private headerService: HeaderService,
     private aiService: AIService,
     private candidatureService: CandidatureService,
+    private cvGenerationService: CvGenerationService,
     private toastController: ToastController,
     private router: Router
   ) { }
@@ -51,10 +68,90 @@ export class PostulerPage {
   ionViewWillEnter() {
     this.headerService.updateTitle('Postuler');
     this.headerService.setShowBackButton(false);
+    this.loadMostRecentCv();
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  async loadMostRecentCv() {
+    this.isLoadingRecentCv = true;
+    console.log('🔍 Recherche du CV généré le plus récent...');
+    
+    try {
+      const subscription = this.cvGenerationService.getGeneratedCvs().subscribe({
+        next: (cvs) => {
+          console.log('📄 CVs générés trouvés:', cvs);
+          if (cvs && cvs.length > 0) {
+            this.mostRecentCv = cvs[0]; // Le plus récent (trié par date desc)
+            this.mostRecentCvText = this.generateTextFromCvData(this.mostRecentCv);
+            
+            this.cvSelectionMode = 'recent';
+            console.log('✅ CV récent sélectionné par défaut:', this.mostRecentCv);
+          } else {
+            this.mostRecentCv = null;
+            this.mostRecentCvText = null;
+            this.cvSelectionMode = 'upload';
+            console.log('📁 Aucun CV généré trouvé, mode upload sélectionné');
+          }
+          this.isLoadingRecentCv = false;
+        },
+        error: (error) => {
+          console.error('❌ Erreur lors du chargement des CVs générés:', error);
+          this.mostRecentCv = null;
+          this.mostRecentCvText = null;
+          this.cvSelectionMode = 'upload';
+          this.isLoadingRecentCv = false;
+        }
+      });
+      this.subscriptions.push(subscription);
+    } catch (error) {
+      console.error('❌ Erreur try/catch lors du chargement du CV récent:', error);
+      this.cvSelectionMode = 'upload';
+      this.isLoadingRecentCv = false;
+    }
+  }
+
+  /**
+   * Convertit un CV généré en texte simple pour l'IA
+   */
+  private generateTextFromCvData(cv: GeneratedCv): string {
+    if (!cv.data) return '';
+
+    let text = '';
+
+    // Expériences
+    if (cv.data.experiences?.length > 0) {
+      text += 'EXPÉRIENCES PROFESSIONNELLES\n';
+      cv.data.experiences.forEach(exp => {
+        text += `${exp.poste} - ${exp.entreprise}\n`;
+        if (exp.description) text += `${exp.description}\n`;
+        text += '\n';
+      });
+    }
+
+    // Formations
+    if (cv.data.formations?.length > 0) {
+      text += 'FORMATIONS\n';
+      cv.data.formations.forEach(form => {
+        text += `${form.diplome} - ${form.etablissement}\n`;
+        if (form.description) text += `${form.description}\n`;
+        text += '\n';
+      });
+    }
+
+    // Compétences
+    if (cv.data.competences?.length > 0) {
+      text += 'COMPÉTENCES\n';
+      text += cv.data.competences.map(comp => comp.nom).join(', ') + '\n';
+    }
+
+    return text;
   }
 
   triggerFileInput() {
-    if (this.isExtractingText || this.isGeneratingAIContent || this.isSavingCandidature) return;
+    if (this.cvSelectionMode !== 'upload' || this.isExtractingText || this.isGeneratingAIContent || this.isSavingCandidature) return;
     this.fileInput.nativeElement.click();
   }
 
@@ -113,9 +210,48 @@ export class PostulerPage {
     this.generatedCoverLetter = null;
     this.aiError = null;
     this.isExtractingText = false;
+    this.saveUploadedCv = false;
     if (this.fileInput) {
       this.fileInput.nativeElement.value = '';
     }
+  }
+
+  isCvReady(): boolean {
+    if (this.cvSelectionMode === 'recent') {
+      return !!this.mostRecentCv && !!this.mostRecentCvText;
+    } else {
+      return !!this.extractedCvText;
+    }
+  }
+
+  getCurrentCvText(): string | null {
+    if (this.cvSelectionMode === 'recent') {
+      return this.mostRecentCvText;
+    } else if (this.cvSelectionMode === 'upload') {
+      return this.extractedCvText;
+    }
+    return null;
+  }
+
+  getCvDisplayName(): string {
+    if (this.cvSelectionMode === 'recent' && this.mostRecentCv) {
+      return `CV Généré (${this.mostRecentCv.templateId})`;
+    }
+    return '';
+  }
+
+  getCvCreationDate(): string {
+    if (this.cvSelectionMode === 'recent' && this.mostRecentCv) {
+      const date = new Date(this.mostRecentCv.createdAt);
+      return date.toLocaleDateString('fr-FR', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    return '';
   }
 
   async generateApplication() {
@@ -124,8 +260,10 @@ export class PostulerPage {
       this.presentToast("Veuillez saisir l'offre d'emploi.", 'warning');
       return;
     }
-    if (!this.extractedCvText) {
-      this.presentToast("Veuillez sélectionner un CV et attendre l'extraction de son texte, ou le texte n'a pas pu être extrait.", 'warning');
+
+    const cvText = this.getCurrentCvText();
+    if (!cvText) {
+      this.presentToast("Veuillez sélectionner un CV.", 'warning');
       return;
     }
 
@@ -134,11 +272,16 @@ export class PostulerPage {
     this.generatedCoverLetter = null;
 
     try {
-      const atsPromise = this.aiService.getATSAnalysis(this.jobOfferText, this.extractedCvText);
-      const letterPromise = this.aiService.generateCoverLetter(this.jobOfferText, this.extractedCvText);
+      const atsPromise = this.aiService.getATSAnalysis(this.jobOfferText, cvText);
+      const letterPromise = this.aiService.generateCoverLetter(this.jobOfferText, cvText);
       const [atsResult, letterResult] = await Promise.all([atsPromise, letterPromise]);
       this.atsAnalysisResult = atsResult;
       this.generatedCoverLetter = letterResult;
+
+      // Note: Pas de sauvegarde de CV uploadé car on utilise le système de CV générés existant
+      if (this.cvSelectionMode === 'upload' && this.saveUploadedCv) {
+        this.presentToast('Pour sauvegarder un CV, utilisez la section "Mon CV Structuré"', 'warning');
+      }
     } catch (error) {
       let errorMessage = "Une erreur est survenue lors de la génération par l'IA.";
       if (error instanceof Error) { errorMessage = error.message; }
@@ -158,30 +301,52 @@ export class PostulerPage {
   }
 
   async saveCandidature() {
-    if (!this.jobOfferText || !this.selectedFile || !this.extractedCvText || !this.atsAnalysisResult || !this.generatedCoverLetter) {
+    if (!this.jobOfferText || !this.atsAnalysisResult || !this.generatedCoverLetter) {
       this.presentToast('Veuillez d\'abord générer l\'analyse ATS et la lettre de motivation.', 'warning');
       return;
     }
+
+    const cvText = this.getCurrentCvText();
+    if (!cvText) {
+      this.presentToast('Aucun CV disponible.', 'warning');
+      return;
+    }
+
     if (!this.atsAnalysisResult.jobTitle || !this.atsAnalysisResult.company) {
-        this.presentToast('Le titre du poste ou l\'entreprise n\'a pas pu être extrait correctement par l\'IA. Sauvegarde annulée.', 'warning');
-        return;
+      this.presentToast('Le titre du poste ou l\'entreprise n\'a pas pu être extrait correctement par l\'IA. Sauvegarde annulée.', 'warning');
+      return;
     }
 
     this.isSavingCandidature = true;
+
+    // Préparer les données de candidature
+    let cvOriginalNom: string | undefined;
+    let cvOriginalUrl: string | undefined;
+    let fileToUpload: File | null = null;
+
+    if (this.cvSelectionMode === 'recent' && this.mostRecentCv) {
+      cvOriginalNom = this.getCvDisplayName();
+      // Note: Les CV générés n'ont pas d'URL de fichier, on utilise l'ID
+      cvOriginalUrl = `generated_cv_${this.mostRecentCv.id}`;
+    } else if (this.cvSelectionMode === 'upload' && this.selectedFile) {
+      cvOriginalNom = this.selectedFileName || undefined;
+      fileToUpload = this.selectedFile;
+    }
 
     const candidatureDetails: Omit<Candidature, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'dateCandidature'> = {
       poste: this.atsAnalysisResult.jobTitle,
       entreprise: this.atsAnalysisResult.company,
       offreTexteComplet: this.jobOfferText,
-      cvOriginalNom: this.selectedFileName || undefined,
-      cvTexteExtrait: this.extractedCvText || undefined,
+      cvOriginalNom: cvOriginalNom,
+      cvOriginalUrl: cvOriginalUrl,
+      cvTexteExtrait: cvText,
       analyseATS: this.atsAnalysisResult.analysisText,
       lettreMotivationGeneree: this.generatedCoverLetter,
       statut: 'envoyee',
     };
 
     try {
-      await this.candidatureService.createCandidature(candidatureDetails, this.selectedFile);
+      await this.candidatureService.createCandidature(candidatureDetails, fileToUpload);
       this.presentToast('Candidature sauvegardée avec succès !', 'success');
       this.resetForm();
       this.router.navigate(['/tabs/dashboard']);
@@ -198,6 +363,10 @@ export class PostulerPage {
   resetForm() {
     this.jobOfferText = '';
     this.clearFileSelection();
+    this.cvSelectionMode = this.mostRecentCv ? 'recent' : 'upload';
+    this.atsAnalysisResult = null;
+    this.generatedCoverLetter = null;
+    this.aiError = null;
   }
 
   async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light' ) {
