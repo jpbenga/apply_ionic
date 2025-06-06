@@ -4,11 +4,11 @@ import {
   ComponentRef, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef 
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CvTemplate, CvTheme, CvData } from 'src/app/models/cv-template.model';
+import { CvTemplate, CvTheme, CvData, GeneratedCv } from 'src/app/models/cv-template.model';
 import { CvGenerationService } from 'src/app/services/cv-generation/cv-generation.service';
 import { CvTemplateService } from 'src/app/services/cv-template/cv-template.service';
 import { CvTemplateBaseComponent } from '../cv-template/base/cv-template-base.component';
-import { combineLatest, Subscription } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -219,7 +219,7 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
     instance.userProfile = this.userProfile;
     instance.previewMode = true;
     
-    // Configure le thème avec la couleur reçue en input
+    // Configure le thème
     instance.theme = this.buildThemeObject();
 
     // Force la détection des changements sur le composant template
@@ -273,6 +273,22 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
   }
 
   refresh() {
+    this.renderTemplate();
+  }
+
+  // Méthode pour afficher un CV spécifique
+  displayGeneratedCv(generatedCv: GeneratedCv) {
+    this.cvData = generatedCv.data;
+    this.theme = generatedCv.theme.primaryColor;
+    this.template = { 
+      id: generatedCv.templateId, 
+      name: '', 
+      description: '', 
+      imageUrl: '', 
+      category: 'modern', 
+      component: null 
+    } as CvTemplate;
+    
     this.renderTemplate();
   }
 

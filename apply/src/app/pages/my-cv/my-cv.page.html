@@ -3,6 +3,43 @@
 </ion-header>
 
 <ion-content class="ion-padding">
+  
+  <!-- Sélecteur de CV générés -->
+  <app-cv-selector 
+    (cvSelected)="onCvSelected($event)"
+    (createNewCv)="generateCv()">
+  </app-cv-selector>
+
+  <!-- Aperçu du CV sélectionné -->
+  <div *ngIf="selectedGeneratedCv" class="cv-preview-section">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Aperçu du CV</ion-card-title>
+        <ion-card-subtitle>{{ getSelectedCvInfo() }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <app-cv-preview 
+          #cvPreview
+          [template]="getSelectedTemplate()"
+          [theme]="getSelectedTheme()"
+          [previewMode]="'normal'">
+        </app-cv-preview>
+        
+        <div class="cv-actions ion-margin-top">
+          <ion-button fill="outline" (click)="editSelectedCv()">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Modifier
+          </ion-button>
+          <ion-button color="primary" (click)="generateNewCvFromSelected()">
+            <ion-icon name="copy-outline" slot="start"></ion-icon>
+            Dupliquer
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Section des données de base -->
   <ion-list-header>
     <ion-label>Mes Expériences Professionnelles</ion-label>
   </ion-list-header>

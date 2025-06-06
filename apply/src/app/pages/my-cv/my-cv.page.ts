@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
   IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
-  IonItemOptions, IonItemOption, IonButton
+  IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
+  IonCardTitle, IonCardSubtitle, IonCardContent
 } from '@ionic/angular/standalone';
 import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
 import { HeaderService } from 'src/app/services/header/header.service';
@@ -23,9 +24,15 @@ import { Timestamp } from '@angular/fire/firestore';
 import { addIcons } from 'ionicons';
 import {
   addOutline, listOutline, businessOutline, createOutline, trashOutline,
-  schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline
+  schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
+  copyOutline
 } from 'ionicons/icons';
 import { GenerateCvModalComponent } from 'src/app/components/generate-cv-modal/generate-cv-modal.component';
+import { CvSelectorComponent } from 'src/app/components/cv-selector/cv-selector.component';
+import { CvPreviewComponent } from 'src/app/components/cv-preview/cv-preview.component';
+import { GeneratedCv, CvTemplate } from 'src/app/models/cv-template.model';
+import { CvTemplateService } from 'src/app/services/cv-template/cv-template.service';
+import { CvGenerationService } from 'src/app/services/cv-generation/cv-generation.service';
 
 @Component({
   selector: 'app-my-cv',
@@ -36,11 +43,14 @@ import { GenerateCvModalComponent } from 'src/app/components/generate-cv-modal/g
     CommonModule, FormsModule, DatePipe,
     IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
     IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
-    IonItemOptions, IonItemOption, IonButton,
-    UserHeaderComponent
+    IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
+    IonCardTitle, IonCardSubtitle, IonCardContent,
+    UserHeaderComponent, CvSelectorComponent, CvPreviewComponent
   ]
 })
 export class MyCvPage implements OnInit, OnDestroy {
+  @ViewChild('cvPreview') cvPreview!: CvPreviewComponent;
+
   public experiences$: Observable<Experience[]> = of([]);
   public formations$: Observable<Formation[]> = of([]);
   public competences$: Observable<Competence[]> = of([]);
@@ -53,6 +63,9 @@ export class MyCvPage implements OnInit, OnDestroy {
   public errorLoadingFormations: string | null = null;
   public errorLoadingCompetences: string | null = null;
 
+  // Nouveau : gestion des CV générés
+  public selectedGeneratedCv: GeneratedCv | null = null;
+
   private isModalOpening: boolean = false;
 
   constructor(
@@ -60,11 +73,14 @@ export class MyCvPage implements OnInit, OnDestroy {
     private modalCtrl: ModalController,
     private authService: AuthService,
     private cvDataService: CvDataService,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private cvTemplateService: CvTemplateService,
+    private cvGenerationService: CvGenerationService
   ) {
     addIcons({
       addOutline, listOutline, businessOutline, createOutline, trashOutline,
-      schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline
+      schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
+      copyOutline
     });
   }
 
@@ -82,6 +98,77 @@ export class MyCvPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  // Nouvelles méthodes pour la gestion des CV générés
+  onCvSelected(generatedCv: GeneratedCv) {
+    this.selectedGeneratedCv = generatedCv;
+    console.log('CV sélectionné:', generatedCv);
+    
+    // Affiche le CV dans le preview
+    if (this.cvPreview) {
+      this.cvPreview.displayGeneratedCv(generatedCv);
+    }
+  }
+
+  getSelectedCvInfo(): string {
+    if (!this.selectedGeneratedCv) return '';
+    
+    const templateName = this.cvTemplateService.getTemplateById(this.selectedGeneratedCv.templateId)?.name || 'Template inconnu';
+    const date = new Date(this.selectedGeneratedCv.createdAt).toLocaleDateString('fr-FR');
+    
+    return `${templateName} - Créé le ${date}`;
+  }
+
+  getSelectedTemplate(): CvTemplate | null {
+    if (!this.selectedGeneratedCv) return null;
+    
+    return this.cvTemplateService.getTemplateById(this.selectedGeneratedCv.templateId) || null;
+  }
+
+  getSelectedTheme(): string | null {
+    return this.selectedGeneratedCv?.theme.primaryColor || null;
+  }
+
+  async editSelectedCv() {
+    if (!this.selectedGeneratedCv) return;
+    
+    // Ouvre la modal de génération avec les données du CV sélectionné
+    const modal = await this.modalCtrl.create({
+      component: GenerateCvModalComponent,
+      componentProps: {
+        existingCv: this.selectedGeneratedCv
+      },
+      breakpoints: [0, 0.5, 0.8, 1],
+      initialBreakpoint: 0.8,
+      handle: true,
+      backdropDismiss: true,
+    });
+    
+    await modal.present();
+    
+    const { data, role } = await modal.onWillDismiss();
+    if (role === 'generate') {
+      this.presentToast('CV mis à jour avec succès !', 'success');
+    }
+  }
+
+  async generateNewCvFromSelected() {
+    if (!this.selectedGeneratedCv) return;
+    
+    try {
+      // Duplique le CV avec un nouveau template/thème
+      const newCvId = await this.cvGenerationService.saveGeneratedCv(
+        this.selectedGeneratedCv.templateId,
+        this.selectedGeneratedCv.theme
+      );
+      
+      this.presentToast('CV dupliqué avec succès !', 'success');
+    } catch (error) {
+      console.error('Erreur lors de la duplication:', error);
+      this.presentToast('Erreur lors de la duplication du CV', 'danger');
+    }
+  }
+
+  // Méthodes existantes...
   loadAllCvData(event?: any) {
     this.loadExperiences(event && event.target && event.target.id === 'experiencesRefresher' ? event : undefined);
     this.loadFormations(event && event.target && event.target.id === 'formationsRefresher' ? event : undefined);
@@ -305,11 +392,14 @@ export class MyCvPage implements OnInit, OnDestroy {
     await modal.present();
 
     const { data, role } = await modal.onWillDismiss();
-    if (role === 'generate') {
-      console.log('Modal dismissed with generate role, data:', data);
-      this.presentToast(`CV generation started with template: ${data.template?.name} and theme: ${data.theme}`, 'success');
+    if (role === 'generate' && data) {
+      console.log('CV généré avec succès:', data);
+      this.presentToast(`CV généré avec le template: ${data.template?.name}`, 'success');
+      
+      // Recharge la liste des CV générés
+      // Le cv-selector se mettra à jour automatiquement
     } else {
-      console.log('Modal dismissed with role:', role);
+      console.log('Modal fermée avec le rôle:', role);
     }
   }
 }

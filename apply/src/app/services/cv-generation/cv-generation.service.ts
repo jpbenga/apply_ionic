@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { 
   Firestore, collection, addDoc, updateDoc, deleteDoc, 
-  query, orderBy, doc, docData 
+  query, orderBy, doc, docData, collectionData 
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, of, combineLatest } from 'rxjs';
@@ -114,7 +114,7 @@ export class CvGenerationService {
     try {
       const generatedCvsCollectionRef = this.getUserSubcollectionRef();
       const q = query(generatedCvsCollectionRef, orderBy('createdAt', 'desc'));
-      return of([]);
+      return collectionData(q, { idField: 'id' }) as Observable<GeneratedCv[]>;
     } catch (error) {
       console.error("Erreur getGeneratedCvs:", error);
       return of([]);

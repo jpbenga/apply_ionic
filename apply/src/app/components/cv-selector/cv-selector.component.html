@@ -1,0 +1,113 @@
+<!-- src/app/components/cv-selector/cv-selector.component.html -->
+<div class="cv-selector-container">
+  
+  <!-- En-tête -->
+  <div class="selector-header">
+    <h3 class="selector-title">
+      <ion-icon name="document-text-outline"></ion-icon>
+      Mes CV Générés
+    </h3>
+    <ion-button 
+      fill="outline" 
+      size="small" 
+      (click)="onCreateNewCv()"
+      class="create-new-btn"
+    >
+      <ion-icon name="create-outline" slot="start"></ion-icon>
+      Nouveau CV
+    </ion-button>
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Chargement de vos CV...</p>
+    </div>
+  </div>
+
+  <!-- État d'erreur -->
+  <div *ngIf="error && !isLoading" class="error-state">
+    <div class="error-content">
+      <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+      <p>{{ error }}</p>
+      <ion-button fill="outline" size="small" (click)="loadGeneratedCvs()">
+        Réessayer
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Liste des CV générés -->
+  <div *ngIf="!isLoading && !error" class="cvs-content">
+    <div *ngIf="(generatedCvs$ | async) as cvs">
+      
+      <!-- Aucun CV trouvé -->
+      <div *ngIf="cvs.length === 0" class="empty-state">
+        <div class="empty-content">
+          <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
+          <h4>Aucun CV généré</h4>
+          <p>Vous n'avez pas encore créé de CV. Commencez par générer votre premier CV !</p>
+          <ion-button (click)="onCreateNewCv()" class="primary-btn">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Créer mon premier CV
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Liste des CV -->
+      <div *ngIf="cvs.length > 0" class="cvs-list">
+        <ion-radio-group 
+          [(ngModel)]="selectedCvId" 
+          (ionChange)="onCvSelectionChange($event.detail.value, cvs)"
+        >
+          <div 
+            *ngFor="let cv of cvs; trackBy: trackByCvId" 
+            class="cv-item"
+            [class.selected]="cv.id === selectedCvId"
+          >
+            <ion-item lines="none" class="cv-item-content">
+              <ion-radio 
+                slot="start" 
+                [value]="cv.id"
+                class="cv-radio"
+              ></ion-radio>
+              
+              <ion-label class="cv-info">
+                <div class="cv-main-info">
+                  <h4 class="cv-title">
+                    CV {{ getTemplateName(cv.templateId) }}
+                  </h4>
+                  <p class="cv-date">
+                    Créé le {{ getFormattedDate(cv.createdAt) }}
+                  </p>
+                </div>
+                
+                <div class="cv-details">
+                  <span class="cv-template-badge">{{ getTemplateName(cv.templateId) }}</span>
+                  <div 
+                    class="cv-color-indicator" 
+                    [style.background-color]="cv.theme.primaryColor"
+                    [title]="'Couleur: ' + cv.theme.primaryColor"
+                  ></div>
+                </div>
+              </ion-label>
+
+              <div class="cv-actions" slot="end">
+                <ion-button 
+                  fill="clear" 
+                  size="small" 
+                  (click)="deleteCv(cv, $event)"
+                  class="delete-btn"
+                  [title]="'Supprimer ce CV'"
+                >
+                  <ion-icon name="trash-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </ion-item>
+          </div>
+        </ion-radio-group>
+      </div>
+    </div>
+  </div>
+
+</div>
