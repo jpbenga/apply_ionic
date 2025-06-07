@@ -159,82 +159,295 @@
     {{ isImprovingCv ? 'Analyse du CV en cours...' : 'Améliorer le CV avec l\'IA' }}
   </ion-button>
 
-  <!-- Section des améliorations suggérées -->
-  <div *ngIf="cvImprovements && !isImprovingCv" class="ion-margin-top">
+  <!-- Section des améliorations suggérées - Interface adaptée -->
+  <div *ngIf="(cvImprovements || structuredCvImprovements) && !isImprovingCv" class="ion-margin-top">
     <ion-card>
       <ion-card-header>
         <ion-card-title>
           <ion-icon name="construct-outline" color="primary"></ion-icon>
           Améliorations suggérées pour votre CV
+          <span class="cv-type-badge" [class]="getCvImprovementType()">
+            {{ getCvImprovementType() === 'structured' ? 'CV Structuré' : 'CV Uploadé' }}
+          </span>
         </ion-card-title>
         <ion-card-subtitle>
-          {{ cvImprovements.summary.totalSuggestions }} suggestion(s) • 
-          <span *ngIf="cvImprovements.summary.criticalIssues > 0" class="critical-issues">
-            {{ cvImprovements.summary.criticalIssues }} critique(s)
+          <span *ngIf="structuredCvImprovements">
+            {{ structuredCvImprovements.summary.totalSuggestions }} suggestion(s) • 
+            <span *ngIf="structuredCvImprovements.summary.criticalIssues > 0" class="critical-issues">
+              {{ structuredCvImprovements.summary.criticalIssues }} critique(s)
+            </span>
+            <span *ngIf="structuredCvImprovements.summary.enhancementSuggestions > 0">
+              {{ structuredCvImprovements.summary.enhancementSuggestions }} amélioration(s)
+            </span>
+            <span *ngIf="structuredCvImprovements.summary.newCompetencesSuggested > 0" class="new-competences">
+              + {{ structuredCvImprovements.summary.newCompetencesSuggested }} nouvelle(s) compétence(s)
+            </span>
           </span>
-          <span *ngIf="cvImprovements.summary.enhancementSuggestions > 0">
-            {{ cvImprovements.summary.enhancementSuggestions }} amélioration(s)
+          <span *ngIf="cvImprovements">
+            {{ cvImprovements.summary.totalSuggestions }} suggestion(s) • 
+            <span *ngIf="cvImprovements.summary.criticalIssues > 0" class="critical-issues">
+              {{ cvImprovements.summary.criticalIssues }} critique(s)
+            </span>
+            <span *ngIf="cvImprovements.summary.enhancementSuggestions > 0">
+              {{ cvImprovements.summary.enhancementSuggestions }} amélioration(s)
+            </span>
           </span>
         </ion-card-subtitle>
       </ion-card-header>
       
       <ion-card-content>
-        <!-- Mots-clés ATS manquants -->
-        <div *ngIf="cvImprovements.summary.atsKeywords.length > 0" class="ats-keywords-section">
-          <h4>🎯 Mots-clés ATS manquants</h4>
-          <div class="keywords-chips">
-            <ion-chip *ngFor="let keyword of cvImprovements.summary.atsKeywords" color="warning">
-              <ion-label>{{ keyword }}</ion-label>
-            </ion-chip>
+        <!-- Interface pour CV Structuré -->
+        <div *ngIf="structuredCvImprovements" class="structured-improvements">
+          
+          <!-- Nouvelles compétences suggérées -->
+          <div *ngIf="structuredCvImprovements.improvements.suggestedCompetences.length > 0" class="suggested-competences-section">
+            <h4>✨ Nouvelles compétences suggérées</h4>
+            <div class="suggested-competences-list">
+              <div 
+                *ngFor="let competence of structuredCvImprovements.improvements.suggestedCompetences; let i = index" 
+                class="suggested-competence-item"
+                [class.accepted]="competence.accepted">
+                
+                <div class="competence-header">
+                  <div class="competence-info">
+                    <span class="competence-name">{{ competence.nom }}</span>
+                    <span class="competence-category">{{ competence.categorie }}</span>
+                    <span class="competence-impact" [class]="competence.impact">{{ getImpactLabel(competence.impact) }}</span>
+                  </div>
+                  <ion-checkbox 
+                    [(ngModel)]="competence.accepted"
+                    (ionChange)="onImprovementToggle()"
+                    [disabled]="isGeneratingAIContent || isSavingCandidature">
+                  </ion-checkbox>
+                </div>
+                
+                <p class="competence-reason">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  {{ competence.raison }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Améliorations des expériences -->
+          <div *ngIf="structuredCvImprovements.improvements.experiences.length > 0" class="section-improvements">
+            <h4>💼 Expériences professionnelles</h4>
+            <div 
+              *ngFor="let sectionImprovement of structuredCvImprovements.improvements.experiences" 
+              class="section-item">
+              
+              <h5 class="section-title">{{ sectionImprovement.itemTitle }}</h5>
+              
+              <div 
+                *ngFor="let improvement of sectionImprovement.improvements" 
+                class="field-improvement"
+                [class.accepted]="improvement.accepted"
+                [class.critical]="improvement.impact === 'fort'">
+                
+                <div class="improvement-header">
+                  <div class="improvement-meta">
+                    <span class="improvement-type" [class]="improvement.type">
+                      {{ getImprovementTypeLabel(improvement.type) }}
+                    </span>
+                    <span class="improvement-field">{{ improvement.field }}</span>
+                    <span class="improvement-impact" [class]="improvement.impact">
+                      {{ getImpactLabel(improvement.impact) }}
+                    </span>
+                  </div>
+                  <ion-checkbox 
+                    [(ngModel)]="improvement.accepted"
+                    (ionChange)="onImprovementToggle()"
+                    [disabled]="isGeneratingAIContent || isSavingCandidature">
+                  </ion-checkbox>
+                </div>
+
+                <h6>{{ improvement.titre }}</h6>
+                
+                <div class="field-comparison">
+                  <div class="original-value">
+                    <label>{{ improvement.field }} actuel :</label>
+                    <p>{{ improvement.originalValue }}</p>
+                  </div>
+                  <div class="improved-value">
+                    <label>{{ improvement.field }} amélioré :</label>
+                    <p>{{ improvement.improvedValue }}</p>
+                  </div>
+                </div>
+                
+                <p class="explanation">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  {{ improvement.explication }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Améliorations des formations -->
+          <div *ngIf="structuredCvImprovements.improvements.formations.length > 0" class="section-improvements">
+            <h4>🎓 Formations</h4>
+            <div 
+              *ngFor="let sectionImprovement of structuredCvImprovements.improvements.formations" 
+              class="section-item">
+              
+              <h5 class="section-title">{{ sectionImprovement.itemTitle }}</h5>
+              
+              <div 
+                *ngFor="let improvement of sectionImprovement.improvements" 
+                class="field-improvement"
+                [class.accepted]="improvement.accepted"
+                [class.critical]="improvement.impact === 'fort'">
+                
+                <div class="improvement-header">
+                  <div class="improvement-meta">
+                    <span class="improvement-type" [class]="improvement.type">
+                      {{ getImprovementTypeLabel(improvement.type) }}
+                    </span>
+                    <span class="improvement-field">{{ improvement.field }}</span>
+                    <span class="improvement-impact" [class]="improvement.impact">
+                      {{ getImpactLabel(improvement.impact) }}
+                    </span>
+                  </div>
+                  <ion-checkbox 
+                    [(ngModel)]="improvement.accepted"
+                    (ionChange)="onImprovementToggle()"
+                    [disabled]="isGeneratingAIContent || isSavingCandidature">
+                  </ion-checkbox>
+                </div>
+
+                <h6>{{ improvement.titre }}</h6>
+                
+                <div class="field-comparison">
+                  <div class="original-value">
+                    <label>{{ improvement.field }} actuel :</label>
+                    <p>{{ improvement.originalValue }}</p>
+                  </div>
+                  <div class="improved-value">
+                    <label>{{ improvement.field }} amélioré :</label>
+                    <p>{{ improvement.improvedValue }}</p>
+                  </div>
+                </div>
+                
+                <p class="explanation">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  {{ improvement.explication }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Améliorations des compétences -->
+          <div *ngIf="structuredCvImprovements.improvements.competences.length > 0" class="section-improvements">
+            <h4>🛠️ Compétences</h4>
+            <div 
+              *ngFor="let sectionImprovement of structuredCvImprovements.improvements.competences" 
+              class="section-item">
+              
+              <h5 class="section-title">{{ sectionImprovement.itemTitle }}</h5>
+              
+              <div 
+                *ngFor="let improvement of sectionImprovement.improvements" 
+                class="field-improvement"
+                [class.accepted]="improvement.accepted"
+                [class.critical]="improvement.impact === 'fort'">
+                
+                <div class="improvement-header">
+                  <div class="improvement-meta">
+                    <span class="improvement-type" [class]="improvement.type">
+                      {{ getImprovementTypeLabel(improvement.type) }}
+                    </span>
+                    <span class="improvement-field">{{ improvement.field }}</span>
+                    <span class="improvement-impact" [class]="improvement.impact">
+                      {{ getImpactLabel(improvement.impact) }}
+                    </span>
+                  </div>
+                  <ion-checkbox 
+                    [(ngModel)]="improvement.accepted"
+                    (ionChange)="onImprovementToggle()"
+                    [disabled]="isGeneratingAIContent || isSavingCandidature">
+                  </ion-checkbox>
+                </div>
+
+                <h6>{{ improvement.titre }}</h6>
+                
+                <div class="field-comparison">
+                  <div class="original-value">
+                    <label>{{ improvement.field }} actuel :</label>
+                    <p>{{ improvement.originalValue }}</p>
+                  </div>
+                  <div class="improved-value">
+                    <label>{{ improvement.field }} amélioré :</label>
+                    <p>{{ improvement.improvedValue }}</p>
+                  </div>
+                </div>
+                
+                <p class="explanation">
+                  <ion-icon name="information-circle-outline"></ion-icon>
+                  {{ improvement.explication }}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Liste des améliorations -->
-        <div class="improvements-list">
-          <div 
-            *ngFor="let improvement of cvImprovements.improvements; let i = index" 
-            class="improvement-item"
-            [class.accepted]="improvement.accepted"
-            [class.critical]="improvement.impact === 'fort'">
-            
-            <div class="improvement-header">
-              <div class="improvement-meta">
-                <span class="improvement-type" [class]="improvement.type">
-                  {{ getImprovementTypeLabel(improvement.type) }}
-                </span>
-                <span class="improvement-section">{{ improvement.section }}</span>
-                <span class="improvement-impact" [class]="improvement.impact">
-                  {{ getImpactLabel(improvement.impact) }}
-                </span>
-              </div>
-              <ion-checkbox 
-                [(ngModel)]="improvement.accepted"
-                (ionChange)="onImprovementToggle()"
-                [disabled]="isGeneratingAIContent || isSavingCandidature">
-              </ion-checkbox>
+        <!-- Interface pour CV Uploadé (existante) -->
+        <div *ngIf="cvImprovements" class="text-improvements">
+          <!-- Mots-clés ATS manquants -->
+          <div *ngIf="cvImprovements.summary.atsKeywords.length > 0" class="ats-keywords-section">
+            <h4>🎯 Mots-clés ATS manquants</h4>
+            <div class="keywords-chips">
+              <ion-chip *ngFor="let keyword of cvImprovements.summary.atsKeywords" color="warning">
+                <ion-label>{{ keyword }}</ion-label>
+              </ion-chip>
             </div>
+          </div>
 
-            <h5>{{ improvement.titre }}</h5>
-            
-            <div class="text-comparison">
-              <div class="original-text">
-                <label>Texte actuel :</label>
-                <p>{{ improvement.textOriginal }}</p>
+          <!-- Liste des améliorations texte -->
+          <div class="improvements-list">
+            <div 
+              *ngFor="let improvement of cvImprovements.improvements; let i = index" 
+              class="improvement-item"
+              [class.accepted]="improvement.accepted"
+              [class.critical]="improvement.impact === 'fort'">
+              
+              <div class="improvement-header">
+                <div class="improvement-meta">
+                  <span class="improvement-type" [class]="improvement.type">
+                    {{ getImprovementTypeLabel(improvement.type) }}
+                  </span>
+                  <span class="improvement-section">{{ improvement.section }}</span>
+                  <span class="improvement-impact" [class]="improvement.impact">
+                    {{ getImpactLabel(improvement.impact) }}
+                  </span>
+                </div>
+                <ion-checkbox 
+                  [(ngModel)]="improvement.accepted"
+                  (ionChange)="onImprovementToggle()"
+                  [disabled]="isGeneratingAIContent || isSavingCandidature">
+                </ion-checkbox>
               </div>
-              <div class="improved-text">
-                <label>Suggestion :</label>
-                <p>{{ improvement.textAmeliore }}</p>
+
+              <h5>{{ improvement.titre }}</h5>
+              
+              <div class="text-comparison">
+                <div class="original-text">
+                  <label>Texte actuel :</label>
+                  <p>{{ improvement.textOriginal }}</p>
+                </div>
+                <div class="improved-text">
+                  <label>Suggestion :</label>
+                  <p>{{ improvement.textAmeliore }}</p>
+                </div>
               </div>
+              
+              <p class="explanation">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                {{ improvement.explication }}
+              </p>
             </div>
-            
-            <p class="explanation">
-              <ion-icon name="information-circle-outline"></ion-icon>
-              {{ improvement.explication }}
-            </p>
           </div>
         </div>
 
-        <!-- Actions -->
+        <!-- Actions communes -->
         <div class="improvement-actions ion-margin-top">
           <ion-button 
             fill="clear" 
@@ -261,12 +474,17 @@
     </ion-card>
   </div>
 
-  <!-- Message CV amélioré -->
-  <ion-card *ngIf="improvedCvText" color="success" class="ion-margin-top">
+  <!-- Message CV amélioré - Version adaptée -->
+  <ion-card *ngIf="improvedCvText || improvedStructuredCvData" color="success" class="ion-margin-top">
     <ion-card-content>
       <ion-icon name="checkmark-circle" color="light"></ion-icon>
       <strong>CV amélioré !</strong> 
-      {{ appliedImprovementsCount }} modification(s) appliquée(s). 
+      <span *ngIf="improvedCvText">
+        {{ appliedImprovementsCount }} modification(s) appliquée(s).
+      </span>
+      <span *ngIf="improvedStructuredCvData">
+        {{ appliedStructuredImprovementsCount }} modification(s) appliquée(s) sur vos données.
+      </span>
       Le CV amélioré sera utilisé pour générer la lettre de motivation.
     </ion-card-content>
   </ion-card>

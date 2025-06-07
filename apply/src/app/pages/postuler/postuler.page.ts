@@ -18,6 +18,12 @@ import { UserHeaderComponent } from 'src/app/components/user-header/user-header.
 import { Subscription } from 'rxjs';
 import { Timestamp } from '@angular/fire/firestore';
 import { CvImprovementResponse, CvImprovement, CvImprovementResult } from 'src/app/models/cv-improvement.model';
+import { 
+  StructuredCvImprovementResponse, 
+  StructuredCvImprovementResult,
+  SectionImprovement,
+  SuggestedCompetence
+} from 'src/app/models/cv-structured-improvement.model';
 
 @Component({
   selector: 'app-postuler',
@@ -60,6 +66,11 @@ export class PostulerPage implements OnDestroy {
   isImprovingCv: boolean = false;
   improvedCvText: string | null = null;
   appliedImprovementsCount: number = 0;
+
+  // Propriétés pour l'amélioration CV structuré
+  structuredCvImprovements: StructuredCvImprovementResponse | null = null;
+  improvedStructuredCvData: any = null;
+  appliedStructuredImprovementsCount: number = 0;
 
   private subscriptions: Subscription[] = [];
 
@@ -312,25 +323,32 @@ export class PostulerPage implements OnDestroy {
       this.presentToast('Veuillez d\'abord générer l\'analyse ATS et la lettre de motivation.', 'warning');
       return;
     }
-
+  
     const cvText = this.getCurrentCvText();
     if (!cvText) {
       this.presentToast('Aucun CV disponible.', 'warning');
       return;
     }
-
+  
+    // MODIFICATION : Utiliser des valeurs par défaut si extraction échoue
+    const jobTitle = this.atsAnalysisResult.jobTitle || 'Poste non spécifié';
+    const company = this.atsAnalysisResult.company || 'Entreprise non spécifiée';
+  
+    // Afficher un avertissement si l'extraction a échoué
     if (!this.atsAnalysisResult.jobTitle || !this.atsAnalysisResult.company) {
-      this.presentToast('Le titre du poste ou l\'entreprise n\'a pas pu être extrait correctement par l\'IA. Sauvegarde annulée.', 'warning');
-      return;
+      console.warn('⚠️ Extraction titre/entreprise incomplète:', {
+        titre: this.atsAnalysisResult.jobTitle,
+        entreprise: this.atsAnalysisResult.company
+      });
     }
-
+  
     this.isSavingCandidature = true;
-
+  
     // Préparer les données de candidature
     let cvOriginalNom: string | undefined;
     let cvOriginalUrl: string | undefined;
     let fileToUpload: File | null = null;
-
+  
     if (this.cvSelectionMode === 'recent' && this.mostRecentCv) {
       cvOriginalNom = this.getCvDisplayName();
       // Note: Les CV générés n'ont pas d'URL de fichier, on utilise l'ID
@@ -339,10 +357,10 @@ export class PostulerPage implements OnDestroy {
       cvOriginalNom = this.selectedFileName || undefined;
       fileToUpload = this.selectedFile;
     }
-
+  
     const candidatureDetails: Omit<Candidature, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'dateCandidature'> = {
-      poste: this.atsAnalysisResult.jobTitle,
-      entreprise: this.atsAnalysisResult.company,
+      poste: jobTitle,           // ← Utilise la valeur par défaut si nécessaire
+      entreprise: company,       // ← Utilise la valeur par défaut si nécessaire
       offreTexteComplet: this.jobOfferText,
       cvOriginalNom: cvOriginalNom,
       cvOriginalUrl: cvOriginalUrl,
@@ -351,10 +369,17 @@ export class PostulerPage implements OnDestroy {
       lettreMotivationGeneree: this.generatedCoverLetter,
       statut: 'envoyee',
     };
-
+  
     try {
       await this.candidatureService.createCandidature(candidatureDetails, fileToUpload);
-      this.presentToast('Candidature sauvegardée avec succès !', 'success');
+      
+      // Message adapté selon l'extraction
+      if (!this.atsAnalysisResult.jobTitle || !this.atsAnalysisResult.company) {
+        this.presentToast('Candidature sauvegardée ! (Titre/entreprise auto-générés)', 'success');
+      } else {
+        this.presentToast('Candidature sauvegardée avec succès !', 'success');
+      }
+      
       this.resetForm();
       this.router.navigate(['/tabs/dashboard']);
     } catch (error) {
@@ -374,10 +399,16 @@ export class PostulerPage implements OnDestroy {
     this.atsAnalysisResult = null;
     this.generatedCoverLetter = null;
     this.aiError = null;
-    // Reset des améliorations - AJOUTEZ CES LIGNES
-  this.cvImprovements = null;
-  this.improvedCvText = null;
-  this.appliedImprovementsCount = 0;
+    
+    // Reset des améliorations - version étendue
+    this.cvImprovements = null;
+    this.improvedCvText = null;
+    this.appliedImprovementsCount = 0;
+    
+    // Reset des améliorations structurées
+    this.structuredCvImprovements = null;
+    this.improvedStructuredCvData = null;
+    this.appliedStructuredImprovementsCount = 0;
   }
 
   async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light' ) {
@@ -456,14 +487,35 @@ export class PostulerPage implements OnDestroy {
   }
 
   /**
-   * Sélectionne/désélectionne toutes les améliorations
+   * Sélectionne/désélectionne toutes les améliorations - version adaptée
    */
   selectAllImprovements(select: boolean) {
-    if (!this.cvImprovements) return;
-    
-    this.cvImprovements.improvements.forEach(improvement => {
-      improvement.accepted = select;
-    });
+    if (this.structuredCvImprovements) {
+      // Sélectionner toutes les améliorations structurées
+      this.structuredCvImprovements.improvements.experiences.forEach(section => {
+        section.improvements.forEach(improvement => {
+          improvement.accepted = select;
+        });
+      });
+      this.structuredCvImprovements.improvements.formations.forEach(section => {
+        section.improvements.forEach(improvement => {
+          improvement.accepted = select;
+        });
+      });
+      this.structuredCvImprovements.improvements.competences.forEach(section => {
+        section.improvements.forEach(improvement => {
+          improvement.accepted = select;
+        });
+      });
+      this.structuredCvImprovements.improvements.suggestedCompetences.forEach(competence => {
+        competence.accepted = select;
+      });
+    } else if (this.cvImprovements) {
+      // Sélectionner toutes les améliorations texte
+      this.cvImprovements.improvements.forEach(improvement => {
+        improvement.accepted = select;
+      });
+    }
   }
 
   /**
@@ -510,5 +562,13 @@ export class PostulerPage implements OnDestroy {
       'fort': 'Impact fort'
     };
     return labels[impact] || impact;
+  }
+  /**
+   * Détecte le type de CV pour l'affichage
+   */
+  getCvImprovementType(): 'structured' | 'text' | null {
+    if (this.structuredCvImprovements) return 'structured';
+    if (this.cvImprovements) return 'text';
+    return null;
   }
 }

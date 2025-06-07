@@ -8,6 +8,18 @@ import { getCoverLetterPrompt } from './prompts/cover-letter.prompt';
 import { getCvImprovementPrompt } from './prompts/cv-improvement.prompt';
 import { CvImprovementResponse, CvImprovement, CvImprovementResult } from 'src/app/models/cv-improvement.model';
 
+import { getStructuredCvImprovementPrompt } from './prompts/cv-structured-improvement.prompt';
+import { 
+  StructuredCvImprovementResponse, 
+  StructuredCvImprovementResult,
+  SectionImprovement,
+  SuggestedCompetence
+} from 'src/app/models/cv-structured-improvement.model';
+import { GeneratedCv } from 'src/app/models/cv-template.model';
+import { Experience } from 'src/app/models/experience.model';
+import { Formation } from 'src/app/models/formation.model';
+import { Competence } from 'src/app/models/competence.model';
+
 export interface OpenAIResponse {
   success: boolean;
   response?: string;
@@ -230,5 +242,232 @@ export class AIService {
       improvedText,
       appliedImprovements
     };
+  }
+  /**
+   * Améliore un CV structuré (GeneratedCv) par rapport à une offre d'emploi
+   */
+  async improveStructuredCv(jobOfferText: string, cvData: GeneratedCv): Promise<StructuredCvImprovementResponse> {
+    const prompt = getStructuredCvImprovementPrompt(jobOfferText, cvData);
+    const callOpenAiFn = httpsCallable(this.functions, 'callOpenAi');
+
+    try {
+      const result = await callOpenAiFn({ prompt }) as HttpsCallableResult;
+      const data = result.data as OpenAIResponse;
+
+      if (data.success && data.response) {
+        try {
+          // Parse la réponse JSON de l'IA
+          const aiResponse = JSON.parse(data.response);
+          
+          // Validation et nettoyage des données
+          const improvements = {
+            experiences: this.validateSectionImprovements(aiResponse.improvements?.experiences || [], 'experience'),
+            formations: this.validateSectionImprovements(aiResponse.improvements?.formations || [], 'formation'),
+            competences: this.validateSectionImprovements(aiResponse.improvements?.competences || [], 'competence'),
+            suggestedCompetences: this.validateSuggestedCompetences(aiResponse.improvements?.suggestedCompetences || [])
+          };
+
+          const summary = {
+            totalSuggestions: this.countTotalSuggestions(improvements),
+            criticalIssues: this.countCriticalIssues(improvements),
+            enhancementSuggestions: this.countEnhancementSuggestions(improvements),
+            newCompetencesSuggested: improvements.suggestedCompetences.length,
+            atsKeywordsIntegrated: this.countAtsKeywords(improvements)
+          };
+
+          return {
+            success: true,
+            improvements,
+            summary
+          };
+        } catch (parseError) {
+          console.error('AIService: Erreur parsing JSON de l\'amélioration CV structuré:', parseError);
+          console.log('Réponse brute de l\'IA:', data.response);
+          throw new Error('Erreur lors de l\'analyse de la réponse d\'amélioration du CV structuré. Veuillez réessayer.');
+        }
+      } else {
+        throw new Error(data.message || "L'amélioration du CV structuré a échoué ou la réponse est invalide.");
+      }
+    } catch (error) {
+      console.error('AIService: Erreur lors de l\'appel d\'amélioration CV structuré:', error);
+      if (error instanceof Error) {
+        throw new Error(`Échec de l'amélioration du CV structuré : ${error.message}`);
+      }
+      throw new Error("Échec de l'amélioration du CV structuré : Erreur inconnue.");
+    }
+  }
+
+  /**
+   * Applique les améliorations structurées acceptées aux données du CV
+   */
+  applyStructuredCvImprovements(originalCv: GeneratedCv, improvements: StructuredCvImprovementResponse): StructuredCvImprovementResult {
+    // Clone profond des données originales
+    const originalData = {
+      experiences: JSON.parse(JSON.stringify(originalCv.data.experiences || [])),
+      formations: JSON.parse(JSON.stringify(originalCv.data.formations || [])),
+      competences: JSON.parse(JSON.stringify(originalCv.data.competences || []))
+    };
+
+    const improvedData = {
+      experiences: JSON.parse(JSON.stringify(originalCv.data.experiences || [])),
+      formations: JSON.parse(JSON.stringify(originalCv.data.formations || [])),
+      competences: JSON.parse(JSON.stringify(originalCv.data.competences || []))
+    };
+
+    const appliedImprovements = {
+      experiences: [] as SectionImprovement[],
+      formations: [] as SectionImprovement[],
+      competences: [] as SectionImprovement[],
+      addedCompetences: [] as SuggestedCompetence[]
+    };
+
+    let changesCount = { experiences: 0, formations: 0, competences: 0, total: 0 };
+
+    // Appliquer les améliorations d'expériences
+    improvements.improvements.experiences.forEach(sectionImprovement => {
+      const acceptedImprovements = sectionImprovement.improvements.filter(imp => imp.accepted);
+      if (acceptedImprovements.length > 0 && improvedData.experiences[sectionImprovement.itemIndex]) {
+        acceptedImprovements.forEach(improvement => {
+          const experience = improvedData.experiences[sectionImprovement.itemIndex];
+          if (experience && improvement.field in experience) {
+            (experience as any)[improvement.field] = improvement.improvedValue;
+            changesCount.experiences++;
+          }
+        });
+        appliedImprovements.experiences.push({
+          ...sectionImprovement,
+          improvements: acceptedImprovements
+        });
+      }
+    });
+
+    // Appliquer les améliorations de formations
+    improvements.improvements.formations.forEach(sectionImprovement => {
+      const acceptedImprovements = sectionImprovement.improvements.filter(imp => imp.accepted);
+      if (acceptedImprovements.length > 0 && improvedData.formations[sectionImprovement.itemIndex]) {
+        acceptedImprovements.forEach(improvement => {
+          const formation = improvedData.formations[sectionImprovement.itemIndex];
+          if (formation && improvement.field in formation) {
+            (formation as any)[improvement.field] = improvement.improvedValue;
+            changesCount.formations++;
+          }
+        });
+        appliedImprovements.formations.push({
+          ...sectionImprovement,
+          improvements: acceptedImprovements
+        });
+      }
+    });
+
+    // Appliquer les améliorations de compétences
+    improvements.improvements.competences.forEach(sectionImprovement => {
+      const acceptedImprovements = sectionImprovement.improvements.filter(imp => imp.accepted);
+      if (acceptedImprovements.length > 0 && improvedData.competences[sectionImprovement.itemIndex]) {
+        acceptedImprovements.forEach(improvement => {
+          const competence = improvedData.competences[sectionImprovement.itemIndex];
+          if (competence && improvement.field in competence) {
+            (competence as any)[improvement.field] = improvement.improvedValue;
+            changesCount.competences++;
+          }
+        });
+        appliedImprovements.competences.push({
+          ...sectionImprovement,
+          improvements: acceptedImprovements
+        });
+      }
+    });
+
+    // Ajouter les nouvelles compétences acceptées
+    const acceptedNewCompetences = improvements.improvements.suggestedCompetences.filter(comp => comp.accepted);
+    acceptedNewCompetences.forEach(suggestedComp => {
+      const newCompetence: Competence = {
+        userId: originalCv.userId,
+        nom: suggestedComp.nom,
+        categorie: suggestedComp.categorie
+      };
+      improvedData.competences.push(newCompetence);
+      appliedImprovements.addedCompetences.push(suggestedComp);
+      changesCount.competences++;
+    });
+
+    changesCount.total = changesCount.experiences + changesCount.formations + changesCount.competences;
+
+    return {
+      originalData,
+      improvedData,
+      appliedImprovements,
+      changesCount
+    };
+  }
+
+  // Méthodes utilitaires privées pour la validation
+  private validateSectionImprovements(sections: any[], type: string): SectionImprovement[] {
+    return sections.map((section, index) => ({
+      id: section.id || `${type}_${index}`,
+      sectionType: section.sectionType || type,
+      itemIndex: section.itemIndex || index,
+      itemId: section.itemId,
+      itemTitle: section.itemTitle || `${type} ${index + 1}`,
+      improvements: (section.improvements || []).map((imp: any, impIndex: number) => ({
+        id: imp.id || `${type}_imp_${index}_${impIndex}`,
+        type: imp.type || 'reformulation',
+        field: imp.field || 'description',
+        titre: imp.titre || 'Amélioration suggérée',
+        originalValue: imp.originalValue || '',
+        improvedValue: imp.improvedValue || '',
+        explication: imp.explication || '',
+        impact: imp.impact || 'moyen',
+        accepted: false
+      }))
+    }));
+  }
+
+  private validateSuggestedCompetences(competences: any[]): SuggestedCompetence[] {
+    return competences.map((comp, index) => ({
+      id: comp.id || `new_comp_${index}`,
+      nom: comp.nom || '',
+      categorie: comp.categorie || 'Autre',
+      raison: comp.raison || '',
+      impact: comp.impact || 'moyen',
+      accepted: false
+    }));
+  }
+
+  private countTotalSuggestions(improvements: any): number {
+    return improvements.experiences.reduce((sum: number, exp: any) => sum + exp.improvements.length, 0) +
+           improvements.formations.reduce((sum: number, form: any) => sum + form.improvements.length, 0) +
+           improvements.competences.reduce((sum: number, comp: any) => sum + comp.improvements.length, 0) +
+           improvements.suggestedCompetences.length;
+  }
+
+  private countCriticalIssues(improvements: any): number {
+    const countInSection = (sections: any[]) => 
+      sections.reduce((sum: number, section: any) => 
+        sum + section.improvements.filter((imp: any) => imp.impact === 'fort' && imp.type === 'orthographe').length, 0);
+    
+    return countInSection(improvements.experiences) +
+           countInSection(improvements.formations) +
+           countInSection(improvements.competences);
+  }
+
+  private countEnhancementSuggestions(improvements: any): number {
+    const countInSection = (sections: any[]) => 
+      sections.reduce((sum: number, section: any) => 
+        sum + section.improvements.filter((imp: any) => imp.type === 'reformulation' || imp.type === 'mots-cles').length, 0);
+    
+    return countInSection(improvements.experiences) +
+           countInSection(improvements.formations) +
+           countInSection(improvements.competences);
+  }
+
+  private countAtsKeywords(improvements: any): number {
+    const countInSection = (sections: any[]) => 
+      sections.reduce((sum: number, section: any) => 
+        sum + section.improvements.filter((imp: any) => imp.type === 'mots-cles').length, 0);
+    
+    return countInSection(improvements.experiences) +
+           countInSection(improvements.formations) +
+           countInSection(improvements.competences) +
+           improvements.suggestedCompetences.length;
   }
 }

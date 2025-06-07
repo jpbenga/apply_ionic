@@ -212,3 +212,319 @@ ion-card[color="success"] {
     }
   }
 }
+
+// Styles pour les améliorations CV structurées
+.cv-type-badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  font-weight: 600;
+
+  &.structured {
+    background: var(--ion-color-primary-tint);
+    color: var(--ion-color-primary);
+  }
+
+  &.text {
+    background: var(--ion-color-secondary-tint);
+    color: var(--ion-color-secondary);
+  }
+}
+
+.new-competences {
+  color: var(--ion-color-tertiary);
+  font-weight: 600;
+}
+
+// Nouvelles compétences suggérées
+.suggested-competences-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--ion-color-tertiary-tint);
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-tertiary);
+
+  h4 {
+    margin: 0 0 12px 0;
+    color: var(--ion-color-tertiary-contrast);
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .suggested-competences-list {
+    .suggested-competence-item {
+      background: white;
+      border: 1px solid var(--ion-color-light);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+
+      &.accepted {
+        border-color: var(--ion-color-success);
+        background: var(--ion-color-success-tint);
+      }
+
+      .competence-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+
+        .competence-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          flex: 1;
+
+          .competence-name {
+            font-weight: 600;
+            color: var(--ion-color-dark);
+            font-size: 14px;
+          }
+
+          .competence-category {
+            font-size: 12px;
+            color: var(--ion-color-medium);
+            font-style: italic;
+          }
+
+          .competence-impact {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+
+            &.fort {
+              color: var(--ion-color-danger);
+            }
+
+            &.moyen {
+              color: var(--ion-color-warning);
+            }
+
+            &.faible {
+              color: var(--ion-color-medium);
+            }
+          }
+        }
+      }
+
+      .competence-reason {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        margin: 0;
+        font-size: 12px;
+        color: var(--ion-color-medium);
+        line-height: 1.4;
+
+        ion-icon {
+          margin-top: 1px;
+          flex-shrink: 0;
+        }
+      }
+    }
+  }
+}
+
+// Améliorations par section
+.section-improvements {
+  margin-bottom: 24px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    color: var(--ion-color-primary);
+    font-size: 16px;
+    font-weight: 600;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ion-color-primary-tint);
+  }
+
+  .section-item {
+    background: var(--ion-color-light-tint);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+
+    .section-title {
+      margin: 0 0 12px 0;
+      color: var(--ion-color-dark);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 12px;
+      background: white;
+      border-radius: 6px;
+      border-left: 3px solid var(--ion-color-primary);
+    }
+
+    .field-improvement {
+      background: white;
+      border: 1px solid var(--ion-color-light);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+
+      &.accepted {
+        border-color: var(--ion-color-success);
+        background: var(--ion-color-success-tint);
+      }
+
+      &.critical {
+        border-left: 4px solid var(--ion-color-danger);
+      }
+
+      .improvement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+
+        .improvement-meta {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          flex: 1;
+
+          .improvement-type {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 6px;
+            border-radius: 10px;
+            width: fit-content;
+
+            &.orthographe {
+              background: var(--ion-color-danger-tint);
+              color: var(--ion-color-danger);
+            }
+
+            &.reformulation {
+              background: var(--ion-color-primary-tint);
+              color: var(--ion-color-primary);
+            }
+
+            &.mots-cles {
+              background: var(--ion-color-warning-tint);
+              color: var(--ion-color-warning);
+            }
+
+            &.structure, &.ajout {
+              background: var(--ion-color-medium-tint);
+              color: var(--ion-color-medium);
+            }
+          }
+
+          .improvement-field {
+            font-size: 10px;
+            color: var(--ion-color-medium);
+            font-weight: 500;
+            text-transform: uppercase;
+          }
+
+          .improvement-impact {
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+
+            &.fort {
+              color: var(--ion-color-danger);
+            }
+
+            &.moyen {
+              color: var(--ion-color-warning);
+            }
+
+            &.faible {
+              color: var(--ion-color-medium);
+            }
+          }
+        }
+      }
+
+      h6 {
+        margin: 0 0 8px 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+      }
+
+      .field-comparison {
+        margin: 8px 0;
+
+        .original-value,
+        .improved-value {
+          margin-bottom: 8px;
+
+          label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+          }
+
+          p {
+            margin: 0;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.3;
+          }
+        }
+
+        .original-value {
+          label {
+            color: var(--ion-color-medium);
+          }
+
+          p {
+            background: var(--ion-color-light);
+            color: var(--ion-color-dark);
+            border: 1px solid var(--ion-color-medium-tint);
+          }
+        }
+
+        .improved-value {
+          label {
+            color: var(--ion-color-success);
+          }
+
+          p {
+            background: var(--ion-color-success-tint);
+            color: var(--ion-color-success-contrast);
+            border: 1px solid var(--ion-color-success);
+            font-weight: 500;
+          }
+        }
+      }
+
+      .explanation {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        margin: 8px 0 0 0;
+        font-size: 11px;
+        color: var(--ion-color-medium);
+        font-style: italic;
+        line-height: 1.3;
+
+        ion-icon {
+          margin-top: 1px;
+          flex-shrink: 0;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}
+
+// Interface adaptée
+.structured-improvements,
+.text-improvements {
+  .improvement-actions {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ion-color-light);
+  }
+}
