@@ -9,169 +9,97 @@
     </ion-toolbar>
   </ion-header>
 
-  <ion-item lines="full">
-    <ion-label position="stacked">Coller l'offre d'emploi ici</ion-label>
-    <ion-textarea
-      rows="8"
-      placeholder="Entrez ou collez la description complète de l'offre d'emploi..."
-      aria-label="Offre d'emploi"
-      [(ngModel)]="jobOfferText"
-      [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
-    </ion-textarea>
-  </ion-item>
-
-  <!-- Section CV -->
-  <div class="ion-margin-top cv-selection-section">
-    <ion-item lines="none">
-      <ion-label>
-        <h2>Choisir votre CV</h2>
-      </ion-label>
-    </ion-item>
-
-    <!-- Spinner pendant le chargement du CV récent -->
-    <ion-item *ngIf="isLoadingRecentCv" lines="none">
-      <ion-spinner name="crescent" slot="start"></ion-spinner>
-      <ion-label>Chargement du CV le plus récent...</ion-label>
-    </ion-item>
-
-    <!-- Radio group pour choisir entre CV récent et upload -->
-    <ion-radio-group [(ngModel)]="cvSelectionMode" [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
-      
-      <!-- Option 1: CV le plus récent -->
-      <ion-item *ngIf="mostRecentCv && !isLoadingRecentCv" class="cv-info">
-        <ion-radio slot="start" value="recent"></ion-radio>
-        <ion-label>
-          <h3>Utiliser le CV le plus récent</h3>
-          <p>{{ getCvDisplayName() }}</p>
-          <p><small>Créé le {{ getCvCreationDate() }}</small></p>
-        </ion-label>
-        <ion-icon name="document-text-outline" slot="end" color="primary"></ion-icon>
-      </ion-item>
-
-      <!-- Option 2: Upload nouveau CV -->
-      <ion-item class="cv-info">
-        <ion-radio slot="start" value="upload"></ion-radio>
-        <ion-label>
-          <h3>Uploader un nouveau CV</h3>
-          <p *ngIf="!mostRecentCv && !isLoadingRecentCv"><small>Aucun CV sauvegardé trouvé</small></p>
-        </ion-label>
-        <ion-button 
-          slot="end" 
-          fill="outline" 
-          (click)="triggerFileInput()" 
-          [disabled]="cvSelectionMode !== 'upload' || isExtractingText || isGeneratingAIContent || isSavingCandidature">
-          <ion-icon slot="start" name="document-attach-outline"></ion-icon>
-          Choisir fichier
+  <!-- Message si pas de données CV structurées -->
+  <ion-card *ngIf="!hasStructuredCvData && !isLoadingCvData" color="warning">
+    <ion-card-content>
+      <div class="text-center">
+        <ion-icon name="warning-outline" size="large"></ion-icon>
+        <h3>Aucune donnée CV structurée</h3>
+        <p>Pour postuler, vous devez d'abord créer votre CV structuré avec vos expériences, formations et compétences.</p>
+        <ion-button expand="block" (click)="goToMyCv()">
+          <ion-icon name="create-outline" slot="start"></ion-icon>
+          Créer mon CV structuré
         </ion-button>
-      </ion-item>
-    </ion-radio-group>
+      </div>
+    </ion-card-content>
+  </ion-card>
 
-    <!-- Input file caché -->
-    <input type="file" #fileInput hidden
-           (change)="handleFileSelected($event)"
-           accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.pdf,application/pdf" />
+  <!-- Loading CV data -->
+  <ion-card *ngIf="isLoadingCvData">
+    <ion-card-content class="text-center">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Chargement de vos données CV...</p>
+    </ion-card-content>
+  </ion-card>
 
-    <!-- Affichage du fichier sélectionné -->
-    <ion-item *ngIf="selectedFileName && cvSelectionMode === 'upload' && !isExtractingText" lines="none" class="ion-margin-start">
-      <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
-      <ion-label color="medium">
-        <small>{{ selectedFileName }}</small>
-      </ion-label>
-      <ion-button fill="clear" slot="end" (click)="clearFileSelection()" color="danger" 
-                  [disabled]="isExtractingText || isGeneratingAIContent || isSavingCandidature">
-        <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
-      </ion-button>
+  <!-- Section principale (visible si données CV disponibles) -->
+  <div *ngIf="hasStructuredCvData && !isLoadingCvData">
+
+    <!-- Section offre d'emploi -->
+    <ion-item lines="full">
+      <ion-label position="stacked">Coller l'offre d'emploi ici</ion-label>
+      <ion-textarea
+        rows="8"
+        placeholder="Entrez ou collez la description complète de l'offre d'emploi..."
+        aria-label="Offre d'emploi"
+        [(ngModel)]="jobOfferText"
+        [disabled]="isGeneratingAIContent || isSavingCandidature">
+      </ion-textarea>
     </ion-item>
 
-    <!-- Extraction en cours -->
-    <ion-item *ngIf="isExtractingText" lines="none" class="ion-margin-start">
-      <ion-spinner name="crescent" slot="start"></ion-spinner>
-      <ion-label>Traitement du CV en cours...</ion-label>
-    </ion-item>
+    <!-- Bouton générer analyse -->
+    <ion-button 
+      expand="block" 
+      class="ion-margin-top" 
+      (click)="generateApplication()" 
+      [disabled]="!jobOfferText || isGeneratingAIContent || isSavingCandidature">
+      <ion-spinner *ngIf="isGeneratingAIContent" name="crescent" slot="start"></ion-spinner>
+      <ion-icon *ngIf="!isGeneratingAIContent" slot="start" name="sparkles-outline"></ion-icon>
+      {{ isGeneratingAIContent ? 'Génération IA en cours...' : 'Analyser avec l\'IA' }}
+    </ion-button>
 
-    <!-- Succès extraction -->
-    <ion-item *ngIf="!isExtractingText && ((cvSelectionMode === 'upload' && selectedFile && extractedCvText !== null) || (cvSelectionMode === 'recent' && mostRecentCv && mostRecentCvText))" 
-              lines="none" class="ion-margin-start">
-      <ion-icon name="checkmark-circle" slot="start" color="success"></ion-icon>
-      <ion-label color="success">
-        <small>
-          CV prêt à utiliser
-          <span *ngIf="cvSelectionMode === 'upload'"> ({{ getFileTypeLabel(selectedFile) }}) extrait</span>
-          <span *ngIf="cvSelectionMode === 'recent'"> (CV généré)</span>
-        </small>
-      </ion-label>
-    </ion-item>
+    <!-- Erreur IA -->
+    <div *ngIf="aiError" class="ion-padding ion-text-center" style="color: var(--ion-color-danger);">
+      <p>{{ aiError }}</p>
+    </div>
 
-    <!-- Échec extraction -->
-    <ion-item *ngIf="!isExtractingText && cvSelectionMode === 'upload' && selectedFile && extractedCvText === null && selectedFileName" 
-              lines="none" class="ion-margin-start">
-      <ion-icon name="warning" slot="start" color="danger"></ion-icon>
-      <ion-label color="danger">
-        <small>Échec de l'extraction du texte du CV ({{ getFileTypeLabel(selectedFile) }}).</small>
-      </ion-label>
-    </ion-item>
+    <!-- Résultats ATS -->
+    <div *ngIf="atsAnalysisResult && !isGeneratingAIContent && !isSavingCandidature" class="ion-margin-top">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Analyse ATS</ion-card-title>
+          <p *ngIf="atsAnalysisResult.jobTitle"><strong>Poste :</strong> {{ atsAnalysisResult.jobTitle }}</p>
+          <p *ngIf="atsAnalysisResult.company"><strong>Entreprise :</strong> {{ atsAnalysisResult.company }}</p>
+        </ion-card-header>
+        <ion-card-content>
+          <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ atsAnalysisResult.analysisText }}</pre>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
-    <!-- Info pour sauvegarder le CV uploadé -->
-    <ion-item *ngIf="cvSelectionMode === 'upload' && extractedCvText && !isExtractingText" lines="none" class="ion-margin-start">
-      <ion-label class="ion-margin-start">
-        <p><small>💡 Pour sauvegarder un CV, utilisez la section "Mon CV Structuré"</small></p>
-      </ion-label>
-    </ion-item>
-  </div>
+    <!-- Bouton amélioration CV -->
+    <ion-button 
+      expand="block" 
+      fill="outline" 
+      class="ion-margin-top"
+      (click)="improveCv()"
+      [disabled]="!atsAnalysisResult || isImprovingCv || isGeneratingAIContent || isSavingCandidature"
+      *ngIf="atsAnalysisResult && !structuredCvImprovements">
+      <ion-spinner *ngIf="isImprovingCv" name="crescent" slot="start"></ion-spinner>
+      <ion-icon *ngIf="!isImprovingCv" slot="start" name="construct-outline"></ion-icon>
+      {{ isImprovingCv ? 'Analyse du CV en cours...' : 'Améliorer le CV avec l\'IA' }}
+    </ion-button>
 
-  <!-- Bouton générer -->
-  <ion-button expand="block" class="ion-margin-top" (click)="generateApplication()" 
-              [disabled]="!jobOfferText || !isCvReady() || isGeneratingAIContent || isExtractingText || isSavingCandidature">
-    <ion-spinner *ngIf="isGeneratingAIContent" name="crescent" slot="start"></ion-spinner>
-    <ion-icon *ngIf="!isGeneratingAIContent" slot="start" name="sparkles-outline"></ion-icon>
-    {{ isGeneratingAIContent ? 'Génération IA en cours...' : 'Générer Analyse & Lettre' }}
-  </ion-button>
-
-  <!-- Erreur IA -->
-  <div *ngIf="aiError" class="ion-padding ion-text-center" style="color: var(--ion-color-danger);">
-    <p>{{ aiError }}</p>
-  </div>
-
-  <!-- Résultats ATS -->
-  <div *ngIf="atsAnalysisResult && !isGeneratingAIContent && !isSavingCandidature" class="ion-margin-top">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Analyse ATS</ion-card-title>
-        <p *ngIf="atsAnalysisResult.jobTitle"><strong>Poste :</strong> {{ atsAnalysisResult.jobTitle }}</p>
-        <p *ngIf="atsAnalysisResult.company"><strong>Entreprise :</strong> {{ atsAnalysisResult.company }}</p>
-      </ion-card-header>
-      <ion-card-content>
-        <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ atsAnalysisResult.analysisText }}</pre>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- Bouton d'amélioration CV - après l'analyse ATS -->
-  <ion-button 
-    expand="block" 
-    fill="outline" 
-    class="ion-margin-top"
-    (click)="improveCv()"
-    [disabled]="!atsAnalysisResult || isImprovingCv || isGeneratingAIContent || isSavingCandidature"
-    *ngIf="atsAnalysisResult && !cvImprovements">
-    <ion-spinner *ngIf="isImprovingCv" name="crescent" slot="start"></ion-spinner>
-    <ion-icon *ngIf="!isImprovingCv" slot="start" name="construct-outline"></ion-icon>
-    {{ isImprovingCv ? 'Analyse du CV en cours...' : 'Améliorer le CV avec l\'IA' }}
-  </ion-button>
-
-  <!-- Section des améliorations suggérées - Interface adaptée -->
-  <div *ngIf="(cvImprovements || structuredCvImprovements) && !isImprovingCv" class="ion-margin-top">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="construct-outline" color="primary"></ion-icon>
-          Améliorations suggérées pour votre CV
-          <span class="cv-type-badge" [class]="getCvImprovementType()">
-            {{ getCvImprovementType() === 'structured' ? 'CV Structuré' : 'CV Uploadé' }}
-          </span>
-        </ion-card-title>
-        <ion-card-subtitle>
-          <span *ngIf="structuredCvImprovements">
+    <!-- Section des améliorations suggérées -->
+    <div *ngIf="structuredCvImprovements && !isImprovingCv && !improvementsApplied" class="ion-margin-top">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="construct-outline" color="primary"></ion-icon>
+            Améliorations suggérées pour votre CV
+            <span class="cv-type-badge structured">CV Structuré</span>
+          </ion-card-title>
+          <ion-card-subtitle>
             {{ structuredCvImprovements.summary.totalSuggestions }} suggestion(s) • 
             <span *ngIf="structuredCvImprovements.summary.criticalIssues > 0" class="critical-issues">
               {{ structuredCvImprovements.summary.criticalIssues }} critique(s)
@@ -182,22 +110,10 @@
             <span *ngIf="structuredCvImprovements.summary.newCompetencesSuggested > 0" class="new-competences">
               + {{ structuredCvImprovements.summary.newCompetencesSuggested }} nouvelle(s) compétence(s)
             </span>
-          </span>
-          <span *ngIf="cvImprovements">
-            {{ cvImprovements.summary.totalSuggestions }} suggestion(s) • 
-            <span *ngIf="cvImprovements.summary.criticalIssues > 0" class="critical-issues">
-              {{ cvImprovements.summary.criticalIssues }} critique(s)
-            </span>
-            <span *ngIf="cvImprovements.summary.enhancementSuggestions > 0">
-              {{ cvImprovements.summary.enhancementSuggestions }} amélioration(s)
-            </span>
-          </span>
-        </ion-card-subtitle>
-      </ion-card-header>
-      
-      <ion-card-content>
-        <!-- Interface pour CV Structuré -->
-        <div *ngIf="structuredCvImprovements" class="structured-improvements">
+          </ion-card-subtitle>
+        </ion-card-header>
+        
+        <ion-card-content>
           
           <!-- Nouvelles compétences suggérées -->
           <div *ngIf="structuredCvImprovements.improvements.suggestedCompetences.length > 0" class="suggested-competences-section">
@@ -387,136 +303,257 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Interface pour CV Uploadé (existante) -->
-        <div *ngIf="cvImprovements" class="text-improvements">
-          <!-- Mots-clés ATS manquants -->
-          <div *ngIf="cvImprovements.summary.atsKeywords.length > 0" class="ats-keywords-section">
-            <h4>🎯 Mots-clés ATS manquants</h4>
-            <div class="keywords-chips">
-              <ion-chip *ngFor="let keyword of cvImprovements.summary.atsKeywords" color="warning">
-                <ion-label>{{ keyword }}</ion-label>
-              </ion-chip>
+          <!-- Actions pour les améliorations -->
+          <div class="improvement-actions ion-margin-top">
+            <ion-button 
+              fill="clear" 
+              (click)="selectAllImprovements(true)"
+              [disabled]="isGeneratingAIContent || isSavingCandidature">
+              Tout sélectionner
+            </ion-button>
+            <ion-button 
+              fill="clear" 
+              (click)="selectAllImprovements(false)"
+              [disabled]="isGeneratingAIContent || isSavingCandidature">
+              Tout désélectionner
+            </ion-button>
+            <ion-button 
+              expand="block" 
+              color="primary"
+              (click)="applySelectedImprovements()"
+              [disabled]="!hasAcceptedImprovements() || isGeneratingAIContent || isSavingCandidature">
+              <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+              Appliquer les modifications ({{ getAcceptedCount() }})
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Comparaison avant/après avec slider -->
+    <div *ngIf="improvedCvData && originalCvData && improvementsApplied" class="cv-comparison-section ion-margin-top">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="git-compare-outline" color="success"></ion-icon>
+            Comparaison avant/après
+          </ion-card-title>
+          <ion-card-subtitle>Visualisez les améliorations de votre CV</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          
+          <!-- Contrôles de vue -->
+          <ion-segment [(ngModel)]="comparisonView" class="ion-margin-bottom">
+            <ion-segment-button value="original">
+              <ion-label>Original</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="split">
+              <ion-label>Comparaison</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="improved">
+              <ion-label>Amélioré</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+
+          <!-- Résumé des modifications -->
+          <div class="modifications-summary ion-margin-bottom">
+            <ion-badge color="success">{{ getTotalChangesCount() }} modification(s) appliquée(s)</ion-badge>
+            <div class="changes-details">
+              <span *ngIf="getChangesCount('experiences') > 0">
+                • {{ getChangesCount('experiences') }} expérience(s)
+              </span>
+              <span *ngIf="getChangesCount('formations') > 0">
+                • {{ getChangesCount('formations') }} formation(s)
+              </span>
+              <span *ngIf="getChangesCount('competences') > 0">
+                • {{ getChangesCount('competences') }} compétence(s)
+              </span>
             </div>
           </div>
 
-          <!-- Liste des améliorations texte -->
-          <div class="improvements-list">
-            <div 
-              *ngFor="let improvement of cvImprovements.improvements; let i = index" 
-              class="improvement-item"
-              [class.accepted]="improvement.accepted"
-              [class.critical]="improvement.impact === 'fort'">
-              
-              <div class="improvement-header">
-                <div class="improvement-meta">
-                  <span class="improvement-type" [class]="improvement.type">
-                    {{ getImprovementTypeLabel(improvement.type) }}
-                  </span>
-                  <span class="improvement-section">{{ improvement.section }}</span>
-                  <span class="improvement-impact" [class]="improvement.impact">
-                    {{ getImpactLabel(improvement.impact) }}
-                  </span>
+          <!-- Slider de comparaison -->
+          <div *ngIf="comparisonView === 'split'" class="comparison-slider-container">
+            <div class="cv-comparison-wrapper">
+              <div class="cv-original">
+                <div class="cv-section-title">CV Original</div>
+                <div class="cv-content-display">
+                  {{ generateDisplayTextFromCvData(originalCvData) }}
                 </div>
-                <ion-checkbox 
-                  [(ngModel)]="improvement.accepted"
-                  (ionChange)="onImprovementToggle()"
-                  [disabled]="isGeneratingAIContent || isSavingCandidature">
-                </ion-checkbox>
               </div>
+              <div class="cv-improved" [style.clip-path]="'polygon(' + sliderPosition + '% 0%, 100% 0%, 100% 100%, ' + sliderPosition + '% 100%)'">
+                <div class="cv-section-title">CV Amélioré</div>
+                <div class="cv-content-display">
+                  {{ generateDisplayTextFromCvData(improvedCvData) }}
+                </div>
+              </div>
+              
+              <!-- Slider overlay -->
+              <div class="slider-overlay" [style.left.%]="sliderPosition">
+                <div class="slider-handle">
+                  <ion-icon name="resize-outline"></ion-icon>
+                </div>
+              </div>
+            </div>
+            
+            <ion-range 
+              [(ngModel)]="sliderPosition" 
+              min="0" 
+              max="100" 
+              step="1"
+              class="comparison-range">
+              <ion-label slot="start">Original</ion-label>
+              <ion-label slot="end">Amélioré</ion-label>
+            </ion-range>
+          </div>
 
-              <h5>{{ improvement.titre }}</h5>
-              
-              <div class="text-comparison">
-                <div class="original-text">
-                  <label>Texte actuel :</label>
-                  <p>{{ improvement.textOriginal }}</p>
-                </div>
-                <div class="improved-text">
-                  <label>Suggestion :</label>
-                  <p>{{ improvement.textAmeliore }}</p>
-                </div>
-              </div>
-              
-              <p class="explanation">
-                <ion-icon name="information-circle-outline"></ion-icon>
-                {{ improvement.explication }}
-              </p>
+          <!-- Vue simple original -->
+          <div *ngIf="comparisonView === 'original'" class="single-cv-view">
+            <h4>CV Original</h4>
+            <div class="cv-content-display">
+              {{ generateDisplayTextFromCvData(originalCvData) }}
             </div>
           </div>
-        </div>
 
-        <!-- Actions communes -->
-        <div class="improvement-actions ion-margin-top">
-          <ion-button 
-            fill="clear" 
-            (click)="selectAllImprovements(true)"
-            [disabled]="isGeneratingAIContent || isSavingCandidature">
-            Tout sélectionner
-          </ion-button>
-          <ion-button 
-            fill="clear" 
-            (click)="selectAllImprovements(false)"
-            [disabled]="isGeneratingAIContent || isSavingCandidature">
-            Tout désélectionner
-          </ion-button>
+          <!-- Vue simple amélioré -->
+          <div *ngIf="comparisonView === 'improved'" class="single-cv-view">
+            <h4>CV Amélioré</h4>
+            <div class="cv-content-display">
+              {{ generateDisplayTextFromCvData(improvedCvData) }}
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="comparison-actions ion-margin-top">
+            <ion-button 
+              expand="block" 
+              color="success"
+              (click)="saveImprovements()"
+              [disabled]="isGeneratingAIContent || isSavingCandidature || isSavingImprovements">
+              <ion-spinner *ngIf="isSavingImprovements" name="crescent" slot="start"></ion-spinner>
+              <ion-icon *ngIf="!isSavingImprovements" slot="start" name="save-outline"></ion-icon>
+              {{ isSavingImprovements ? 'Sauvegarde en cours...' : 'Valider et sauvegarder les améliorations' }}
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Section sélection template et thème (APRÈS validation des améliorations) -->
+    <div *ngIf="cvImprovementsValidated" class="ion-margin-top">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="brush-outline" color="primary"></ion-icon>
+            Personnaliser votre CV
+          </ion-card-title>
+          <ion-card-subtitle>Choisissez le template et le thème pour votre candidature</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          
+          <!-- Loading templates -->
+          <div *ngIf="isLoadingTemplates" class="text-center ion-padding">
+            <ion-spinner name="crescent"></ion-spinner>
+            <p>Chargement des templates...</p>
+          </div>
+
+          <!-- Grille des templates -->
+          <div *ngIf="!isLoadingTemplates" class="template-selection">
+            <h4>Template</h4>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6" size-md="4" size-lg="3" *ngFor="let template of availableTemplates">
+                  <div 
+                    class="template-card" 
+                    [class.selected]="selectedTemplate?.id === template.id"
+                    (click)="onTemplateChange(template)">
+                    <img [src]="template.imageUrl" [alt]="template.name" />
+                    <div class="template-info">
+                      <h5>{{ template.name }}</h5>
+                      <p><small>{{ template.description }}</small></p>
+                    </div>
+                    <ion-badge 
+                      *ngIf="selectedTemplate?.id === template.id" 
+                      color="primary"
+                      class="selected-badge">
+                      ✓
+                    </ion-badge>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+
+          <!-- Sélection couleur -->
+          <div class="theme-selection ion-margin-top">
+            <h4>Couleur principale</h4>
+            <div class="color-picker">
+              <div 
+                *ngFor="let theme of availableThemes"
+                class="color-option"
+                [class.selected]="selectedTheme.primaryColor === theme.primaryColor"
+                [style.background-color]="theme.primaryColor"
+                (click)="onThemeChange(theme)">
+                <ion-icon 
+                  *ngIf="selectedTheme.primaryColor === theme.primaryColor" 
+                  name="checkmark" 
+                  color="light">
+                </ion-icon>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aperçu du CV final -->
+          <div class="cv-preview-section ion-margin-top" *ngIf="selectedTemplate">
+            <h4>Aperçu final</h4>
+            <div class="cv-preview-container">
+              <app-cv-preview 
+                [template]="selectedTemplate"
+                [theme]="selectedTheme.primaryColor">
+              </app-cv-preview>
+            </div>
+          </div>
+
+          <!-- Bouton générer lettre -->
           <ion-button 
             expand="block" 
-            color="primary"
-            (click)="applySelectedImprovements()"
-            [disabled]="!hasAcceptedImprovements() || isGeneratingAIContent || isSavingCandidature">
-            <ion-icon slot="start" name="checkmark-outline"></ion-icon>
-            Appliquer les modifications ({{ getAcceptedCount() }})
+            color="secondary"
+            class="ion-margin-top"
+            (click)="generateCoverLetter()"
+            [disabled]="!selectedTemplate || isGeneratingCoverLetter">
+            <ion-spinner *ngIf="isGeneratingCoverLetter" name="crescent" slot="start"></ion-spinner>
+            <ion-icon *ngIf="!isGeneratingCoverLetter" slot="start" name="document-text-outline"></ion-icon>
+            {{ isGeneratingCoverLetter ? 'Génération en cours...' : 'Générer la lettre de motivation' }}
           </ion-button>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
-  <!-- Message CV amélioré - Version adaptée -->
-  <ion-card *ngIf="improvedCvText || improvedStructuredCvData" color="success" class="ion-margin-top">
-    <ion-card-content>
-      <ion-icon name="checkmark-circle" color="light"></ion-icon>
-      <strong>CV amélioré !</strong> 
-      <span *ngIf="improvedCvText">
-        {{ appliedImprovementsCount }} modification(s) appliquée(s).
-      </span>
-      <span *ngIf="improvedStructuredCvData">
-        {{ appliedStructuredImprovementsCount }} modification(s) appliquée(s) sur vos données.
-      </span>
-      Le CV amélioré sera utilisé pour générer la lettre de motivation.
-    </ion-card-content>
-  </ion-card>
+    <!-- Lettre de motivation générée (APRÈS personnalisation) -->
+    <div *ngIf="generatedCoverLetter && cvImprovementsValidated" class="ion-margin-top">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Lettre de Motivation Générée</ion-card-title>
+          <ion-card-subtitle>Basée sur votre CV amélioré</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ generatedCoverLetter }}</pre>
+        </ion-card-content>
+      </ion-card>
+    </div>
 
-  <!-- Lettre de motivation -->
-  <div *ngIf="generatedCoverLetter && !isGeneratingAIContent && !isSavingCandidature" class="ion-margin-top">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Lettre de Motivation Générée</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ generatedCoverLetter }}</pre>
-      </ion-card-content>
-    </ion-card>
-  </div>
+    <!-- Bouton sauvegarder candidature (FINAL) -->
+    <ion-button 
+      *ngIf="generatedCoverLetter && cvImprovementsValidated"
+      expand="block" 
+      color="success" 
+      class="ion-margin-top"
+      (click)="saveCandidature()"
+      [disabled]="!atsAnalysisResult || !generatedCoverLetter || isSavingCandidature">
+      <ion-spinner *ngIf="isSavingCandidature" name="crescent" slot="start"></ion-spinner>
+      <ion-icon *ngIf="!isSavingCandidature" name="save-outline" slot="start"></ion-icon>
+      {{ isSavingCandidature ? 'Sauvegarde en cours...' : 'Sauvegarder la Candidature' }}
+    </ion-button>
 
-  <!-- Bouton sauvegarder candidature -->
-  <ion-button expand="block" color="success" class="ion-margin-top"
-              (click)="saveCandidature()"
-              [disabled]="!atsAnalysisResult || !generatedCoverLetter || isSavingCandidature || isGeneratingAIContent || isExtractingText">
-    <ion-spinner *ngIf="isSavingCandidature" name="crescent" slot="start"></ion-spinner>
-    <ion-icon *ngIf="!isSavingCandidature" name="save-outline" slot="start"></ion-icon>
-    {{ isSavingCandidature ? 'Sauvegarde en cours...' : 'Sauvegarder la Candidature' }}
-  </ion-button>
-
-  <!-- Aperçus des documents -->
-  <div *ngIf="!isGeneratingAIContent && !isSavingCandidature && (atsAnalysisResult || generatedCoverLetter)" class="ion-margin-top results-placeholder">
-    <ion-label class="ion-padding-start">Aperçu CV Final (Éditable)</ion-label>
-    <div class="document-preview-placeholder">CV Éditable</div>
-  </div>
-  <div *ngIf="!isGeneratingAIContent && !isSavingCandidature && (atsAnalysisResult || generatedCoverLetter)" class="ion-margin-top results-placeholder">
-    <ion-label class="ion-padding-start">Aperçu Lettre Finale (Éditable)</ion-label>
-    <div class="document-preview-placeholder">Lettre Éditable</div>
   </div>
 </ion-content>

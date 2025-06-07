@@ -1,260 +1,162 @@
-// Styles pour les améliorations CV
-.ats-keywords-section {
-  margin-bottom: 20px;
-  padding: 12px;
-  background: var(--ion-color-warning-tint);
-  border-radius: 8px;
-  border-left: 4px solid var(--ion-color-warning);
+// ===========================================
+// STYLES POUR LA NOUVELLE PAGE POSTULER
+// ===========================================
 
-  h4 {
-    margin: 0 0 8px 0;
-    color: var(--ion-color-warning-contrast);
-    font-size: 14px;
-    font-weight: 600;
-  }
-
-  .keywords-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
+.text-center {
+  text-align: center;
 }
 
-.improvements-list {
-  .improvement-item {
-    border: 1px solid var(--ion-color-light);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
+// Template Selection Grid
+// ===========================================
+.template-selection {
+  .template-card {
+    position: relative;
+    border: 2px solid var(--ion-color-light);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
     transition: all 0.3s ease;
+    background: var(--ion-color-light);
+    overflow: hidden;
+    margin-bottom: 16px;
 
-    &.accepted {
-      border-color: var(--ion-color-success);
-      background: var(--ion-color-success-tint);
+    &:hover {
+      border-color: var(--ion-color-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    &.critical {
-      border-left: 4px solid var(--ion-color-danger);
+    &.selected {
+      border-color: var(--ion-color-primary);
+      background: var(--ion-color-primary-tint);
+      box-shadow: 0 0 0 2px var(--ion-color-primary-contrast);
     }
 
-    .improvement-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
+    img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
 
-      .improvement-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        flex: 1;
+    .template-info {
+      h5 {
+        margin: 4px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+      }
 
-        .improvement-type {
-          font-size: 12px;
-          font-weight: 600;
-          padding: 4px 8px;
-          border-radius: 12px;
-          width: fit-content;
-
-          &.orthographe {
-            background: var(--ion-color-danger-tint);
-            color: var(--ion-color-danger);
-          }
-
-          &.reformulation {
-            background: var(--ion-color-primary-tint);
-            color: var(--ion-color-primary);
-          }
-
-          &.mots-cles {
-            background: var(--ion-color-warning-tint);
-            color: var(--ion-color-warning);
-          }
-
-          &.structure {
-            background: var(--ion-color-medium-tint);
-            color: var(--ion-color-medium);
-          }
-        }
-
-        .improvement-section {
-          font-size: 11px;
-          color: var(--ion-color-medium);
-          font-weight: 500;
-        }
-
-        .improvement-impact {
-          font-size: 10px;
-          font-weight: 600;
-          text-transform: uppercase;
-
-          &.fort {
-            color: var(--ion-color-danger);
-          }
-
-          &.moyen {
-            color: var(--ion-color-warning);
-          }
-
-          &.faible {
-            color: var(--ion-color-medium);
-          }
-        }
+      p {
+        margin: 0;
+        color: var(--ion-color-medium);
+        font-size: 12px;
+        line-height: 1.3;
       }
     }
 
-    h5 {
-      margin: 0 0 12px 0;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--ion-color-dark);
-    }
-
-    .text-comparison {
-      margin: 12px 0;
-
-      .original-text,
-      .improved-text {
-        margin-bottom: 12px;
-
-        label {
-          display: block;
-          font-size: 12px;
-          font-weight: 600;
-          margin-bottom: 4px;
-          text-transform: uppercase;
-        }
-
-        p {
-          margin: 0;
-          padding: 8px 12px;
-          border-radius: 6px;
-          font-size: 14px;
-          line-height: 1.4;
-        }
-      }
-
-      .original-text {
-        label {
-          color: var(--ion-color-medium);
-        }
-
-        p {
-          background: var(--ion-color-light);
-          color: var(--ion-color-dark);
-          border: 1px solid var(--ion-color-medium-tint);
-        }
-      }
-
-      .improved-text {
-        label {
-          color: var(--ion-color-success);
-        }
-
-        p {
-          background: var(--ion-color-success-tint);
-          color: var(--ion-color-success-contrast);
-          border: 1px solid var(--ion-color-success);
-          font-weight: 500;
-        }
-      }
-    }
-
-    .explanation {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      margin: 12px 0 0 0;
-      font-size: 13px;
-      color: var(--ion-color-medium);
-      font-style: italic;
-      line-height: 1.4;
-
-      ion-icon {
-        margin-top: 2px;
-        flex-shrink: 0;
-      }
+    .selected-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 12px;
+      --padding-start: 6px;
+      --padding-end: 6px;
     }
   }
 }
 
-.improvement-actions {
-  border-top: 1px solid var(--ion-color-light);
-  padding-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  ion-button[fill="clear"] {
-    font-size: 12px;
-    height: 32px;
-  }
-
-  ion-button[expand="block"] {
-    margin-top: 8px;
-  }
-}
-
-.critical-issues {
-  color: var(--ion-color-danger);
-  font-weight: 600;
-}
-
-// Style pour le message de succès
-ion-card[color="success"] {
-  ion-card-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    ion-icon {
-      font-size: 24px;
-    }
-  }
-}
-
-// Styles pour les améliorations CV structurées
-.cv-type-badge {
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 12px;
-  margin-left: 8px;
-  font-weight: 600;
-
-  &.structured {
-    background: var(--ion-color-primary-tint);
-    color: var(--ion-color-primary);
-  }
-
-  &.text {
-    background: var(--ion-color-secondary-tint);
-    color: var(--ion-color-secondary);
-  }
-}
-
-.new-competences {
-  color: var(--ion-color-tertiary);
-  font-weight: 600;
-}
-
-// Nouvelles compétences suggérées
-.suggested-competences-section {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: var(--ion-color-tertiary-tint);
-  border-radius: 8px;
-  border-left: 4px solid var(--ion-color-tertiary);
-
+// Theme Color Picker
+// ===========================================
+.theme-selection {
   h4 {
-    margin: 0 0 12px 0;
-    color: var(--ion-color-tertiary-contrast);
+    margin-bottom: 12px;
     font-size: 16px;
     font-weight: 600;
   }
 
+  .color-picker {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+
+    .color-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      &.selected {
+        border-color: var(--ion-color-dark);
+        transform: scale(1.1);
+        box-shadow: 0 0 0 2px var(--ion-color-light);
+      }
+
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+// CV Preview Section
+// ===========================================
+.cv-preview-section {
+  h4 {
+    margin-bottom: 12px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .cv-preview-container {
+    max-height: 300px;
+    overflow: hidden;
+    border: 1px solid var(--ion-color-light);
+    border-radius: 8px;
+    background: white;
+  }
+}
+
+// CV Type Badge
+// ===========================================
+.cv-type-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+
+  &.structured {
+    background: var(--ion-color-success-tint);
+    color: var(--ion-color-success);
+  }
+}
+
+// Improvements Section
+// ===========================================
+.suggested-competences-section {
+  margin-bottom: 24px;
+
+  h4 {
+    color: var(--ion-color-primary);
+    margin-bottom: 16px;
+  }
+
   .suggested-competences-list {
     .suggested-competence-item {
-      background: white;
       border: 1px solid var(--ion-color-light);
       border-radius: 8px;
       padding: 12px;
@@ -262,8 +164,8 @@ ion-card[color="success"] {
       transition: all 0.3s ease;
 
       &.accepted {
-        border-color: var(--ion-color-success);
         background: var(--ion-color-success-tint);
+        border-color: var(--ion-color-success);
       }
 
       .competence-header {
@@ -273,54 +175,58 @@ ion-card[color="success"] {
         margin-bottom: 8px;
 
         .competence-info {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
           flex: 1;
 
           .competence-name {
             font-weight: 600;
             color: var(--ion-color-dark);
-            font-size: 14px;
+            display: block;
+            margin-bottom: 4px;
           }
 
           .competence-category {
-            font-size: 12px;
+            background: var(--ion-color-medium-tint);
             color: var(--ion-color-medium);
-            font-style: italic;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-right: 8px;
           }
 
           .competence-impact {
-            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
             font-weight: 600;
-            text-transform: uppercase;
 
-            &.fort {
-              color: var(--ion-color-danger);
+            &.faible {
+              background: var(--ion-color-light);
+              color: var(--ion-color-medium);
             }
 
             &.moyen {
+              background: var(--ion-color-warning-tint);
               color: var(--ion-color-warning);
             }
 
-            &.faible {
-              color: var(--ion-color-medium);
+            &.fort {
+              background: var(--ion-color-danger-tint);
+              color: var(--ion-color-danger);
             }
           }
         }
       }
 
       .competence-reason {
+        margin: 0;
+        color: var(--ion-color-medium);
+        font-size: 13px;
         display: flex;
         align-items: flex-start;
         gap: 6px;
-        margin: 0;
-        font-size: 12px;
-        color: var(--ion-color-medium);
-        line-height: 1.4;
 
         ion-icon {
-          margin-top: 1px;
+          margin-top: 2px;
           flex-shrink: 0;
         }
       }
@@ -328,47 +234,36 @@ ion-card[color="success"] {
   }
 }
 
-// Améliorations par section
 .section-improvements {
   margin-bottom: 24px;
 
   h4 {
-    margin: 0 0 16px 0;
     color: var(--ion-color-primary);
-    font-size: 16px;
-    font-weight: 600;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--ion-color-primary-tint);
+    margin-bottom: 16px;
   }
 
   .section-item {
-    background: var(--ion-color-light-tint);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 
     .section-title {
-      margin: 0 0 12px 0;
-      color: var(--ion-color-dark);
       font-size: 14px;
       font-weight: 600;
-      padding: 8px 12px;
-      background: white;
-      border-radius: 6px;
-      border-left: 3px solid var(--ion-color-primary);
+      color: var(--ion-color-dark);
+      margin-bottom: 12px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--ion-color-light);
     }
 
     .field-improvement {
-      background: white;
       border: 1px solid var(--ion-color-light);
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 12px;
       margin-bottom: 12px;
       transition: all 0.3s ease;
 
       &.accepted {
-        border-color: var(--ion-color-success);
         background: var(--ion-color-success-tint);
+        border-color: var(--ion-color-success);
       }
 
       &.critical {
@@ -383,17 +278,19 @@ ion-card[color="success"] {
 
         .improvement-meta {
           display: flex;
-          flex-direction: column;
-          gap: 3px;
-          flex: 1;
+          gap: 8px;
+          flex-wrap: wrap;
 
-          .improvement-type {
+          .improvement-type,
+          .improvement-field,
+          .improvement-impact {
+            padding: 2px 6px;
+            border-radius: 4px;
             font-size: 11px;
             font-weight: 600;
-            padding: 3px 6px;
-            border-radius: 10px;
-            width: fit-content;
+          }
 
+          .improvement-type {
             &.orthographe {
               background: var(--ion-color-danger-tint);
               color: var(--ion-color-danger);
@@ -409,122 +306,422 @@ ion-card[color="success"] {
               color: var(--ion-color-warning);
             }
 
-            &.structure, &.ajout {
-              background: var(--ion-color-medium-tint);
-              color: var(--ion-color-medium);
+            &.structure {
+              background: var(--ion-color-secondary-tint);
+              color: var(--ion-color-secondary);
+            }
+
+            &.ajout {
+              background: var(--ion-color-success-tint);
+              color: var(--ion-color-success);
             }
           }
 
           .improvement-field {
-            font-size: 10px;
+            background: var(--ion-color-medium-tint);
             color: var(--ion-color-medium);
-            font-weight: 500;
-            text-transform: uppercase;
           }
 
           .improvement-impact {
-            font-size: 9px;
-            font-weight: 600;
-            text-transform: uppercase;
-
-            &.fort {
-              color: var(--ion-color-danger);
+            &.faible {
+              background: var(--ion-color-light);
+              color: var(--ion-color-medium);
             }
 
             &.moyen {
+              background: var(--ion-color-warning-tint);
               color: var(--ion-color-warning);
             }
 
-            &.faible {
-              color: var(--ion-color-medium);
+            &.fort {
+              background: var(--ion-color-danger-tint);
+              color: var(--ion-color-danger);
             }
           }
         }
       }
 
       h6 {
-        margin: 0 0 8px 0;
-        font-size: 13px;
+        margin: 0 0 12px 0;
+        font-size: 14px;
         font-weight: 600;
         color: var(--ion-color-dark);
       }
 
       .field-comparison {
-        margin: 8px 0;
+        margin-bottom: 12px;
 
         .original-value,
         .improved-value {
           margin-bottom: 8px;
 
           label {
-            display: block;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: 600;
-            margin-bottom: 3px;
-            text-transform: uppercase;
+            color: var(--ion-color-medium);
+            display: block;
+            margin-bottom: 4px;
           }
 
           p {
             margin: 0;
-            padding: 6px 10px;
+            padding: 8px;
             border-radius: 4px;
-            font-size: 12px;
-            line-height: 1.3;
+            font-size: 13px;
+            line-height: 1.4;
           }
         }
 
-        .original-value {
-          label {
-            color: var(--ion-color-medium);
-          }
-
-          p {
-            background: var(--ion-color-light);
-            color: var(--ion-color-dark);
-            border: 1px solid var(--ion-color-medium-tint);
-          }
+        .original-value p {
+          background: var(--ion-color-light-tint);
+          border-left: 3px solid var(--ion-color-medium);
         }
 
-        .improved-value {
-          label {
-            color: var(--ion-color-success);
-          }
-
-          p {
-            background: var(--ion-color-success-tint);
-            color: var(--ion-color-success-contrast);
-            border: 1px solid var(--ion-color-success);
-            font-weight: 500;
-          }
+        .improved-value p {
+          background: var(--ion-color-success-tint);
+          border-left: 3px solid var(--ion-color-success);
         }
       }
 
       .explanation {
+        margin: 0;
+        color: var(--ion-color-medium);
+        font-size: 13px;
         display: flex;
         align-items: flex-start;
         gap: 6px;
-        margin: 8px 0 0 0;
-        font-size: 11px;
-        color: var(--ion-color-medium);
-        font-style: italic;
-        line-height: 1.3;
 
         ion-icon {
-          margin-top: 1px;
+          margin-top: 2px;
           flex-shrink: 0;
-          font-size: 12px;
         }
       }
     }
   }
 }
 
-// Interface adaptée
-.structured-improvements,
-.text-improvements {
-  .improvement-actions {
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid var(--ion-color-light);
+.improvement-actions {
+  border-top: 1px solid var(--ion-color-light);
+  padding-top: 16px;
+  
+  ion-button[fill="clear"] {
+    margin: 0 8px 8px 0;
+  }
+}
+
+// CV Comparison Section
+// ===========================================
+.cv-comparison-section {
+  .modifications-summary {
+    text-align: center;
+    padding: 12px;
+    background: var(--ion-color-success-tint);
+    border-radius: 8px;
+    border: 1px solid var(--ion-color-success);
+
+    .changes-details {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--ion-color-success);
+      
+      span {
+        margin-right: 12px;
+      }
+    }
+  }
+
+  .comparison-slider-container {
+    position: relative;
+    margin-bottom: 16px;
+
+    .cv-comparison-wrapper {
+      position: relative;
+      height: 500px;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid var(--ion-color-light);
+      background: white;
+
+      .cv-original,
+      .cv-improved {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        padding: 16px;
+        box-sizing: border-box;
+      }
+
+      .cv-original {
+        background: #f8f9fa;
+      }
+
+      .cv-improved {
+        background: #e8f5e8;
+        transition: clip-path 0.1s ease-out;
+      }
+
+      .cv-section-title {
+        position: sticky;
+        top: 0;
+        background: inherit;
+        padding: 8px 0;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--ion-color-dark);
+        border-bottom: 2px solid var(--ion-color-primary);
+        margin-bottom: 12px;
+        z-index: 5;
+      }
+
+      .cv-content-display {
+        white-space: pre-wrap;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--ion-color-dark);
+      }
+
+      .slider-overlay {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--ion-color-primary);
+        z-index: 10;
+        pointer-events: none;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+
+        .slider-handle {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 40px;
+          height: 40px;
+          background: var(--ion-color-primary);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          border: 3px solid white;
+
+          ion-icon {
+            font-size: 20px;
+          }
+        }
+      }
+    }
+
+    .comparison-range {
+      margin-top: 16px;
+      
+      ion-label[slot="start"],
+      ion-label[slot="end"] {
+        font-size: 12px;
+        font-weight: 600;
+      }
+    }
+  }
+
+  .single-cv-view {
+    h4 {
+      margin-bottom: 12px;
+      text-align: center;
+      color: var(--ion-color-primary);
+    }
+
+    .cv-content-display {
+      background: white;
+      border: 1px solid var(--ion-color-light);
+      border-radius: 8px;
+      padding: 16px;
+      white-space: pre-wrap;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--ion-color-dark);
+      max-height: 500px;
+      overflow-y: auto;
+    }
+  }
+}
+
+// Critical Issues and New Competences
+// ===========================================
+.critical-issues {
+  color: var(--ion-color-danger);
+  font-weight: 600;
+}
+
+.new-competences {
+  color: var(--ion-color-success);
+  font-weight: 600;
+}
+
+// Responsive Design
+// ===========================================
+@media (max-width: 768px) {
+  .template-selection {
+    .template-card {
+      img {
+        height: 80px;
+      }
+
+      .template-info {
+        h5 {
+          font-size: 12px;
+        }
+
+        p {
+          font-size: 11px;
+        }
+      }
+    }
+  }
+
+  .theme-selection {
+    .color-picker {
+      .color-option {
+        width: 35px;
+        height: 35px;
+
+        ion-icon {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .cv-comparison-section {
+    .comparison-slider-container {
+      .cv-comparison-wrapper {
+        height: 400px;
+
+        .cv-original,
+        .cv-improved {
+          padding: 12px;
+        }
+      }
+    }
+
+    .single-cv-view {
+      .cv-content-display {
+        padding: 12px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  .field-improvement {
+    .improvement-header {
+      flex-direction: column;
+      gap: 8px;
+
+      .improvement-meta {
+        order: 1;
+      }
+
+      ion-checkbox {
+        order: 0;
+        align-self: flex-end;
+      }
+    }
+  }
+
+  .modifications-summary {
+    .changes-details {
+      span {
+        display: block;
+        margin: 4px 0;
+      }
+    }
+  }
+}
+
+// Animations
+// ===========================================
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cv-comparison-section {
+  animation: slideIn 0.5s ease-out;
+}
+
+.field-improvement.accepted {
+  animation: slideIn 0.3s ease-out;
+}
+
+// États de loading
+// ===========================================
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  color: var(--ion-color-medium);
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+}
+
+// Amélioration des badges d'impact
+// ===========================================
+.impact-badge {
+  &.faible {
+    background: var(--ion-color-light);
+    color: var(--ion-color-medium);
+  }
+
+  &.moyen {
+    background: var(--ion-color-warning-tint);
+    color: var(--ion-color-warning);
+  }
+
+  &.fort {
+    background: var(--ion-color-danger-tint);
+    color: var(--ion-color-danger);
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// Highlight des différences
+// ===========================================
+.cv-content-display {
+  .highlight-added {
+    background: rgba(40, 167, 69, 0.2);
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+
+  .highlight-modified {
+    background: rgba(255, 193, 7, 0.2);
+    padding: 2px 4px;
+    border-radius: 3px;
   }
 }

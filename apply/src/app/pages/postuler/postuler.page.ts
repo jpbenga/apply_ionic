@@ -1,23 +1,26 @@
-import { Component, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel,
-  IonTextarea, IonButton, IonIcon, IonSpinner,
+  IonTextarea, IonButton, IonIcon, IonSpinner, IonSegment, IonSegmentButton,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,
-  IonRadioGroup, IonRadio, IonCheckbox, IonChip, ToastController
+  IonCheckbox, IonGrid, IonRow, IonCol, IonRange, IonBadge,
+  ToastController
 } from '@ionic/angular/standalone';
 import { HeaderService } from 'src/app/services/header/header.service';
 import { AIService, ATSAnalysisResult } from 'src/app/services/ai/ai.service';
 import { CandidatureService } from 'src/app/services/candidature/candidature.service';
 import { CvGenerationService } from 'src/app/services/cv-generation/cv-generation.service';
-import { GeneratedCv } from 'src/app/models/cv-template.model';
+import { CvTemplateService } from 'src/app/services/cv-template/cv-template.service';
+import { CvDataService } from 'src/app/services/cv-data/cv-data.service';
+import { GeneratedCv, CvTemplate, CvTheme, CvData } from 'src/app/models/cv-template.model';
 import { Candidature } from 'src/app/models/candidature.model';
 import { Router } from '@angular/router';
 import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
-import { Subscription } from 'rxjs';
+import { CvPreviewComponent } from 'src/app/components/cv-preview/cv-preview.component';
+import { Subscription, combineLatest } from 'rxjs';
 import { Timestamp } from '@angular/fire/firestore';
-import { CvImprovementResponse, CvImprovement, CvImprovementResult } from 'src/app/models/cv-improvement.model';
 import { 
   StructuredCvImprovementResponse, 
   StructuredCvImprovementResult,
@@ -32,45 +35,59 @@ import {
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonItem, IonLabel, IonTextarea, IonButton, IonIcon, IonSpinner,
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,
-  IonRadioGroup, IonRadio, IonCheckbox, IonChip, UserHeaderComponent
+    IonItem, IonLabel, IonTextarea, IonButton, IonIcon, IonSpinner, IonSegment, IonSegmentButton,
+    IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,
+    IonCheckbox, IonGrid, IonRow, IonCol, IonRange, IonBadge,
+    UserHeaderComponent, CvPreviewComponent
   ]
 })
-export class PostulerPage implements OnDestroy {
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+export class PostulerPage implements OnInit, OnDestroy {
+  @ViewChild('originalPreview') originalPreview!: CvPreviewComponent;
+  @ViewChild('improvedPreview') improvedPreview!: CvPreviewComponent;
 
-  // Propriétés existantes
+  // Propriétés de base
   jobOfferText: string = '';
-  selectedFileName: string | null = null;
-  selectedFile: File | null = null;
-  extractedCvText: string | null = null;
-  isExtractingText: boolean = false;
-
   atsAnalysisResult: ATSAnalysisResult | null = null;
   generatedCoverLetter: string | null = null;
   isGeneratingAIContent: boolean = false;
+  isGeneratingCoverLetter: boolean = false;
   aiError: string | null = null;
-
   isSavingCandidature: boolean = false;
+  isSavingImprovements: boolean = false;
 
-  // Nouvelles propriétés pour la gestion des CVs
-  cvSelectionMode: 'recent' | 'upload' = 'upload';
-  mostRecentCv: GeneratedCv | null = null;
-  mostRecentCvText: string | null = null;
-  isLoadingRecentCv: boolean = false;
-  saveUploadedCv: boolean = false;
+  // Workflow states
+  cvImprovementsValidated: boolean = false;
 
-  // Propriétés pour l'amélioration CV
-  cvImprovements: CvImprovementResponse | null = null;
-  isImprovingCv: boolean = false;
-  improvedCvText: string | null = null;
-  appliedImprovementsCount: number = 0;
+  // Gestion CV structuré et templates
+  availableTemplates: CvTemplate[] = [];
+  selectedTemplate: CvTemplate | null = null;
+  selectedTheme: CvTheme = { primaryColor: '#007bff' };
+  availableThemes: CvTheme[] = [
+    { primaryColor: '#007bff' }, // Bleu
+    { primaryColor: '#28a745' }, // Vert
+    { primaryColor: '#dc3545' }, // Rouge
+    { primaryColor: '#6f42c1' }, // Violet
+    { primaryColor: '#fd7e14' }, // Orange
+    { primaryColor: '#20c997' }, // Teal
+  ];
+  
+  // Données CV
+  hasStructuredCvData: boolean = false;
+  currentCvData: CvData | null = null;
+  originalCvData: CvData | null = null;
+  improvedCvData: CvData | null = null;
+  isLoadingCvData: boolean = false;
+  isLoadingTemplates: boolean = false;
 
-  // Propriétés pour l'amélioration CV structuré
+  // Améliorations CV
   structuredCvImprovements: StructuredCvImprovementResponse | null = null;
-  improvedStructuredCvData: any = null;
-  appliedStructuredImprovementsCount: number = 0;
+  isImprovingCv: boolean = false;
+  improvementsApplied: boolean = false;
+  appliedChangesCount = { experiences: 0, formations: 0, competences: 0, total: 0 };
+
+  // Comparaison avant/après
+  comparisonView: 'original' | 'improved' | 'split' = 'split';
+  sliderPosition: number = 50; // Position du slider en %
 
   private subscriptions: Subscription[] = [];
 
@@ -79,231 +96,155 @@ export class PostulerPage implements OnDestroy {
     private aiService: AIService,
     private candidatureService: CandidatureService,
     private cvGenerationService: CvGenerationService,
+    private cvTemplateService: CvTemplateService,
+    private cvDataService: CvDataService,
     private toastController: ToastController,
     private router: Router
   ) { }
 
+  async ngOnInit() {
+    await this.loadAvailableTemplates();
+  }
+
   ionViewWillEnter() {
     this.headerService.updateTitle('Postuler');
     this.headerService.setShowBackButton(false);
-    this.loadMostRecentCv();
+    this.checkStructuredCvData();
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
-  async loadMostRecentCv() {
-    this.isLoadingRecentCv = true;
-    console.log('🔍 Recherche du CV généré le plus récent...');
-    
-    try {
-      const subscription = this.cvGenerationService.getGeneratedCvs().subscribe({
-        next: (cvs) => {
-          console.log('📄 CVs générés trouvés:', cvs);
-          if (cvs && cvs.length > 0) {
-            this.mostRecentCv = cvs[0]; // Le plus récent (trié par date desc)
-            this.mostRecentCvText = this.generateTextFromCvData(this.mostRecentCv);
-            
-            this.cvSelectionMode = 'recent';
-            console.log('✅ CV récent sélectionné par défaut:', this.mostRecentCv);
-          } else {
-            this.mostRecentCv = null;
-            this.mostRecentCvText = null;
-            this.cvSelectionMode = 'upload';
-            console.log('📁 Aucun CV généré trouvé, mode upload sélectionné');
-          }
-          this.isLoadingRecentCv = false;
-        },
-        error: (error) => {
-          console.error('❌ Erreur lors du chargement des CVs générés:', error);
-          this.mostRecentCv = null;
-          this.mostRecentCvText = null;
-          this.cvSelectionMode = 'upload';
-          this.isLoadingRecentCv = false;
+  /**
+   * Charge les templates disponibles
+   */
+  async loadAvailableTemplates() {
+    this.isLoadingTemplates = true;
+    const subscription = this.cvTemplateService.getAvailableTemplates().subscribe({
+      next: (templates) => {
+        this.availableTemplates = templates;
+        // Sélectionner le premier template par défaut
+        if (templates.length > 0 && !this.selectedTemplate) {
+          this.selectedTemplate = templates[0];
         }
-      });
-      this.subscriptions.push(subscription);
-    } catch (error) {
-      console.error('❌ Erreur try/catch lors du chargement du CV récent:', error);
-      this.cvSelectionMode = 'upload';
-      this.isLoadingRecentCv = false;
+        this.isLoadingTemplates = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des templates:', error);
+        this.isLoadingTemplates = false;
+      }
+    });
+    this.subscriptions.push(subscription);
+  }
+
+  /**
+   * Vérifie si l'utilisateur a des données CV structurées
+   */
+  checkStructuredCvData() {
+    this.isLoadingCvData = true;
+    
+    const subscription = combineLatest([
+      this.cvDataService.getExperiences(),
+      this.cvDataService.getFormations(),
+      this.cvDataService.getCompetences()
+    ]).subscribe({
+      next: ([experiences, formations, competences]) => {
+        const hasData = experiences.length > 0 || formations.length > 0 || competences.length > 0;
+        this.hasStructuredCvData = hasData;
+        
+        if (hasData) {
+          this.currentCvData = {
+            userId: '', // Sera rempli par le service
+            experiences,
+            formations,
+            competences,
+            templateId: this.selectedTemplate?.id || 'modern',
+            theme: this.selectedTheme
+          };
+          // Créer une copie profonde pour l'original
+          this.originalCvData = JSON.parse(JSON.stringify(this.currentCvData));
+        }
+        
+        this.isLoadingCvData = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des données CV:', error);
+        this.hasStructuredCvData = false;
+        this.isLoadingCvData = false;
+      }
+    });
+    
+    this.subscriptions.push(subscription);
+  }
+
+  /**
+   * Redirige vers la page Mon CV si pas de données
+   */
+  goToMyCv() {
+    this.router.navigate(['/tabs/my-cv']);
+  }
+
+  /**
+   * Gestion du changement de template
+   */
+  onTemplateChange(template: CvTemplate) {
+    this.selectedTemplate = template;
+    this.updateCvData();
+  }
+
+  /**
+   * Gestion du changement de thème
+   */
+  onThemeChange(theme: CvTheme) {
+    this.selectedTheme = theme;
+    this.updateCvData();
+  }
+
+  /**
+   * Met à jour les données CV avec le nouveau template/thème
+   */
+  updateCvData() {
+    if (this.currentCvData && this.selectedTemplate) {
+      this.currentCvData.templateId = this.selectedTemplate.id;
+      this.currentCvData.theme = this.selectedTheme;
     }
   }
 
   /**
-   * Convertit un CV généré en texte simple pour l'IA
+   * Génère SEULEMENT l'analyse ATS (pas la lettre)
    */
-  private generateTextFromCvData(cv: GeneratedCv): string {
-    if (!cv.data) return '';
-
-    let text = '';
-
-    // Expériences
-    if (cv.data.experiences?.length > 0) {
-      text += 'EXPÉRIENCES PROFESSIONNELLES\n';
-      cv.data.experiences.forEach(exp => {
-        text += `${exp.poste} - ${exp.entreprise}\n`;
-        if (exp.description) text += `${exp.description}\n`;
-        text += '\n';
-      });
-    }
-
-    // Formations
-    if (cv.data.formations?.length > 0) {
-      text += 'FORMATIONS\n';
-      cv.data.formations.forEach(form => {
-        text += `${form.diplome} - ${form.etablissement}\n`;
-        if (form.description) text += `${form.description}\n`;
-        text += '\n';
-      });
-    }
-
-    // Compétences
-    if (cv.data.competences?.length > 0) {
-      text += 'COMPÉTENCES\n';
-      text += cv.data.competences.map(comp => comp.nom).join(', ') + '\n';
-    }
-
-    return text;
-  }
-
-  triggerFileInput() {
-    if (this.cvSelectionMode !== 'upload' || this.isExtractingText || this.isGeneratingAIContent || this.isSavingCandidature) return;
-    this.fileInput.nativeElement.click();
-  }
-
-  async handleFileSelected(event: Event) {
-    this.extractedCvText = null;
-    this.atsAnalysisResult = null;
-    this.generatedCoverLetter = null;
-    this.aiError = null;
-    this.isExtractingText = true;
-
-    const element = event.currentTarget as HTMLInputElement;
-    const fileList: FileList | null = element.files;
-
-    if (fileList && fileList.length > 0) {
-      this.selectedFile = fileList[0];
-      this.selectedFileName = this.selectedFile.name;
-
-      try {
-        if (this.selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || this.selectedFile.name.toLowerCase().endsWith('.docx')) {
-          this.extractedCvText = await this.aiService.extractTextFromDocx(this.selectedFile);
-        } else if (this.selectedFile.type === 'application/pdf' || this.selectedFile.name.toLowerCase().endsWith('.pdf')) {
-          this.extractedCvText = await this.aiService.getTextFromPdfViaFunction(this.selectedFile);
-        } else {
-          this.presentToast('Type de fichier non supporté. Veuillez choisir un DOCX ou PDF.', 'warning');
-          this.clearFileSelection();
-          this.isExtractingText = false;
-          return;
-        }
-        if (!this.extractedCvText || this.extractedCvText.trim() === '') {
-          this.extractedCvText = null;
-        }
-      } catch (error) {
-        let errorMessage = 'Erreur lors du traitement du fichier.';
-        if (error instanceof Error) { errorMessage = error.message; }
-        else if (typeof error === 'string') { errorMessage = error; }
-        this.presentToast(`Erreur: ${errorMessage}`, 'danger');
-        this.clearFileSelection();
-      } finally {
-        this.isExtractingText = false;
-      }
-    } else {
-      this.clearFileSelection();
-      this.isExtractingText = false;
-    }
-
-    if (this.fileInput) {
-      this.fileInput.nativeElement.value = '';
-    }
-  }
-
-  clearFileSelection() {
-    this.selectedFile = null;
-    this.selectedFileName = null;
-    this.extractedCvText = null;
-    this.atsAnalysisResult = null;
-    this.generatedCoverLetter = null;
-    this.aiError = null;
-    this.isExtractingText = false;
-    this.saveUploadedCv = false;
-    if (this.fileInput) {
-      this.fileInput.nativeElement.value = '';
-    }
-  }
-
-  isCvReady(): boolean {
-    if (this.cvSelectionMode === 'recent') {
-      return !!this.mostRecentCv && !!this.mostRecentCvText;
-    } else {
-      return !!this.extractedCvText;
-    }
-  }
-
-  getCurrentCvText(): string | null {
-    if (this.cvSelectionMode === 'recent') {
-      return this.mostRecentCvText;
-    } else if (this.cvSelectionMode === 'upload') {
-      return this.extractedCvText;
-    }
-    return null;
-  }
-
-  getCvDisplayName(): string {
-    if (this.cvSelectionMode === 'recent' && this.mostRecentCv) {
-      return `CV Généré (${this.mostRecentCv.templateId})`;
-    }
-    return '';
-  }
-
-  getCvCreationDate(): string {
-    if (this.cvSelectionMode === 'recent' && this.mostRecentCv) {
-      const date = new Date(this.mostRecentCv.createdAt);
-      return date.toLocaleDateString('fr-FR', { 
-        day: '2-digit', 
-        month: '2-digit', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-    return '';
-  }
-
   async generateApplication() {
     this.aiError = null;
+    
     if (!this.jobOfferText.trim()) {
       this.presentToast("Veuillez saisir l'offre d'emploi.", 'warning');
       return;
     }
 
-    const cvText = this.getCurrentCvText();
-    if (!cvText) {
-      this.presentToast("Veuillez sélectionner un CV.", 'warning');
+    if (!this.hasStructuredCvData || !this.currentCvData) {
+      this.presentToast("Aucune donnée CV structurée disponible.", 'warning');
       return;
     }
 
     this.isGeneratingAIContent = true;
     this.atsAnalysisResult = null;
-    this.generatedCoverLetter = null;
 
     try {
-      const atsPromise = this.aiService.getATSAnalysis(this.jobOfferText, cvText);
-      const letterPromise = this.aiService.generateCoverLetter(this.jobOfferText, cvText);
-      const [atsResult, letterResult] = await Promise.all([atsPromise, letterPromise]);
+      // Convertir les données structurées en texte pour l'IA
+      const cvText = this.generateTextFromCvData(this.currentCvData);
+      
+      // Générer SEULEMENT l'analyse ATS
+      const atsResult = await this.aiService.getATSAnalysis(this.jobOfferText, cvText);
       this.atsAnalysisResult = atsResult;
-      this.generatedCoverLetter = letterResult;
-
-      // Note: Pas de sauvegarde de CV uploadé car on utilise le système de CV générés existant
-      if (this.cvSelectionMode === 'upload' && this.saveUploadedCv) {
-        this.presentToast('Pour sauvegarder un CV, utilisez la section "Mon CV Structuré"', 'warning');
-      }
+      
     } catch (error) {
       let errorMessage = "Une erreur est survenue lors de la génération par l'IA.";
-      if (error instanceof Error) { errorMessage = error.message; }
-      else if (typeof error === 'string') { errorMessage = error; }
+      if (error instanceof Error) { 
+        errorMessage = error.message; 
+      } else if (typeof error === 'string') { 
+        errorMessage = error; 
+      }
       this.aiError = errorMessage;
       this.presentToast(`Erreur IA: ${errorMessage}`, 'danger');
     } finally {
@@ -311,138 +252,38 @@ export class PostulerPage implements OnDestroy {
     }
   }
 
-  getFileTypeLabel(file: File | null): string {
-    if (!file || !file.name) { return ''; }
-    if (file.name.toLowerCase().endsWith('.docx')) { return 'DOCX'; }
-    if (file.name.toLowerCase().endsWith('.pdf')) { return 'PDF'; }
-    return 'FICHIER';
-  }
-
-  async saveCandidature() {
-    if (!this.jobOfferText || !this.atsAnalysisResult || !this.generatedCoverLetter) {
-      this.presentToast('Veuillez d\'abord générer l\'analyse ATS et la lettre de motivation.', 'warning');
-      return;
-    }
-  
-    const cvText = this.getCurrentCvText();
-    if (!cvText) {
-      this.presentToast('Aucun CV disponible.', 'warning');
-      return;
-    }
-  
-    // MODIFICATION : Utiliser des valeurs par défaut si extraction échoue
-    const jobTitle = this.atsAnalysisResult.jobTitle || 'Poste non spécifié';
-    const company = this.atsAnalysisResult.company || 'Entreprise non spécifiée';
-  
-    // Afficher un avertissement si l'extraction a échoué
-    if (!this.atsAnalysisResult.jobTitle || !this.atsAnalysisResult.company) {
-      console.warn('⚠️ Extraction titre/entreprise incomplète:', {
-        titre: this.atsAnalysisResult.jobTitle,
-        entreprise: this.atsAnalysisResult.company
-      });
-    }
-  
-    this.isSavingCandidature = true;
-  
-    // Préparer les données de candidature
-    let cvOriginalNom: string | undefined;
-    let cvOriginalUrl: string | undefined;
-    let fileToUpload: File | null = null;
-  
-    if (this.cvSelectionMode === 'recent' && this.mostRecentCv) {
-      cvOriginalNom = this.getCvDisplayName();
-      // Note: Les CV générés n'ont pas d'URL de fichier, on utilise l'ID
-      cvOriginalUrl = `generated_cv_${this.mostRecentCv.id}`;
-    } else if (this.cvSelectionMode === 'upload' && this.selectedFile) {
-      cvOriginalNom = this.selectedFileName || undefined;
-      fileToUpload = this.selectedFile;
-    }
-  
-    const candidatureDetails: Omit<Candidature, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'dateCandidature'> = {
-      poste: jobTitle,           // ← Utilise la valeur par défaut si nécessaire
-      entreprise: company,       // ← Utilise la valeur par défaut si nécessaire
-      offreTexteComplet: this.jobOfferText,
-      cvOriginalNom: cvOriginalNom,
-      cvOriginalUrl: cvOriginalUrl,
-      cvTexteExtrait: cvText,
-      analyseATS: this.atsAnalysisResult.analysisText,
-      lettreMotivationGeneree: this.generatedCoverLetter,
-      statut: 'envoyee',
-    };
-  
-    try {
-      await this.candidatureService.createCandidature(candidatureDetails, fileToUpload);
-      
-      // Message adapté selon l'extraction
-      if (!this.atsAnalysisResult.jobTitle || !this.atsAnalysisResult.company) {
-        this.presentToast('Candidature sauvegardée ! (Titre/entreprise auto-générés)', 'success');
-      } else {
-        this.presentToast('Candidature sauvegardée avec succès !', 'success');
-      }
-      
-      this.resetForm();
-      this.router.navigate(['/tabs/dashboard']);
-    } catch (error) {
-      let errorMessage = "Erreur lors de la sauvegarde de la candidature.";
-      if (error instanceof Error) {errorMessage = error.message;}
-      else if (typeof error === 'string') { errorMessage = error; }
-      this.presentToast(errorMessage, 'danger');
-    } finally {
-      this.isSavingCandidature = false;
-    }
-  }
-
-  resetForm() {
-    this.jobOfferText = '';
-    this.clearFileSelection();
-    this.cvSelectionMode = this.mostRecentCv ? 'recent' : 'upload';
-    this.atsAnalysisResult = null;
-    this.generatedCoverLetter = null;
-    this.aiError = null;
-    
-    // Reset des améliorations - version étendue
-    this.cvImprovements = null;
-    this.improvedCvText = null;
-    this.appliedImprovementsCount = 0;
-    
-    // Reset des améliorations structurées
-    this.structuredCvImprovements = null;
-    this.improvedStructuredCvData = null;
-    this.appliedStructuredImprovementsCount = 0;
-  }
-
-  async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light' ) {
-    const toast = await this.toastController.create({
-      message: message,
-      duration: 3000,
-      position: 'top',
-      color: color,
-      buttons: [{ text: 'OK', role: 'cancel' }]
-    });
-    toast.present();
-  }
   /**
-   * Lance l'amélioration du CV par l'IA
+   * Lance l'amélioration du CV structuré
    */
   async improveCv() {
-    if (!this.jobOfferText || !this.getCurrentCvText()) {
-      this.presentToast('Offre d\'emploi et CV requis pour l\'amélioration', 'warning');
+    if (!this.jobOfferText || !this.currentCvData) {
+      this.presentToast('Offre d\'emploi et données CV requises pour l\'amélioration', 'warning');
       return;
     }
 
     this.isImprovingCv = true;
-    this.cvImprovements = null;
+    this.structuredCvImprovements = null;
 
     try {
-      const cvText = this.getCurrentCvText()!;
-      const improvements = await this.aiService.improveCvText(this.jobOfferText, cvText);
+      // Créer un GeneratedCv temporaire pour l'analyse
+      const tempGeneratedCv: GeneratedCv = {
+        id: 'temp',
+        userId: this.currentCvData.userId,
+        templateId: this.currentCvData.templateId,
+        theme: this.currentCvData.theme,
+        data: this.currentCvData,
+        createdAt: new Date().toISOString()
+      };
+
+      const improvements = await this.aiService.improveStructuredCv(this.jobOfferText, tempGeneratedCv);
+      this.structuredCvImprovements = improvements;
       
-      this.cvImprovements = improvements;
-      
-      if (improvements.improvements.length === 0) {
+      if (improvements.summary.totalSuggestions === 0) {
         this.presentToast('Excellent ! Aucune amélioration nécessaire pour votre CV.', 'success');
+        // Marquer comme validé même s'il n'y a pas d'améliorations
+        this.cvImprovementsValidated = true;
       } else {
-        this.presentToast(`${improvements.improvements.length} amélioration(s) suggérée(s)`, 'primary');
+        this.presentToast(`${improvements.summary.totalSuggestions} amélioration(s) suggérée(s)`, 'primary');
       }
     } catch (error) {
       console.error('Erreur lors de l\'amélioration du CV:', error);
@@ -459,27 +300,50 @@ export class PostulerPage implements OnDestroy {
   /**
    * Applique les améliorations sélectionnées
    */
-  applySelectedImprovements() {
-    if (!this.cvImprovements || !this.getCurrentCvText()) return;
+  async applySelectedImprovements() {
+    if (!this.structuredCvImprovements || !this.currentCvData) return;
 
     try {
-      const originalText = this.getCurrentCvText()!;
-      const result: CvImprovementResult = this.aiService.applyCvImprovements(
-        originalText, 
-        this.cvImprovements.improvements
+      console.log('🔧 Application des améliorations...');
+      
+      // Créer un GeneratedCv temporaire pour l'application
+      const tempGeneratedCv: GeneratedCv = {
+        id: 'temp',
+        userId: this.currentCvData.userId,
+        templateId: this.currentCvData.templateId,
+        theme: this.currentCvData.theme,
+        data: this.currentCvData,
+        createdAt: new Date().toISOString()
+      };
+
+      const result: StructuredCvImprovementResult = this.aiService.applyStructuredCvImprovements(
+        tempGeneratedCv, 
+        this.structuredCvImprovements
       );
 
-      this.improvedCvText = result.improvedText;
-      this.appliedImprovementsCount = result.appliedImprovements.length;
+      // Mettre à jour les données améliorées avec une copie profonde
+      this.improvedCvData = {
+        userId: this.currentCvData.userId,
+        templateId: this.currentCvData.templateId,
+        theme: this.currentCvData.theme,
+        experiences: JSON.parse(JSON.stringify(result.improvedData.experiences)),
+        formations: JSON.parse(JSON.stringify(result.improvedData.formations)),
+        competences: JSON.parse(JSON.stringify(result.improvedData.competences))
+      };
 
-      // Mettre à jour le texte CV selon le mode
-      if (this.cvSelectionMode === 'upload') {
-        this.extractedCvText = result.improvedText;
-      } else if (this.cvSelectionMode === 'recent') {
-        this.mostRecentCvText = result.improvedText;
-      }
+      // Sauvegarder le nombre de changements
+      this.appliedChangesCount = result.changesCount;
 
-      this.presentToast(`${this.appliedImprovementsCount} amélioration(s) appliquée(s) !`, 'success');
+      this.improvementsApplied = true;
+      
+      console.log('✅ Améliorations appliquées:', {
+        original: this.originalCvData,
+        improved: this.improvedCvData,
+        changes: this.appliedChangesCount
+      });
+
+      this.presentToast(`${result.changesCount.total} modification(s) appliquée(s) !`, 'success');
+
     } catch (error) {
       console.error('Erreur lors de l\'application des améliorations:', error);
       this.presentToast('Erreur lors de l\'application des améliorations', 'danger');
@@ -487,74 +351,330 @@ export class PostulerPage implements OnDestroy {
   }
 
   /**
-   * Sélectionne/désélectionne toutes les améliorations - version adaptée
+   * Sauvegarde les améliorations et marque comme validé
    */
-  selectAllImprovements(select: boolean) {
-    if (this.structuredCvImprovements) {
-      // Sélectionner toutes les améliorations structurées
-      this.structuredCvImprovements.improvements.experiences.forEach(section => {
-        section.improvements.forEach(improvement => {
-          improvement.accepted = select;
-        });
-      });
-      this.structuredCvImprovements.improvements.formations.forEach(section => {
-        section.improvements.forEach(improvement => {
-          improvement.accepted = select;
-        });
-      });
-      this.structuredCvImprovements.improvements.competences.forEach(section => {
-        section.improvements.forEach(improvement => {
-          improvement.accepted = select;
-        });
-      });
-      this.structuredCvImprovements.improvements.suggestedCompetences.forEach(competence => {
-        competence.accepted = select;
-      });
-    } else if (this.cvImprovements) {
-      // Sélectionner toutes les améliorations texte
-      this.cvImprovements.improvements.forEach(improvement => {
-        improvement.accepted = select;
-      });
+  async saveImprovements() {
+    if (!this.improvedCvData || !this.selectedTemplate) return;
+
+    this.isSavingImprovements = true;
+
+    try {
+      // Sauvegarder les données améliorées en base
+      const savePromises = [];
+
+      console.log('💾 Sauvegarde des améliorations en base...');
+
+      // Sauvegarder les expériences modifiées
+      for (const experience of this.improvedCvData.experiences) {
+        if (experience.id) {
+          savePromises.push(this.cvDataService.updateExperience(experience.id, experience));
+        } else {
+          savePromises.push(this.cvDataService.addExperience(experience));
+        }
+      }
+
+      // Sauvegarder les formations modifiées
+      for (const formation of this.improvedCvData.formations) {
+        if (formation.id) {
+          savePromises.push(this.cvDataService.updateFormation(formation.id, formation));
+        } else {
+          savePromises.push(this.cvDataService.addFormation(formation));
+        }
+      }
+
+      // Sauvegarder les compétences modifiées
+      for (const competence of this.improvedCvData.competences) {
+        if (competence.id) {
+          savePromises.push(this.cvDataService.updateCompetence(competence.id, competence));
+        } else {
+          savePromises.push(this.cvDataService.addCompetence(competence));
+        }
+      }
+
+      await Promise.all(savePromises);
+
+      // Mettre à jour les données actuelles et marquer comme validé
+      this.currentCvData = { ...this.improvedCvData };
+      this.cvImprovementsValidated = true;
+
+      this.presentToast('Améliorations sauvegardées avec succès !', 'success');
+
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      this.presentToast('Erreur lors de la sauvegarde des améliorations', 'danger');
+    } finally {
+      this.isSavingImprovements = false;
     }
   }
 
   /**
-   * Vérifie s'il y a des améliorations acceptées
+   * Génère la lettre de motivation (séparée)
    */
+  async generateCoverLetter() {
+    if (!this.jobOfferText || !this.currentCvData) {
+      this.presentToast('Données requises manquantes pour la lettre', 'warning');
+      return;
+    }
+
+    this.isGeneratingCoverLetter = true;
+    this.generatedCoverLetter = null;
+
+    try {
+      // Utiliser les données actuelles (améliorées) pour la lettre
+      const cvText = this.generateTextFromCvData(this.currentCvData);
+      const letterResult = await this.aiService.generateCoverLetter(this.jobOfferText, cvText);
+      
+      this.generatedCoverLetter = letterResult;
+      this.presentToast('Lettre de motivation générée !', 'success');
+      
+    } catch (error) {
+      let errorMessage = "Erreur lors de la génération de la lettre.";
+      if (error instanceof Error) { 
+        errorMessage = error.message; 
+      }
+      this.presentToast(errorMessage, 'danger');
+    } finally {
+      this.isGeneratingCoverLetter = false;
+    }
+  }
+
+  /**
+   * Sauvegarde la candidature
+   */
+  async saveCandidature() {
+    if (!this.jobOfferText || !this.atsAnalysisResult || !this.generatedCoverLetter) {
+      this.presentToast('Veuillez d\'abord générer l\'analyse ATS et la lettre de motivation.', 'warning');
+      return;
+    }
+  
+    if (!this.currentCvData) {
+      this.presentToast('Aucune donnée CV disponible.', 'warning');
+      return;
+    }
+  
+    const jobTitle = this.atsAnalysisResult.jobTitle || 'Poste non spécifié';
+    const company = this.atsAnalysisResult.company || 'Entreprise non spécifiée';
+  
+    this.isSavingCandidature = true;
+  
+    const candidatureDetails: Omit<Candidature, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'dateCandidature'> = {
+      poste: jobTitle,
+      entreprise: company,
+      offreTexteComplet: this.jobOfferText,
+      cvOriginalNom: `CV Structuré Amélioré (${this.selectedTemplate?.name || 'Template inconnu'})`,
+      cvOriginalUrl: `structured_cv_improved_${this.selectedTemplate?.id || 'unknown'}`,
+      cvTexteExtrait: this.generateTextFromCvData(this.currentCvData),
+      analyseATS: this.atsAnalysisResult.analysisText,
+      lettreMotivationGeneree: this.generatedCoverLetter,
+      statut: 'envoyee',
+    };
+  
+    try {
+      // Générer le CV final avec les données améliorées
+      if (this.selectedTemplate) {
+        await this.cvGenerationService.saveGeneratedCv(
+          this.selectedTemplate.id, 
+          this.selectedTheme
+        );
+      }
+
+      await this.candidatureService.createCandidature(candidatureDetails);
+      
+      this.presentToast('Candidature sauvegardée avec succès !', 'success');
+      this.resetForm();
+      this.router.navigate(['/tabs/dashboard']);
+      
+    } catch (error) {
+      let errorMessage = "Erreur lors de la sauvegarde de la candidature.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') { 
+        errorMessage = error; 
+      }
+      this.presentToast(errorMessage, 'danger');
+    } finally {
+      this.isSavingCandidature = false;
+    }
+  }
+
+  /**
+   * Remet à zéro le formulaire
+   */
+  resetForm() {
+    this.jobOfferText = '';
+    this.atsAnalysisResult = null;
+    this.generatedCoverLetter = null;
+    this.aiError = null;
+    this.structuredCvImprovements = null;
+    this.improvedCvData = null;
+    this.improvementsApplied = false;
+    this.cvImprovementsValidated = false;
+    this.comparisonView = 'split';
+    this.sliderPosition = 50;
+    this.appliedChangesCount = { experiences: 0, formations: 0, competences: 0, total: 0 };
+  }
+
+  /**
+   * Convertit les données CV structurées en texte
+   */
+  private generateTextFromCvData(cvData: CvData): string {
+    let text = '';
+
+    // Expériences
+    if (cvData.experiences?.length > 0) {
+      text += 'EXPÉRIENCES PROFESSIONNELLES\n';
+      cvData.experiences.forEach(exp => {
+        text += `${exp.poste} - ${exp.entreprise}\n`;
+        if (exp.description) text += `${exp.description}\n`;
+        text += '\n';
+      });
+    }
+
+    // Formations
+    if (cvData.formations?.length > 0) {
+      text += 'FORMATIONS\n';
+      cvData.formations.forEach(form => {
+        text += `${form.diplome} - ${form.etablissement}\n`;
+        if (form.description) text += `${form.description}\n`;
+        text += '\n';
+      });
+    }
+
+    // Compétences
+    if (cvData.competences?.length > 0) {
+      text += 'COMPÉTENCES\n';
+      text += cvData.competences.map(comp => comp.nom).join(', ') + '\n';
+    }
+
+    return text;
+  }
+
+  /**
+   * Génère un texte d'affichage formaté pour la comparaison
+   */
+  generateDisplayTextFromCvData(cvData: CvData): string {
+    let text = '';
+
+    // Expériences
+    if (cvData.experiences?.length > 0) {
+      text += '💼 EXPÉRIENCES PROFESSIONNELLES\n\n';
+      cvData.experiences.forEach((exp, index) => {
+        text += `${index + 1}. ${exp.poste} - ${exp.entreprise}\n`;
+        if (exp.lieu) text += `   📍 ${exp.lieu}\n`;
+        if (exp.description) text += `   📝 ${exp.description}\n`;
+        text += '\n';
+      });
+    }
+
+    // Formations
+    if (cvData.formations?.length > 0) {
+      text += '🎓 FORMATIONS\n\n';
+      cvData.formations.forEach((form, index) => {
+        text += `${index + 1}. ${form.diplome} - ${form.etablissement}\n`;
+        if (form.ville) text += `   📍 ${form.ville}\n`;
+        if (form.description) text += `   📝 ${form.description}\n`;
+        text += '\n';
+      });
+    }
+
+    // Compétences
+    if (cvData.competences?.length > 0) {
+      text += '🛠️ COMPÉTENCES\n\n';
+      const competencesByCategory = cvData.competences.reduce((acc: any, comp) => {
+        const category = comp.categorie || 'Autre';
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(comp.nom);
+        return acc;
+      }, {});
+
+      Object.keys(competencesByCategory).forEach(category => {
+        text += `${category}:\n`;
+        text += competencesByCategory[category].join(', ') + '\n\n';
+      });
+    }
+
+    return text || 'Aucune donnée CV disponible';
+  }
+
+  // Méthodes utilitaires pour la comparaison
+  getTotalChangesCount(): number {
+    return this.appliedChangesCount.total;
+  }
+
+  getChangesCount(section: 'experiences' | 'formations' | 'competences'): number {
+    return this.appliedChangesCount[section];
+  }
+
+  // Méthodes utilitaires pour les améliorations
+  selectAllImprovements(select: boolean) {
+    if (!this.structuredCvImprovements) return;
+
+    this.structuredCvImprovements.improvements.experiences.forEach(section => {
+      section.improvements.forEach(improvement => {
+        improvement.accepted = select;
+      });
+    });
+    this.structuredCvImprovements.improvements.formations.forEach(section => {
+      section.improvements.forEach(improvement => {
+        improvement.accepted = select;
+      });
+    });
+    this.structuredCvImprovements.improvements.competences.forEach(section => {
+      section.improvements.forEach(improvement => {
+        improvement.accepted = select;
+      });
+    });
+    this.structuredCvImprovements.improvements.suggestedCompetences.forEach(competence => {
+      competence.accepted = select;
+    });
+  }
+
   hasAcceptedImprovements(): boolean {
-    return this.cvImprovements?.improvements.some(imp => imp.accepted) || false;
+    if (!this.structuredCvImprovements) return false;
+
+    const hasAcceptedSuggestions = this.structuredCvImprovements.improvements.experiences.some(section => 
+      section.improvements.some(imp => imp.accepted)
+    ) || this.structuredCvImprovements.improvements.formations.some(section => 
+      section.improvements.some(imp => imp.accepted)
+    ) || this.structuredCvImprovements.improvements.competences.some(section => 
+      section.improvements.some(imp => imp.accepted)
+    );
+
+    const hasAcceptedCompetences = this.structuredCvImprovements.improvements.suggestedCompetences.some(comp => comp.accepted);
+
+    return hasAcceptedSuggestions || hasAcceptedCompetences;
   }
 
-  /**
-   * Compte les améliorations acceptées
-   */
   getAcceptedCount(): number {
-    return this.cvImprovements?.improvements.filter(imp => imp.accepted).length || 0;
+    if (!this.structuredCvImprovements) return 0;
+
+    let count = 0;
+    
+    this.structuredCvImprovements.improvements.experiences.forEach(section => {
+      count += section.improvements.filter(imp => imp.accepted).length;
+    });
+    this.structuredCvImprovements.improvements.formations.forEach(section => {
+      count += section.improvements.filter(imp => imp.accepted).length;
+    });
+    this.structuredCvImprovements.improvements.competences.forEach(section => {
+      count += section.improvements.filter(imp => imp.accepted).length;
+    });
+    count += this.structuredCvImprovements.improvements.suggestedCompetences.filter(comp => comp.accepted).length;
+
+    return count;
   }
 
-  /**
-   * Callback quand une amélioration est toggleée
-   */
-  onImprovementToggle() {
-    // Optionnel : logique supplémentaire quand l'utilisateur change une sélection
-  }
-
-  /**
-   * Retourne le label du type d'amélioration
-   */
   getImprovementTypeLabel(type: string): string {
     const labels: { [key: string]: string } = {
       'orthographe': 'Orthographe',
       'reformulation': 'Reformulation',
       'mots-cles': 'Mots-clés ATS',
-      'structure': 'Structure'
+      'structure': 'Structure',
+      'ajout': 'Ajout'
     };
     return labels[type] || type;
   }
 
-  /**
-   * Retourne le label de l'impact
-   */
   getImpactLabel(impact: string): string {
     const labels: { [key: string]: string } = {
       'faible': 'Impact faible',
@@ -563,12 +683,20 @@ export class PostulerPage implements OnDestroy {
     };
     return labels[impact] || impact;
   }
-  /**
-   * Détecte le type de CV pour l'affichage
-   */
-  getCvImprovementType(): 'structured' | 'text' | null {
-    if (this.structuredCvImprovements) return 'structured';
-    if (this.cvImprovements) return 'text';
-    return null;
+
+  onImprovementToggle() {
+    // Méthode appelée lors du toggle d'une amélioration
+    // Logique supplémentaire si nécessaire
+  }
+
+  async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light') {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 3000,
+      position: 'top',
+      color: color,
+      buttons: [{ text: 'OK', role: 'cancel' }]
+    });
+    toast.present();
   }
 }

@@ -4,11 +4,9 @@ import { Functions, httpsCallable, HttpsCallableResult } from '@angular/fire/fun
 import { StorageService } from '../storage/storage.service';
 import { getAtsAnalysisPrompt } from './prompts/ats-analysis.prompt';
 import { getCoverLetterPrompt } from './prompts/cover-letter.prompt';
-// Ajoutez ces imports après les imports existants
 import { getCvImprovementPrompt } from './prompts/cv-improvement.prompt';
-import { CvImprovementResponse, CvImprovement, CvImprovementResult } from 'src/app/models/cv-improvement.model';
-
 import { getStructuredCvImprovementPrompt } from './prompts/cv-structured-improvement.prompt';
+import { CvImprovementResponse, CvImprovement, CvImprovementResult } from 'src/app/models/cv-improvement.model';
 import { 
   StructuredCvImprovementResponse, 
   StructuredCvImprovementResult,
@@ -42,6 +40,13 @@ export class AIService {
     private storageService: StorageService
   ) { }
 
+  // ===================================
+  // EXTRACTION DE TEXTE
+  // ===================================
+
+  /**
+   * Extrait le texte d'un fichier DOCX
+   */
   async extractTextFromDocx(file: File): Promise<string> {
     if (!file) {
       return Promise.reject('Aucun fichier fourni.');
@@ -50,6 +55,7 @@ export class AIService {
       console.warn(`AIService: Type de fichier non DOCX (${file.type}) fourni à extractTextFromDocx.`);
       return Promise.reject('Type de fichier non supporté pour l\'extraction DOCX côté client (uniquement .docx).');
     }
+    
     return new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = async () => {
@@ -73,15 +79,20 @@ export class AIService {
     });
   }
 
+  /**
+   * Extrait le texte d'un fichier PDF via une fonction Cloud
+   */
   async getTextFromPdfViaFunction(file: File): Promise<string> {
     if (!file || (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf'))) {
       throw new Error('AIService: Fichier PDF invalide ou non fourni.');
     }
+    
     try {
       const pdfUrl = await this.storageService.uploadFile(file, 'temp_cv_pdfs_for_extraction');
       const extractPdfTextFn = httpsCallable(this.functions, 'extractPdfText');
       const result = await extractPdfTextFn({ pdfUrl: pdfUrl, fileName: file.name });
       const data = result.data as { success: boolean; text?: string; pageCount?: number; message?: string };
+      
       if (data.success && typeof data.text === 'string') {
         return data.text;
       } else {
@@ -97,6 +108,13 @@ export class AIService {
     }
   }
 
+  // ===================================
+  // ANALYSE ATS ET LETTRE DE MOTIVATION
+  // ===================================
+
+  /**
+   * Génère une analyse ATS à partir d'une offre d'emploi et d'un CV
+   */
   async getATSAnalysis(jobOfferText: string, cvText: string): Promise<ATSAnalysisResult> {
     const prompt = getAtsAnalysisPrompt(jobOfferText, cvText);
     const callOpenAiFn = httpsCallable(this.functions, 'callOpenAi');
@@ -137,6 +155,9 @@ export class AIService {
     }
   }
 
+  /**
+   * Génère une lettre de motivation personnalisée
+   */
   async generateCoverLetter(jobOfferText: string, cvText: string): Promise<string> {
     const prompt = getCoverLetterPrompt(jobOfferText, cvText);
     const callOpenAiFn = httpsCallable(this.functions, 'callOpenAi');
@@ -158,6 +179,14 @@ export class AIService {
       throw new Error("Échec de la génération de la lettre : Erreur inconnue.");
     }
   }
+
+  // ===================================
+  // AMÉLIORATION CV TEXTE (Legacy)
+  // ===================================
+
+  /**
+   * Améliore un CV en format texte (méthode legacy)
+   */
   async improveCvText(jobOfferText: string, cvText: string): Promise<CvImprovementResponse> {
     const prompt = getCvImprovementPrompt(jobOfferText, cvText);
     const callOpenAiFn = httpsCallable(this.functions, 'callOpenAi');
@@ -213,7 +242,9 @@ export class AIService {
     }
   }
 
-  // Méthode pour appliquer les améliorations acceptées
+  /**
+   * Applique les améliorations acceptées sur un texte CV (méthode legacy)
+   */
   applyCvImprovements(originalText: string, improvements: CvImprovement[]): CvImprovementResult {
     let improvedText = originalText;
     const appliedImprovements: CvImprovement[] = [];
@@ -243,6 +274,11 @@ export class AIService {
       appliedImprovements
     };
   }
+
+  // ===================================
+  // AMÉLIORATION CV STRUCTURÉ (Nouveau)
+  // ===================================
+
   /**
    * Améliore un CV structuré (GeneratedCv) par rapport à une offre d'emploi
    */
@@ -251,6 +287,7 @@ export class AIService {
     const callOpenAiFn = httpsCallable(this.functions, 'callOpenAi');
 
     try {
+      console.log('🤖 Envoi de la demande d\'amélioration CV structuré à l\'IA...');
       const result = await callOpenAiFn({ prompt }) as HttpsCallableResult;
       const data = result.data as OpenAIResponse;
 
@@ -258,8 +295,9 @@ export class AIService {
         try {
           // Parse la réponse JSON de l'IA
           const aiResponse = JSON.parse(data.response);
+          console.log('📊 Réponse IA reçue:', aiResponse);
           
-          // Validation et nettoyage des données
+          // Validation et nettoyage des données avec meilleure gestion d'erreurs
           const improvements = {
             experiences: this.validateSectionImprovements(aiResponse.improvements?.experiences || [], 'experience'),
             formations: this.validateSectionImprovements(aiResponse.improvements?.formations || [], 'formation'),
@@ -267,13 +305,25 @@ export class AIService {
             suggestedCompetences: this.validateSuggestedCompetences(aiResponse.improvements?.suggestedCompetences || [])
           };
 
+          // Validation du summary avec valeurs par défaut
           const summary = {
-            totalSuggestions: this.countTotalSuggestions(improvements),
-            criticalIssues: this.countCriticalIssues(improvements),
-            enhancementSuggestions: this.countEnhancementSuggestions(improvements),
-            newCompetencesSuggested: improvements.suggestedCompetences.length,
-            atsKeywordsIntegrated: this.countAtsKeywords(improvements)
+            totalSuggestions: aiResponse.summary?.totalSuggestions || this.countTotalSuggestions(improvements),
+            criticalIssues: aiResponse.summary?.criticalIssues || this.countCriticalIssues(improvements),
+            enhancementSuggestions: aiResponse.summary?.enhancementSuggestions || this.countEnhancementSuggestions(improvements),
+            newCompetencesSuggested: aiResponse.summary?.newCompetencesSuggested || improvements.suggestedCompetences.length,
+            atsKeywordsIntegrated: aiResponse.summary?.atsKeywordsIntegrated || this.countAtsKeywords(improvements)
           };
+
+          // Log pour debugging en développement
+          console.log('📊 Améliorations CV structuré analysées:', {
+            totalSuggestions: summary.totalSuggestions,
+            sections: {
+              experiences: improvements.experiences.length,
+              formations: improvements.formations.length,
+              competences: improvements.competences.length,
+              newCompetences: improvements.suggestedCompetences.length
+            }
+          });
 
           return {
             success: true,
@@ -282,8 +332,25 @@ export class AIService {
           };
         } catch (parseError) {
           console.error('AIService: Erreur parsing JSON de l\'amélioration CV structuré:', parseError);
-          console.log('Réponse brute de l\'IA:', data.response);
-          throw new Error('Erreur lors de l\'analyse de la réponse d\'amélioration du CV structuré. Veuillez réessayer.');
+          console.log('Réponse brute de l\'IA:', data.response?.substring(0, 500) + '...');
+          
+          // Fallback avec réponse vide mais valide
+          return {
+            success: true,
+            improvements: {
+              experiences: [],
+              formations: [],
+              competences: [],
+              suggestedCompetences: []
+            },
+            summary: {
+              totalSuggestions: 0,
+              criticalIssues: 0,
+              enhancementSuggestions: 0,
+              newCompetencesSuggested: 0,
+              atsKeywordsIntegrated: 0
+            }
+          };
         }
       } else {
         throw new Error(data.message || "L'amélioration du CV structuré a échoué ou la réponse est invalide.");
@@ -301,17 +368,19 @@ export class AIService {
    * Applique les améliorations structurées acceptées aux données du CV
    */
   applyStructuredCvImprovements(originalCv: GeneratedCv, improvements: StructuredCvImprovementResponse): StructuredCvImprovementResult {
-    // Clone profond des données originales
+    console.log('🔧 Application des améliorations structurées...');
+    
+    // Clone profond des données originales pour éviter les mutations
     const originalData = {
-      experiences: JSON.parse(JSON.stringify(originalCv.data.experiences || [])),
-      formations: JSON.parse(JSON.stringify(originalCv.data.formations || [])),
-      competences: JSON.parse(JSON.stringify(originalCv.data.competences || []))
+      experiences: this.deepClone(originalCv.data.experiences || []),
+      formations: this.deepClone(originalCv.data.formations || []),
+      competences: this.deepClone(originalCv.data.competences || [])
     };
 
     const improvedData = {
-      experiences: JSON.parse(JSON.stringify(originalCv.data.experiences || [])),
-      formations: JSON.parse(JSON.stringify(originalCv.data.formations || [])),
-      competences: JSON.parse(JSON.stringify(originalCv.data.competences || []))
+      experiences: this.deepClone(originalCv.data.experiences || []),
+      formations: this.deepClone(originalCv.data.formations || []),
+      competences: this.deepClone(originalCv.data.competences || [])
     };
 
     const appliedImprovements = {
@@ -323,151 +392,321 @@ export class AIService {
 
     let changesCount = { experiences: 0, formations: 0, competences: 0, total: 0 };
 
-    // Appliquer les améliorations d'expériences
-    improvements.improvements.experiences.forEach(sectionImprovement => {
-      const acceptedImprovements = sectionImprovement.improvements.filter(imp => imp.accepted);
-      if (acceptedImprovements.length > 0 && improvedData.experiences[sectionImprovement.itemIndex]) {
-        acceptedImprovements.forEach(improvement => {
-          const experience = improvedData.experiences[sectionImprovement.itemIndex];
-          if (experience && improvement.field in experience) {
-            (experience as any)[improvement.field] = improvement.improvedValue;
-            changesCount.experiences++;
+    try {
+      // 1. AMÉLIORATIONS DES EXPÉRIENCES
+      console.log('📊 Application des améliorations d\'expériences...');
+      improvements.improvements.experiences.forEach(sectionImprovement => {
+        const acceptedImprovements = sectionImprovement.improvements.filter(imp => imp.accepted);
+        
+        if (acceptedImprovements.length > 0) {
+          const expIndex = sectionImprovement.itemIndex;
+          
+          // Vérification de l'existence de l'expérience
+          if (expIndex >= 0 && expIndex < improvedData.experiences.length) {
+            const experience = improvedData.experiences[expIndex];
+            
+            acceptedImprovements.forEach(improvement => {
+              if (this.isValidExperienceField(improvement.field) && experience) {
+                const oldValue = (experience as any)[improvement.field];
+                (experience as any)[improvement.field] = improvement.improvedValue;
+                changesCount.experiences++;
+                
+                console.log(`✅ Expérience ${expIndex} - ${improvement.field}: "${oldValue}" → "${improvement.improvedValue}"`);
+              }
+            });
+            
+            appliedImprovements.experiences.push({
+              ...sectionImprovement,
+              improvements: acceptedImprovements
+            });
+          } else {
+            console.warn(`⚠️ Index d'expérience invalide: ${expIndex}`);
           }
-        });
-        appliedImprovements.experiences.push({
-          ...sectionImprovement,
-          improvements: acceptedImprovements
-        });
-      }
-    });
+        }
+      });
 
-    // Appliquer les améliorations de formations
-    improvements.improvements.formations.forEach(sectionImprovement => {
-      const acceptedImprovements = sectionImprovement.improvements.filter(imp => imp.accepted);
-      if (acceptedImprovements.length > 0 && improvedData.formations[sectionImprovement.itemIndex]) {
-        acceptedImprovements.forEach(improvement => {
-          const formation = improvedData.formations[sectionImprovement.itemIndex];
-          if (formation && improvement.field in formation) {
-            (formation as any)[improvement.field] = improvement.improvedValue;
-            changesCount.formations++;
+      // 2. AMÉLIORATIONS DES FORMATIONS
+      console.log('🎓 Application des améliorations de formations...');
+      improvements.improvements.formations.forEach(sectionImprovement => {
+        const acceptedImprovements = sectionImprovement.improvements.filter(imp => imp.accepted);
+        
+        if (acceptedImprovements.length > 0) {
+          const formIndex = sectionImprovement.itemIndex;
+          
+          if (formIndex >= 0 && formIndex < improvedData.formations.length) {
+            const formation = improvedData.formations[formIndex];
+            
+            acceptedImprovements.forEach(improvement => {
+              if (this.isValidFormationField(improvement.field) && formation) {
+                const oldValue = (formation as any)[improvement.field];
+                (formation as any)[improvement.field] = improvement.improvedValue;
+                changesCount.formations++;
+                
+                console.log(`✅ Formation ${formIndex} - ${improvement.field}: "${oldValue}" → "${improvement.improvedValue}"`);
+              }
+            });
+            
+            appliedImprovements.formations.push({
+              ...sectionImprovement,
+              improvements: acceptedImprovements
+            });
+          } else {
+            console.warn(`⚠️ Index de formation invalide: ${formIndex}`);
           }
-        });
-        appliedImprovements.formations.push({
-          ...sectionImprovement,
-          improvements: acceptedImprovements
-        });
-      }
-    });
+        }
+      });
 
-    // Appliquer les améliorations de compétences
-    improvements.improvements.competences.forEach(sectionImprovement => {
-      const acceptedImprovements = sectionImprovement.improvements.filter(imp => imp.accepted);
-      if (acceptedImprovements.length > 0 && improvedData.competences[sectionImprovement.itemIndex]) {
-        acceptedImprovements.forEach(improvement => {
-          const competence = improvedData.competences[sectionImprovement.itemIndex];
-          if (competence && improvement.field in competence) {
-            (competence as any)[improvement.field] = improvement.improvedValue;
-            changesCount.competences++;
+      // 3. AMÉLIORATIONS DES COMPÉTENCES
+      console.log('🛠️ Application des améliorations de compétences...');
+      improvements.improvements.competences.forEach(sectionImprovement => {
+        const acceptedImprovements = sectionImprovement.improvements.filter(imp => imp.accepted);
+        
+        if (acceptedImprovements.length > 0) {
+          const compIndex = sectionImprovement.itemIndex;
+          
+          if (compIndex >= 0 && compIndex < improvedData.competences.length) {
+            const competence = improvedData.competences[compIndex];
+            
+            acceptedImprovements.forEach(improvement => {
+              if (this.isValidCompetenceField(improvement.field) && competence) {
+                const oldValue = (competence as any)[improvement.field];
+                (competence as any)[improvement.field] = improvement.improvedValue;
+                changesCount.competences++;
+                
+                console.log(`✅ Compétence ${compIndex} - ${improvement.field}: "${oldValue}" → "${improvement.improvedValue}"`);
+              }
+            });
+            
+            appliedImprovements.competences.push({
+              ...sectionImprovement,
+              improvements: acceptedImprovements
+            });
+          } else {
+            console.warn(`⚠️ Index de compétence invalide: ${compIndex}`);
           }
-        });
-        appliedImprovements.competences.push({
-          ...sectionImprovement,
-          improvements: acceptedImprovements
-        });
-      }
-    });
+        }
+      });
 
-    // Ajouter les nouvelles compétences acceptées
-    const acceptedNewCompetences = improvements.improvements.suggestedCompetences.filter(comp => comp.accepted);
-    acceptedNewCompetences.forEach(suggestedComp => {
-      const newCompetence: Competence = {
-        userId: originalCv.userId,
-        nom: suggestedComp.nom,
-        categorie: suggestedComp.categorie
+      // 4. AJOUT DES NOUVELLES COMPÉTENCES
+      console.log('✨ Ajout des nouvelles compétences...');
+      const acceptedNewCompetences = improvements.improvements.suggestedCompetences.filter(comp => comp.accepted);
+      
+      acceptedNewCompetences.forEach(suggestedComp => {
+        const newCompetence: Competence = {
+          userId: originalCv.userId,
+          nom: suggestedComp.nom,
+          categorie: suggestedComp.categorie
+          // Note: id sera généré lors de la sauvegarde en base
+        };
+        
+        // Vérifier que la compétence n'existe pas déjà
+        const exists = improvedData.competences.some(comp => 
+          comp.nom.toLowerCase().trim() === newCompetence.nom.toLowerCase().trim()
+        );
+        
+        if (!exists) {
+          improvedData.competences.push(newCompetence);
+          appliedImprovements.addedCompetences.push(suggestedComp);
+          changesCount.competences++;
+          
+          console.log(`✅ Nouvelle compétence ajoutée: "${newCompetence.nom}" (${newCompetence.categorie})`);
+        } else {
+          console.log(`⚠️ Compétence "${newCompetence.nom}" existe déjà, ignorée`);
+        }
+      });
+
+      // 5. CALCUL DU TOTAL
+      changesCount.total = changesCount.experiences + changesCount.formations + changesCount.competences;
+      
+      console.log('📈 Résumé des améliorations appliquées:', changesCount);
+
+      return {
+        originalData,
+        improvedData,
+        appliedImprovements,
+        changesCount
       };
-      improvedData.competences.push(newCompetence);
-      appliedImprovements.addedCompetences.push(suggestedComp);
-      changesCount.competences++;
-    });
 
-    changesCount.total = changesCount.experiences + changesCount.formations + changesCount.competences;
-
-    return {
-      originalData,
-      improvedData,
-      appliedImprovements,
-      changesCount
-    };
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'application des améliorations:', error);
+      
+      // En cas d'erreur, retourner les données originales
+      return {
+        originalData,
+        improvedData: originalData, // Pas de changements en cas d'erreur
+        appliedImprovements: {
+          experiences: [],
+          formations: [],
+          competences: [],
+          addedCompetences: []
+        },
+        changesCount: { experiences: 0, formations: 0, competences: 0, total: 0 }
+      };
+    }
   }
 
-  // Méthodes utilitaires privées pour la validation
+  // ===================================
+  // MÉTHODES UTILITAIRES PRIVÉES
+  // ===================================
+
+  /**
+   * Clone profond d'un objet
+   */
+  private deepClone<T>(obj: T): T {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  /**
+   * Valide les améliorations d'une section
+   */
   private validateSectionImprovements(sections: any[], type: string): SectionImprovement[] {
-    return sections.map((section, index) => ({
-      id: section.id || `${type}_${index}`,
-      sectionType: section.sectionType || type,
-      itemIndex: section.itemIndex || index,
-      itemId: section.itemId,
-      itemTitle: section.itemTitle || `${type} ${index + 1}`,
-      improvements: (section.improvements || []).map((imp: any, impIndex: number) => ({
-        id: imp.id || `${type}_imp_${index}_${impIndex}`,
-        type: imp.type || 'reformulation',
-        field: imp.field || 'description',
-        titre: imp.titre || 'Amélioration suggérée',
-        originalValue: imp.originalValue || '',
-        improvedValue: imp.improvedValue || '',
-        explication: imp.explication || '',
-        impact: imp.impact || 'moyen',
-        accepted: false
-      }))
-    }));
+    if (!Array.isArray(sections)) {
+      console.warn(`AIService: sections n'est pas un tableau pour ${type}`);
+      return [];
+    }
+
+    return sections.map((section, index) => {
+      // Validation de la structure de section
+      const validatedSection: SectionImprovement = {
+        id: section.id || `${type}_section_${index}`,
+        sectionType: section.sectionType || type,
+        itemIndex: typeof section.itemIndex === 'number' ? section.itemIndex : index,
+        itemId: section.itemId || undefined,
+        itemTitle: section.itemTitle || `${type} ${index + 1}`,
+        improvements: []
+      };
+
+      // Validation des améliorations
+      if (Array.isArray(section.improvements)) {
+        validatedSection.improvements = section.improvements.map((imp: any, impIndex: number) => ({
+          id: imp.id || `${type}_imp_${index}_${impIndex}`,
+          type: this.validateImprovementType(imp.type),
+          field: imp.field || 'description',
+          titre: imp.titre || 'Amélioration suggérée',
+          originalValue: imp.originalValue || '',
+          improvedValue: imp.improvedValue || '',
+          explication: imp.explication || '',
+          impact: this.validateImpact(imp.impact),
+          accepted: false
+        }));
+      }
+
+      return validatedSection;
+    }).filter(section => section.improvements.length > 0); // Supprimer les sections sans améliorations
   }
 
+  /**
+   * Valide les nouvelles compétences suggérées
+   */
   private validateSuggestedCompetences(competences: any[]): SuggestedCompetence[] {
+    if (!Array.isArray(competences)) {
+      console.warn('AIService: suggestedCompetences n\'est pas un tableau');
+      return [];
+    }
+
     return competences.map((comp, index) => ({
       id: comp.id || `new_comp_${index}`,
-      nom: comp.nom || '',
+      nom: comp.nom || `Compétence ${index + 1}`,
       categorie: comp.categorie || 'Autre',
-      raison: comp.raison || '',
-      impact: comp.impact || 'moyen',
+      raison: comp.raison || 'Compétence recommandée pour ce poste',
+      impact: this.validateImpact(comp.impact),
       accepted: false
-    }));
+    })).filter(comp => comp.nom.trim() !== ''); // Supprimer les compétences vides
   }
 
+  /**
+   * Valide le type d'amélioration
+   */
+  private validateImprovementType(type: any): string {
+    const validTypes = ['orthographe', 'reformulation', 'mots-cles', 'structure', 'ajout'];
+    return validTypes.includes(type) ? type : 'reformulation';
+  }
+
+  /**
+   * Valide l'impact d'une amélioration
+   */
+  private validateImpact(impact: any): 'faible' | 'moyen' | 'fort' {
+    const validImpacts = ['faible', 'moyen', 'fort'];
+    return validImpacts.includes(impact) ? impact : 'moyen';
+  }
+
+  /**
+   * Valide qu'un champ d'expérience est valide
+   */
+  private isValidExperienceField(field: string): boolean {
+    const validFields = ['poste', 'entreprise', 'description', 'lieu'];
+    return validFields.includes(field);
+  }
+
+  /**
+   * Valide qu'un champ de formation est valide
+   */
+  private isValidFormationField(field: string): boolean {
+    const validFields = ['diplome', 'etablissement', 'description', 'ville'];
+    return validFields.includes(field);
+  }
+
+  /**
+   * Valide qu'un champ de compétence est valide
+   */
+  private isValidCompetenceField(field: string): boolean {
+    const validFields = ['nom', 'categorie'];
+    return validFields.includes(field);
+  }
+
+  // ===================================
+  // MÉTHODES DE COMPTAGE
+  // ===================================
+
+  /**
+   * Compte le nombre total de suggestions
+   */
   private countTotalSuggestions(improvements: any): number {
-    return improvements.experiences.reduce((sum: number, exp: any) => sum + exp.improvements.length, 0) +
-           improvements.formations.reduce((sum: number, form: any) => sum + form.improvements.length, 0) +
-           improvements.competences.reduce((sum: number, comp: any) => sum + comp.improvements.length, 0) +
-           improvements.suggestedCompetences.length;
+    const experiencesCount = improvements.experiences?.reduce((sum: number, exp: any) => sum + (exp.improvements?.length || 0), 0) || 0;
+    const formationsCount = improvements.formations?.reduce((sum: number, form: any) => sum + (form.improvements?.length || 0), 0) || 0;
+    const competencesCount = improvements.competences?.reduce((sum: number, comp: any) => sum + (comp.improvements?.length || 0), 0) || 0;
+    const suggestedCount = improvements.suggestedCompetences?.length || 0;
+    
+    return experiencesCount + formationsCount + competencesCount + suggestedCount;
   }
 
+  /**
+   * Compte les problèmes critiques
+   */
   private countCriticalIssues(improvements: any): number {
     const countInSection = (sections: any[]) => 
-      sections.reduce((sum: number, section: any) => 
-        sum + section.improvements.filter((imp: any) => imp.impact === 'fort' && imp.type === 'orthographe').length, 0);
+      sections?.reduce((sum: number, section: any) => 
+        sum + (section.improvements?.filter((imp: any) => imp.impact === 'fort' && (imp.type === 'orthographe' || imp.type === 'structure')).length || 0), 0) || 0;
     
     return countInSection(improvements.experiences) +
            countInSection(improvements.formations) +
            countInSection(improvements.competences);
   }
 
+  /**
+   * Compte les suggestions d'amélioration
+   */
   private countEnhancementSuggestions(improvements: any): number {
     const countInSection = (sections: any[]) => 
-      sections.reduce((sum: number, section: any) => 
-        sum + section.improvements.filter((imp: any) => imp.type === 'reformulation' || imp.type === 'mots-cles').length, 0);
+      sections?.reduce((sum: number, section: any) => 
+        sum + (section.improvements?.filter((imp: any) => imp.type === 'reformulation' || imp.type === 'mots-cles').length || 0), 0) || 0;
     
     return countInSection(improvements.experiences) +
            countInSection(improvements.formations) +
            countInSection(improvements.competences);
   }
 
+  /**
+   * Compte les mots-clés ATS intégrés
+   */
   private countAtsKeywords(improvements: any): number {
     const countInSection = (sections: any[]) => 
-      sections.reduce((sum: number, section: any) => 
-        sum + section.improvements.filter((imp: any) => imp.type === 'mots-cles').length, 0);
+      sections?.reduce((sum: number, section: any) => 
+        sum + (section.improvements?.filter((imp: any) => imp.type === 'mots-cles').length || 0), 0) || 0;
     
     return countInSection(improvements.experiences) +
            countInSection(improvements.formations) +
            countInSection(improvements.competences) +
-           improvements.suggestedCompetences.length;
+           (improvements.suggestedCompetences?.length || 0);
   }
 }
