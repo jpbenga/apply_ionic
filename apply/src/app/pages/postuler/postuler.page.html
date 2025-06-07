@@ -146,6 +146,131 @@
     </ion-card>
   </div>
 
+  <!-- Bouton d'amélioration CV - après l'analyse ATS -->
+  <ion-button 
+    expand="block" 
+    fill="outline" 
+    class="ion-margin-top"
+    (click)="improveCv()"
+    [disabled]="!atsAnalysisResult || isImprovingCv || isGeneratingAIContent || isSavingCandidature"
+    *ngIf="atsAnalysisResult && !cvImprovements">
+    <ion-spinner *ngIf="isImprovingCv" name="crescent" slot="start"></ion-spinner>
+    <ion-icon *ngIf="!isImprovingCv" slot="start" name="construct-outline"></ion-icon>
+    {{ isImprovingCv ? 'Analyse du CV en cours...' : 'Améliorer le CV avec l\'IA' }}
+  </ion-button>
+
+  <!-- Section des améliorations suggérées -->
+  <div *ngIf="cvImprovements && !isImprovingCv" class="ion-margin-top">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="construct-outline" color="primary"></ion-icon>
+          Améliorations suggérées pour votre CV
+        </ion-card-title>
+        <ion-card-subtitle>
+          {{ cvImprovements.summary.totalSuggestions }} suggestion(s) • 
+          <span *ngIf="cvImprovements.summary.criticalIssues > 0" class="critical-issues">
+            {{ cvImprovements.summary.criticalIssues }} critique(s)
+          </span>
+          <span *ngIf="cvImprovements.summary.enhancementSuggestions > 0">
+            {{ cvImprovements.summary.enhancementSuggestions }} amélioration(s)
+          </span>
+        </ion-card-subtitle>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <!-- Mots-clés ATS manquants -->
+        <div *ngIf="cvImprovements.summary.atsKeywords.length > 0" class="ats-keywords-section">
+          <h4>🎯 Mots-clés ATS manquants</h4>
+          <div class="keywords-chips">
+            <ion-chip *ngFor="let keyword of cvImprovements.summary.atsKeywords" color="warning">
+              <ion-label>{{ keyword }}</ion-label>
+            </ion-chip>
+          </div>
+        </div>
+
+        <!-- Liste des améliorations -->
+        <div class="improvements-list">
+          <div 
+            *ngFor="let improvement of cvImprovements.improvements; let i = index" 
+            class="improvement-item"
+            [class.accepted]="improvement.accepted"
+            [class.critical]="improvement.impact === 'fort'">
+            
+            <div class="improvement-header">
+              <div class="improvement-meta">
+                <span class="improvement-type" [class]="improvement.type">
+                  {{ getImprovementTypeLabel(improvement.type) }}
+                </span>
+                <span class="improvement-section">{{ improvement.section }}</span>
+                <span class="improvement-impact" [class]="improvement.impact">
+                  {{ getImpactLabel(improvement.impact) }}
+                </span>
+              </div>
+              <ion-checkbox 
+                [(ngModel)]="improvement.accepted"
+                (ionChange)="onImprovementToggle()"
+                [disabled]="isGeneratingAIContent || isSavingCandidature">
+              </ion-checkbox>
+            </div>
+
+            <h5>{{ improvement.titre }}</h5>
+            
+            <div class="text-comparison">
+              <div class="original-text">
+                <label>Texte actuel :</label>
+                <p>{{ improvement.textOriginal }}</p>
+              </div>
+              <div class="improved-text">
+                <label>Suggestion :</label>
+                <p>{{ improvement.textAmeliore }}</p>
+              </div>
+            </div>
+            
+            <p class="explanation">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              {{ improvement.explication }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="improvement-actions ion-margin-top">
+          <ion-button 
+            fill="clear" 
+            (click)="selectAllImprovements(true)"
+            [disabled]="isGeneratingAIContent || isSavingCandidature">
+            Tout sélectionner
+          </ion-button>
+          <ion-button 
+            fill="clear" 
+            (click)="selectAllImprovements(false)"
+            [disabled]="isGeneratingAIContent || isSavingCandidature">
+            Tout désélectionner
+          </ion-button>
+          <ion-button 
+            expand="block" 
+            color="primary"
+            (click)="applySelectedImprovements()"
+            [disabled]="!hasAcceptedImprovements() || isGeneratingAIContent || isSavingCandidature">
+            <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+            Appliquer les modifications ({{ getAcceptedCount() }})
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Message CV amélioré -->
+  <ion-card *ngIf="improvedCvText" color="success" class="ion-margin-top">
+    <ion-card-content>
+      <ion-icon name="checkmark-circle" color="light"></ion-icon>
+      <strong>CV amélioré !</strong> 
+      {{ appliedImprovementsCount }} modification(s) appliquée(s). 
+      Le CV amélioré sera utilisé pour générer la lettre de motivation.
+    </ion-card-content>
+  </ion-card>
+
   <!-- Lettre de motivation -->
   <div *ngIf="generatedCoverLetter && !isGeneratingAIContent && !isSavingCandidature" class="ion-margin-top">
     <ion-card>

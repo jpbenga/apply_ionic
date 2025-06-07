@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import {
   IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel,
   IonTextarea, IonButton, IonIcon, IonSpinner,
-  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonRadioGroup,
-  IonRadio, IonCheckbox, ToastController
+  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,
+  IonRadioGroup, IonRadio, IonCheckbox, IonChip, ToastController
 } from '@ionic/angular/standalone';
 import { HeaderService } from 'src/app/services/header/header.service';
 import { AIService, ATSAnalysisResult } from 'src/app/services/ai/ai.service';
@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
 import { Subscription } from 'rxjs';
 import { Timestamp } from '@angular/fire/firestore';
+import { CvImprovementResponse, CvImprovement, CvImprovementResult } from 'src/app/models/cv-improvement.model';
 
 @Component({
   selector: 'app-postuler',
@@ -25,9 +26,9 @@ import { Timestamp } from '@angular/fire/firestore';
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
-    IonItem, IonLabel, IonTextarea, IonButton, IonIcon, IonSpinner,
-    IonCard, IonCardHeader, IonCardTitle, IonCardContent, 
-    IonRadioGroup, IonRadio, IonCheckbox, UserHeaderComponent
+  IonItem, IonLabel, IonTextarea, IonButton, IonIcon, IonSpinner,
+  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,
+  IonRadioGroup, IonRadio, IonCheckbox, IonChip, UserHeaderComponent
   ]
 })
 export class PostulerPage implements OnDestroy {
@@ -53,6 +54,12 @@ export class PostulerPage implements OnDestroy {
   mostRecentCvText: string | null = null;
   isLoadingRecentCv: boolean = false;
   saveUploadedCv: boolean = false;
+
+  // Propriétés pour l'amélioration CV
+  cvImprovements: CvImprovementResponse | null = null;
+  isImprovingCv: boolean = false;
+  improvedCvText: string | null = null;
+  appliedImprovementsCount: number = 0;
 
   private subscriptions: Subscription[] = [];
 
@@ -367,6 +374,10 @@ export class PostulerPage implements OnDestroy {
     this.atsAnalysisResult = null;
     this.generatedCoverLetter = null;
     this.aiError = null;
+    // Reset des améliorations - AJOUTEZ CES LIGNES
+  this.cvImprovements = null;
+  this.improvedCvText = null;
+  this.appliedImprovementsCount = 0;
   }
 
   async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light' ) {
@@ -378,5 +389,126 @@ export class PostulerPage implements OnDestroy {
       buttons: [{ text: 'OK', role: 'cancel' }]
     });
     toast.present();
+  }
+  /**
+   * Lance l'amélioration du CV par l'IA
+   */
+  async improveCv() {
+    if (!this.jobOfferText || !this.getCurrentCvText()) {
+      this.presentToast('Offre d\'emploi et CV requis pour l\'amélioration', 'warning');
+      return;
+    }
+
+    this.isImprovingCv = true;
+    this.cvImprovements = null;
+
+    try {
+      const cvText = this.getCurrentCvText()!;
+      const improvements = await this.aiService.improveCvText(this.jobOfferText, cvText);
+      
+      this.cvImprovements = improvements;
+      
+      if (improvements.improvements.length === 0) {
+        this.presentToast('Excellent ! Aucune amélioration nécessaire pour votre CV.', 'success');
+      } else {
+        this.presentToast(`${improvements.improvements.length} amélioration(s) suggérée(s)`, 'primary');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'amélioration du CV:', error);
+      let errorMessage = 'Erreur lors de l\'amélioration du CV';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      this.presentToast(errorMessage, 'danger');
+    } finally {
+      this.isImprovingCv = false;
+    }
+  }
+
+  /**
+   * Applique les améliorations sélectionnées
+   */
+  applySelectedImprovements() {
+    if (!this.cvImprovements || !this.getCurrentCvText()) return;
+
+    try {
+      const originalText = this.getCurrentCvText()!;
+      const result: CvImprovementResult = this.aiService.applyCvImprovements(
+        originalText, 
+        this.cvImprovements.improvements
+      );
+
+      this.improvedCvText = result.improvedText;
+      this.appliedImprovementsCount = result.appliedImprovements.length;
+
+      // Mettre à jour le texte CV selon le mode
+      if (this.cvSelectionMode === 'upload') {
+        this.extractedCvText = result.improvedText;
+      } else if (this.cvSelectionMode === 'recent') {
+        this.mostRecentCvText = result.improvedText;
+      }
+
+      this.presentToast(`${this.appliedImprovementsCount} amélioration(s) appliquée(s) !`, 'success');
+    } catch (error) {
+      console.error('Erreur lors de l\'application des améliorations:', error);
+      this.presentToast('Erreur lors de l\'application des améliorations', 'danger');
+    }
+  }
+
+  /**
+   * Sélectionne/désélectionne toutes les améliorations
+   */
+  selectAllImprovements(select: boolean) {
+    if (!this.cvImprovements) return;
+    
+    this.cvImprovements.improvements.forEach(improvement => {
+      improvement.accepted = select;
+    });
+  }
+
+  /**
+   * Vérifie s'il y a des améliorations acceptées
+   */
+  hasAcceptedImprovements(): boolean {
+    return this.cvImprovements?.improvements.some(imp => imp.accepted) || false;
+  }
+
+  /**
+   * Compte les améliorations acceptées
+   */
+  getAcceptedCount(): number {
+    return this.cvImprovements?.improvements.filter(imp => imp.accepted).length || 0;
+  }
+
+  /**
+   * Callback quand une amélioration est toggleée
+   */
+  onImprovementToggle() {
+    // Optionnel : logique supplémentaire quand l'utilisateur change une sélection
+  }
+
+  /**
+   * Retourne le label du type d'amélioration
+   */
+  getImprovementTypeLabel(type: string): string {
+    const labels: { [key: string]: string } = {
+      'orthographe': 'Orthographe',
+      'reformulation': 'Reformulation',
+      'mots-cles': 'Mots-clés ATS',
+      'structure': 'Structure'
+    };
+    return labels[type] || type;
+  }
+
+  /**
+   * Retourne le label de l'impact
+   */
+  getImpactLabel(impact: string): string {
+    const labels: { [key: string]: string } = {
+      'faible': 'Impact faible',
+      'moyen': 'Impact moyen',
+      'fort': 'Impact fort'
+    };
+    return labels[impact] || impact;
   }
 }

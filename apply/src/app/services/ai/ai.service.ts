@@ -4,6 +4,9 @@ import { Functions, httpsCallable, HttpsCallableResult } from '@angular/fire/fun
 import { StorageService } from '../storage/storage.service';
 import { getAtsAnalysisPrompt } from './prompts/ats-analysis.prompt';
 import { getCoverLetterPrompt } from './prompts/cover-letter.prompt';
+// Ajoutez ces imports après les imports existants
+import { getCvImprovementPrompt } from './prompts/cv-improvement.prompt';
+import { CvImprovementResponse, CvImprovement, CvImprovementResult } from 'src/app/models/cv-improvement.model';
 
 export interface OpenAIResponse {
   success: boolean;
@@ -142,5 +145,90 @@ export class AIService {
       }
       throw new Error("Échec de la génération de la lettre : Erreur inconnue.");
     }
+  }
+  async improveCvText(jobOfferText: string, cvText: string): Promise<CvImprovementResponse> {
+    const prompt = getCvImprovementPrompt(jobOfferText, cvText);
+    const callOpenAiFn = httpsCallable(this.functions, 'callOpenAi');
+
+    try {
+      const result = await callOpenAiFn({ prompt }) as HttpsCallableResult;
+      const data = result.data as OpenAIResponse;
+
+      if (data.success && data.response) {
+        try {
+          // Parse la réponse JSON de l'IA
+          const aiResponse = JSON.parse(data.response);
+          
+          // Validation et nettoyage des données
+          const improvements: CvImprovement[] = aiResponse.improvements?.map((imp: any, index: number) => ({
+            id: imp.id || `improvement_${index}`,
+            type: imp.type || 'reformulation',
+            section: imp.section || 'Section inconnue',
+            titre: imp.titre || 'Amélioration suggérée',
+            textOriginal: imp.textOriginal || '',
+            textAmeliore: imp.textAmeliore || '',
+            explication: imp.explication || '',
+            impact: imp.impact || 'moyen',
+            accepted: false // Par défaut, non acceptée
+          })) || [];
+
+          const summary = {
+            totalSuggestions: improvements.length,
+            criticalIssues: improvements.filter(imp => imp.impact === 'fort' && (imp.type === 'orthographe' || imp.type === 'structure')).length,
+            enhancementSuggestions: improvements.filter(imp => imp.type === 'reformulation' || imp.type === 'mots-cles').length,
+            atsKeywords: aiResponse.summary?.atsKeywords || []
+          };
+
+          return {
+            success: true,
+            improvements,
+            summary
+          };
+        } catch (parseError) {
+          console.error('AIService: Erreur parsing JSON de l\'amélioration CV:', parseError);
+          console.log('Réponse brute de l\'IA:', data.response);
+          throw new Error('Erreur lors de l\'analyse de la réponse d\'amélioration du CV. Veuillez réessayer.');
+        }
+      } else {
+        throw new Error(data.message || "L'amélioration du CV a échoué ou la réponse est invalide.");
+      }
+    } catch (error) {
+      console.error('AIService: Erreur lors de l\'appel d\'amélioration CV:', error);
+      if (error instanceof Error) {
+        throw new Error(`Échec de l'amélioration du CV : ${error.message}`);
+      }
+      throw new Error("Échec de l'amélioration du CV : Erreur inconnue.");
+    }
+  }
+
+  // Méthode pour appliquer les améliorations acceptées
+  applyCvImprovements(originalText: string, improvements: CvImprovement[]): CvImprovementResult {
+    let improvedText = originalText;
+    const appliedImprovements: CvImprovement[] = [];
+
+    // Applique les améliorations acceptées dans l'ordre inverse pour éviter les décalages de position
+    const acceptedImprovements = improvements
+      .filter(imp => imp.accepted)
+      .sort((a, b) => originalText.lastIndexOf(b.textOriginal) - originalText.lastIndexOf(a.textOriginal));
+
+    for (const improvement of acceptedImprovements) {
+      if (improvement.textOriginal && improvement.textAmeliore) {
+        // Remplace seulement la première occurrence pour éviter les remplacements involontaires
+        const index = improvedText.indexOf(improvement.textOriginal);
+        if (index !== -1) {
+          improvedText = 
+            improvedText.substring(0, index) + 
+            improvement.textAmeliore + 
+            improvedText.substring(index + improvement.textOriginal.length);
+          appliedImprovements.push(improvement);
+        }
+      }
+    }
+
+    return {
+      originalText,
+      improvedText,
+      appliedImprovements
+    };
   }
 }

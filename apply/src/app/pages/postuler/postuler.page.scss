@@ -1,91 +1,214 @@
-ion-content {
-    --background: #f8f9fa;
+// Styles pour les améliorations CV
+.ats-keywords-section {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: var(--ion-color-warning-tint);
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-warning);
+
+  h4 {
+    margin: 0 0 8px 0;
+    color: var(--ion-color-warning-contrast);
+    font-size: 14px;
+    font-weight: 600;
   }
-  
-  .results-placeholder {
-    .document-preview-placeholder {
-      background: var(--ion-color-light);
-      border: 2px dashed var(--ion-color-medium);
-      border-radius: 8px;
-      padding: 40px;
-      text-align: center;
-      color: var(--ion-color-medium);
-      font-style: italic;
-      margin-top: 8px;
+
+  .keywords-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+.improvements-list {
+  .improvement-item {
+    border: 1px solid var(--ion-color-light);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+
+    &.accepted {
+      border-color: var(--ion-color-success);
+      background: var(--ion-color-success-tint);
     }
-  }
-  
-  ion-radio-group {
-    ion-item {
-      --border-color: var(--ion-color-light);
-      
-      &.item-radio-checked {
-        --background: var(--ion-color-primary-tint);
-        --border-color: var(--ion-color-primary);
+
+    &.critical {
+      border-left: 4px solid var(--ion-color-danger);
+    }
+
+    .improvement-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+
+      .improvement-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+
+        .improvement-type {
+          font-size: 12px;
+          font-weight: 600;
+          padding: 4px 8px;
+          border-radius: 12px;
+          width: fit-content;
+
+          &.orthographe {
+            background: var(--ion-color-danger-tint);
+            color: var(--ion-color-danger);
+          }
+
+          &.reformulation {
+            background: var(--ion-color-primary-tint);
+            color: var(--ion-color-primary);
+          }
+
+          &.mots-cles {
+            background: var(--ion-color-warning-tint);
+            color: var(--ion-color-warning);
+          }
+
+          &.structure {
+            background: var(--ion-color-medium-tint);
+            color: var(--ion-color-medium);
+          }
+        }
+
+        .improvement-section {
+          font-size: 11px;
+          color: var(--ion-color-medium);
+          font-weight: 500;
+        }
+
+        .improvement-impact {
+          font-size: 10px;
+          font-weight: 600;
+          text-transform: uppercase;
+
+          &.fort {
+            color: var(--ion-color-danger);
+          }
+
+          &.moyen {
+            color: var(--ion-color-warning);
+          }
+
+          &.faible {
+            color: var(--ion-color-medium);
+          }
+        }
       }
     }
-  }
-  
-  ion-card {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    
-    ion-card-header {
-      padding-bottom: 8px;
-    }
-    
-    ion-card-title {
-      color: var(--ion-color-primary);
+
+    h5 {
+      margin: 0 0 12px 0;
+      font-size: 16px;
       font-weight: 600;
-    }
-    
-    pre {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-      font-size: 14px;
-      line-height: 1.5;
       color: var(--ion-color-dark);
     }
+
+    .text-comparison {
+      margin: 12px 0;
+
+      .original-text,
+      .improved-text {
+        margin-bottom: 12px;
+
+        label {
+          display: block;
+          font-size: 12px;
+          font-weight: 600;
+          margin-bottom: 4px;
+          text-transform: uppercase;
+        }
+
+        p {
+          margin: 0;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 14px;
+          line-height: 1.4;
+        }
+      }
+
+      .original-text {
+        label {
+          color: var(--ion-color-medium);
+        }
+
+        p {
+          background: var(--ion-color-light);
+          color: var(--ion-color-dark);
+          border: 1px solid var(--ion-color-medium-tint);
+        }
+      }
+
+      .improved-text {
+        label {
+          color: var(--ion-color-success);
+        }
+
+        p {
+          background: var(--ion-color-success-tint);
+          color: var(--ion-color-success-contrast);
+          border: 1px solid var(--ion-color-success);
+          font-weight: 500;
+        }
+      }
+    }
+
+    .explanation {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 12px 0 0 0;
+      font-size: 13px;
+      color: var(--ion-color-medium);
+      font-style: italic;
+      line-height: 1.4;
+
+      ion-icon {
+        margin-top: 2px;
+        flex-shrink: 0;
+      }
+    }
   }
-  
-  .cv-selection-section {
-    background: white;
-    border-radius: 12px;
-    margin: 16px 0;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.improvement-actions {
+  border-top: 1px solid var(--ion-color-light);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  ion-button[fill="clear"] {
+    font-size: 12px;
+    height: 32px;
   }
-  
+
   ion-button[expand="block"] {
-    margin: 20px 0;
-    height: 48px;
-    
-    &:not([disabled]) {
-      --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+    margin-top: 8px;
+  }
+}
+
+.critical-issues {
+  color: var(--ion-color-danger);
+  font-weight: 600;
+}
+
+// Style pour le message de succès
+ion-card[color="success"] {
+  ion-card-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 24px;
     }
   }
-  
-  .cv-info {
-    ion-label {
-      h3 {
-        font-weight: 600;
-        margin-bottom: 4px;
-      }
-      
-      p {
-        margin: 2px 0;
-        color: var(--ion-color-medium);
-      }
-      
-      small {
-        color: var(--ion-color-medium);
-        font-size: 12px;
-      }
-    }
-  }
-  
-  .error-message {
-    background: var(--ion-color-danger-tint);
-    border-left: 4px solid var(--ion-color-danger);
-    padding: 12px;
-    border-radius: 4px;
-    margin: 16px 0;
-  }
+}
