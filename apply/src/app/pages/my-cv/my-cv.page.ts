@@ -22,12 +22,12 @@ import { CvDataService } from 'src/app/services/cv-data/cv-data.service';
 import { Observable, of, Subject } from 'rxjs';
 import { catchError, finalize, takeUntil, first, timeout } from 'rxjs/operators';
 import { Timestamp } from '@angular/fire/firestore';
-import { addIcons } from 'ionicons';
-import {
-  addOutline, listOutline, businessOutline, createOutline, trashOutline,
-  schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
-  copyOutline, warningOutline
-} from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import {
+//   addOutline, listOutline, businessOutline, createOutline, trashOutline,
+//   schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
+//   copyOutline, warningOutline
+// } from 'ionicons/icons'; // SUPPRIMÉ
 import { GenerateCvModalComponent } from 'src/app/components/generate-cv-modal/generate-cv-modal.component';
 import { CvSelectorComponent } from 'src/app/components/cv-selector/cv-selector.component';
 import { CvPreviewComponent } from 'src/app/components/cv-preview/cv-preview.component';
@@ -88,11 +88,11 @@ private isModalOpening: boolean = false;
     private cvGenerationService: CvGenerationService,
     private cvParsingService: CvParsingService
   ) {
-    addIcons({
-      addOutline, listOutline, businessOutline, createOutline, trashOutline,
-      schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
-      copyOutline, warningOutline
-    });
+    // addIcons({ // SUPPRIMÉ
+    //   addOutline, listOutline, businessOutline, createOutline, trashOutline,
+    //   schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
+    //   copyOutline, warningOutline
+    // });
   }
 
   ngOnInit() {

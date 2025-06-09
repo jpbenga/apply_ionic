@@ -10,8 +10,8 @@ import {
   IonCard, IonCardContent, IonIcon
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../../services/auth/auth.service';
-import { addIcons } from 'ionicons';
-import { checkmarkCircleOutline } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { checkmarkCircleOutline } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-signup',
@@ -50,7 +50,7 @@ export class SignupPage implements OnInit {
     private authService: AuthService,
     private router: Router
   ) {
-    addIcons({ checkmarkCircleOutline });
+    // addIcons({ checkmarkCircleOutline }); // SUPPRIMÉ
   }
 
   ngOnInit() {

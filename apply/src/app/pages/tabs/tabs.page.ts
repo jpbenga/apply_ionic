@@ -5,8 +5,8 @@ import {
   IonTabs, IonTabBar, IonTabButton, IonIcon,
   IonLabel, IonRouterOutlet
 } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { statsChart, add, home } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { statsChart, add, home } from 'ionicons/icons'; // SUPPRIMÉ
 // HeaderService n'est plus directement utilisé par le template de TabsPage
 // UserHeaderComponent n'est plus dans le template de TabsPage
 
@@ -28,7 +28,7 @@ import { statsChart, add, home } from 'ionicons/icons';
 })
 export class TabsPage {
   constructor() { // Plus besoin de HeaderService ici si le header est géré par les pages enfants
-    addIcons({ statsChart, add, home });
+    // addIcons({ statsChart, add, home }); // SUPPRIMÉ
   }
 
   // ngOnInit() {

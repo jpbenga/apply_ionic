@@ -10,8 +10,8 @@ import { AuthService } from '../../services/auth/auth.service';
 import { HeaderService } from 'src/app/services/header/header.service';
 import { Subscription } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
-import { addIcons } from 'ionicons';
-import { personCircle, logOutOutline, settingsOutline, arrowBack, documentTextOutline, createOutline, closeCircleOutline } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { personCircle, logOutOutline, settingsOutline, arrowBack, documentTextOutline, createOutline, closeCircleOutline } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-user-header',
@@ -39,10 +39,10 @@ export class UserHeaderComponent implements OnInit, OnDestroy {
     public headerService: HeaderService,
     private cdr: ChangeDetectorRef
   ) {
-    addIcons({ 
-      personCircle, logOutOutline, settingsOutline, arrowBack, documentTextOutline,
-      createOutline, closeCircleOutline 
-    });
+    // addIcons({  // SUPPRIMÉ
+    //   personCircle, logOutOutline, settingsOutline, arrowBack, documentTextOutline,
+    //   createOutline, closeCircleOutline
+    // });
   }
 
   ngOnInit() {

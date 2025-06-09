@@ -10,12 +10,12 @@ import {
   IonSelect, IonSelectOption, IonText,
   ModalController
 } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import {
-  checkmarkOutline, closeOutline, businessOutline, schoolOutline,
-  starOutline, personOutline, createOutline, trashOutline,
-  chevronDownOutline, chevronUpOutline
-} from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import {
+//   checkmarkOutline, closeOutline, businessOutline, schoolOutline,
+//   starOutline, personOutline, createOutline, trashOutline,
+//   chevronDownOutline, chevronUpOutline
+// } from 'ionicons/icons'; // SUPPRIMÉ
 import { ParsedCvData } from 'src/app/services/cv-parsing/cv-parsing.service';
 
 interface ValidatedExperience {
@@ -77,11 +77,11 @@ export class CvDataValidationModalComponent implements OnInit {
   ];
 
   constructor(private modalCtrl: ModalController) {
-    addIcons({
-      checkmarkOutline, closeOutline, businessOutline, schoolOutline,
-      starOutline, personOutline, createOutline, trashOutline,
-      chevronDownOutline, chevronUpOutline
-    });
+    // addIcons({ // SUPPRIMÉ
+    //   checkmarkOutline, closeOutline, businessOutline, schoolOutline,
+    //   starOutline, personOutline, createOutline, trashOutline,
+    //   chevronDownOutline, chevronUpOutline
+    // });
   }
 
   ngOnInit() {

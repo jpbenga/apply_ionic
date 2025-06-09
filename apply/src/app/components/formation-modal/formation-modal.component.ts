@@ -8,8 +8,8 @@ import {
 } from '@ionic/angular/standalone';
 import { ModalController, ToastController } from '@ionic/angular/standalone';
 import { Formation } from 'src/app/models/formation.model';
-import { addIcons } from 'ionicons';
-import { closeCircleOutline, saveOutline } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { closeCircleOutline, saveOutline } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-formation-modal',
@@ -35,7 +35,7 @@ export class FormationModalComponent implements OnInit {
     private toastCtrl: ToastController,
     private fb: FormBuilder
   ) {
-    addIcons({ closeCircleOutline, saveOutline });
+    // addIcons({ closeCircleOutline, saveOutline }); // SUPPRIMÉ
     this.formationForm = this.fb.group({
       diplome: ['', Validators.required],
       etablissement: ['', Validators.required],

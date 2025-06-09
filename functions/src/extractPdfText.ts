@@ -1,3 +1,19 @@
+/**
+ * Firebase Cloud Function to extract text from a PDF file.
+ * Expects a file URL (typically a Firebase Storage URL) pointing to a .pdf file
+ * passed in `request.data.pdfUrl`. Optionally, `request.data.fileName` can be provided for logging.
+ * The function downloads the file, extracts text content using pdf-parse, and returns it
+ * along with the page count.
+ *
+ * @param {object} request The data object passed to the function.
+ * @param {string} request.data.pdfUrl The URL of the PDF file to process.
+ * @param {string} [request.data.fileName] Optional: The name of the file, used for logging.
+ * @returns {Promise<{success: boolean, text?: string, pageCount?: number, message?: string, info?: any}>}
+ *          An object indicating success or failure. On success, includes the extracted `text`,
+ *          `pageCount`, and optionally PDF `info`. On failure, includes a `message`.
+ * @throws {HttpsError} Throws an HttpsError for authentication failures, invalid arguments,
+ *                      download failures, or internal errors during PDF parsing.
+ */
 import { HttpsOptions, onCall, HttpsError } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import fetch from "node-fetch"; // Gardons node-fetch@2 pour la simplicité avec les buffers

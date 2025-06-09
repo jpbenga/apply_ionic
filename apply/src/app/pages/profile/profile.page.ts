@@ -17,8 +17,8 @@ import { User } from '@angular/fire/auth';
 import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
 import { ToastController, ModalController } from '@ionic/angular/standalone';
 import { StorageService } from 'src/app/services/storage/storage.service';
-import { addIcons } from 'ionicons';
-import { personCircleOutline, createOutline, saveOutline, close, personAddOutline } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { personCircleOutline, createOutline, saveOutline, close, personAddOutline } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-profile',
@@ -61,7 +61,7 @@ export class ProfilePage implements OnInit, OnDestroy {
     private storageService: StorageService
   ) {
     this.currentUserAuth$ = this.authService.user$;
-    addIcons({ personCircleOutline, createOutline, saveOutline, close, personAddOutline });
+    // addIcons({ personCircleOutline, createOutline, saveOutline, close, personAddOutline }); // SUPPRIMÉ
   }
 
   ngOnInit() {

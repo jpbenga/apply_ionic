@@ -15,8 +15,8 @@ import { Candidature } from 'src/app/models/candidature.model';
 import { CandidatureCardComponent } from '../../components/candidature-card/candidature-card.component';
 import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
 import { ToastController, AlertController } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { addCircleOutline, cloudOfflineOutline, fileTrayOutline, add, checkboxOutline, square, trashOutline, checkmarkCircleOutline } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { addCircleOutline, cloudOfflineOutline, fileTrayOutline, add, checkboxOutline, square, trashOutline, checkmarkCircleOutline } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-dashboard',
@@ -60,16 +60,16 @@ export class DashboardPage implements OnInit, OnDestroy {
     private toastController: ToastController,
     private alertController: AlertController
   ) {
-    addIcons({ 
-      addCircleOutline, 
-      cloudOfflineOutline, 
-      fileTrayOutline, 
-      add,
-      checkboxOutline,
-      square,
-      trashOutline,
-      checkmarkCircleOutline
-    });
+    // addIcons({  // SUPPRIMÉ
+    //   addCircleOutline,
+    //   cloudOfflineOutline,
+    //   fileTrayOutline,
+    //   add,
+    //   checkboxOutline,
+    //   square,
+    //   trashOutline,
+    //   checkmarkCircleOutline
+    // });
   }
 
   ngOnInit() {

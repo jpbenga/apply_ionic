@@ -9,8 +9,8 @@ import { CvThemePickerComponent } from '../cv-theme-picker/cv-theme-picker.compo
 import { CvPreviewComponent } from '../cv-preview/cv-preview.component';
 import { CvTemplate } from 'src/app/models/cv-template.model';
 import { CvGenerationService } from 'src/app/services/cv-generation/cv-generation.service';
-import { addIcons } from 'ionicons';
-import { closeOutline } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { closeOutline } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-generate-cv-modal',
@@ -44,7 +44,7 @@ export class GenerateCvModalComponent {
     private cvGenerationService: CvGenerationService,
     private cdr: ChangeDetectorRef
   ) {
-    addIcons({ closeOutline });
+    // addIcons({ closeOutline }); // SUPPRIMÉ
   }
 
   dismissModal() {

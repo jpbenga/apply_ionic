@@ -5,8 +5,8 @@ import {
   IonBadge, IonButton, IonIcon, IonText
 } from '@ionic/angular/standalone';
 import { Candidature } from 'src/app/models/candidature.model';
-import { addIcons } from 'ionicons';
-import { eyeOutline, trashOutline, checkboxOutline, checkmarkCircle } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { eyeOutline, trashOutline, checkboxOutline, checkmarkCircle } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-candidature-card',
@@ -30,7 +30,7 @@ export class CandidatureCardComponent {
   @Output() selectionChanged = new EventEmitter<string>();
 
   constructor() {
-    addIcons({ eyeOutline, trashOutline, checkboxOutline, checkmarkCircle });
+    // addIcons({ eyeOutline, trashOutline, checkboxOutline, checkmarkCircle }); // SUPPRIMÉ
   }
 
   onViewDetails() {

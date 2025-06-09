@@ -17,11 +17,11 @@ import { HeaderService } from 'src/app/services/header/header.service';
 import { ToastController } from '@ionic/angular/standalone';
 import { TextViewerModalComponent } from 'src/app/components/text-viewer-modal/text-viewer-modal.component';
 import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
-import { addIcons } from 'ionicons';
-import {
-  createOutline, closeCircleOutline, saveOutline, mailOutline, callOutline,
-  chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline, trashOutline
-} from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import {
+//   createOutline, closeCircleOutline, saveOutline, mailOutline, callOutline,
+//   chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline, trashOutline
+// } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-candidature-detail',
@@ -77,10 +77,10 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     private alertController: AlertController,
     private router: Router
   ) {
-    addIcons({
-      createOutline, closeCircleOutline, saveOutline, mailOutline, callOutline,
-      chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline, trashOutline
-    });
+    // addIcons({ // SUPPRIMÉ
+    //   createOutline, closeCircleOutline, saveOutline, mailOutline, callOutline,
+    //   chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline, trashOutline
+    // });
   }
 
   ngOnInit() {

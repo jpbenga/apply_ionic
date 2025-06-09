@@ -8,8 +8,8 @@ import {
   IonIcon, IonText
 } from '@ionic/angular/standalone';
 import { AuthService } from '../../../services/auth/auth.service';
-import { addIcons } from 'ionicons';
-import { logoGoogle } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { logoGoogle } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-login',
@@ -41,7 +41,7 @@ export class LoginPage implements OnInit {
     private authService: AuthService,
     private router: Router
   ) {
-    addIcons({ logoGoogle });
+    // addIcons({ logoGoogle }); // SUPPRIMÉ
   }
 
   ngOnInit() {

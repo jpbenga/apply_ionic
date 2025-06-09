@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import * as mammoth from 'mammoth';
 import { Functions, httpsCallable, HttpsCallableResult } from '@angular/fire/functions';
-import { StorageService } from '../storage/storage.service';
+// import { StorageService } from '../storage/storage.service'; // SUPPRIMÉ
+import { FileExtractionService } from '../file-extraction/file-extraction.service';
 import { getAtsAnalysisPrompt } from './prompts/ats-analysis.prompt';
 import { getCoverLetterPrompt } from './prompts/cover-letter.prompt';
 import { getCvImprovementPrompt } from './prompts/cv-improvement.prompt';
@@ -37,7 +37,8 @@ export class AIService {
 
   constructor(
     private functions: Functions,
-    private storageService: StorageService
+    // private storageService: StorageService, // SUPPRIMÉ
+    private fileExtractionService: FileExtractionService
   ) { }
 
   // ===================================
@@ -45,66 +46,44 @@ export class AIService {
   // ===================================
 
   /**
-   * Extrait le texte d'un fichier DOCX
+   * Extrait le texte d'un fichier DOCX en utilisant {@link FileExtractionService}.
+   * Ce service gère l'upload du fichier et l'appel à la fonction cloud appropriée.
+   * @param file Le fichier DOCX à traiter.
+   * @returns Une promesse qui se résout avec le texte extrait.
+   * @throws Error si aucun fichier n'est fourni ou si l'extraction échoue (via FileExtractionService).
    */
   async extractTextFromDocx(file: File): Promise<string> {
-    if (!file) {
-      return Promise.reject('Aucun fichier fourni.');
+    if (!file) { // Garder une validation de base
+      throw new Error('AIService: Aucun fichier DOCX fourni.');
     }
-    if (file.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' && !file.name.toLowerCase().endsWith('.docx')) {
-      console.warn(`AIService: Type de fichier non DOCX (${file.type}) fourni à extractTextFromDocx.`);
-      return Promise.reject('Type de fichier non supporté pour l\'extraction DOCX côté client (uniquement .docx).');
+    // La validation de type plus poussée et la logique d'extraction sont dans FileExtractionService
+    try {
+      return await this.fileExtractionService.extractTextFromFile(file);
+    } catch (error) {
+      console.error('AIService: Erreur lors de l'extraction du texte DOCX via FileExtractionService:', error);
+      // Propager l'erreur ou la reformater si besoin
+      throw error;
     }
-    
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        if (reader.result instanceof ArrayBuffer) {
-          try {
-            const result = await mammoth.extractRawText({ arrayBuffer: reader.result });
-            resolve(result.value);
-          } catch (error) {
-            console.error('AIService: Erreur d\'extraction Mammoth:', error);
-            reject('Erreur lors de l\'extraction du texte du fichier DOCX.');
-          }
-        } else {
-          reject('AIService: Erreur de lecture du fichier DOCX (résultat non ArrayBuffer).');
-        }
-      };
-      reader.onerror = () => {
-        console.error('AIService: Erreur FileReader pour DOCX:', reader.error);
-        reject('Erreur lors de la lecture du fichier DOCX.');
-      };
-      reader.readAsArrayBuffer(file);
-    });
   }
 
   /**
-   * Extrait le texte d'un fichier PDF via une fonction Cloud
+   * Extrait le texte d'un fichier PDF en utilisant {@link FileExtractionService}.
+   * Ce service gère l'upload du fichier et l'appel à la fonction cloud appropriée.
+   * @param file Le fichier PDF à traiter.
+   * @returns Une promesse qui se résout avec le texte extrait.
+   * @throws Error si aucun fichier n'est fourni ou si l'extraction échoue (via FileExtractionService).
    */
-  async getTextFromPdfViaFunction(file: File): Promise<string> {
-    if (!file || (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf'))) {
-      throw new Error('AIService: Fichier PDF invalide ou non fourni.');
+  async extractTextFromPdf(file: File): Promise<string> { // NOM RENOMMÉ
+    if (!file) { // Garder une validation de base
+      throw new Error('AIService: Aucun fichier PDF fourni.');
     }
-    
+    // La validation de type plus poussée et la logique d'extraction sont dans FileExtractionService
     try {
-      const pdfUrl = await this.storageService.uploadFile(file, 'temp_cv_pdfs_for_extraction');
-      const extractPdfTextFn = httpsCallable(this.functions, 'extractPdfText');
-      const result = await extractPdfTextFn({ pdfUrl: pdfUrl, fileName: file.name });
-      const data = result.data as { success: boolean; text?: string; pageCount?: number; message?: string };
-      
-      if (data.success && typeof data.text === 'string') {
-        return data.text;
-      } else {
-        console.error('AIService: La fonction extractPdfText a retourné un échec ou pas de texte:', data);
-        throw new Error(data.message || 'Erreur lors de l\'extraction du texte PDF par la fonction.');
-      }
+      return await this.fileExtractionService.extractTextFromFile(file);
     } catch (error) {
-      console.error('AIService: Erreur dans getTextFromPdfViaFunction:', error);
-      if (error instanceof Error) {
-         throw new Error(`Échec de l'extraction du PDF : ${error.message}`);
-      }
-      throw new Error('Échec de l\'extraction du PDF : Erreur inconnue.');
+      console.error('AIService: Erreur lors de l'extraction du texte PDF via FileExtractionService:', error);
+      // Propager l'erreur ou la reformater si besoin
+      throw error;
     }
   }
 
