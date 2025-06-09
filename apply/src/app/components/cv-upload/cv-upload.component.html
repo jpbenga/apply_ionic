@@ -1,0 +1,111 @@
+<!-- src/app/components/cv-upload/cv-upload.component.html -->
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>
+      <ion-icon name="document-text-outline" slot="start"></ion-icon>
+      Import d'un CV existant
+    </ion-card-title>
+  </ion-card-header>
+  
+  <ion-card-content>
+    <div class="upload-section">
+      
+      <!-- Zone de sélection de fichier -->
+      <div *ngIf="uploadStatus === 'idle'" class="file-input-zone">
+        <input 
+          type="file" 
+          #fileInput 
+          (change)="onFileSelected($event)"
+          accept=".pdf,.docx"
+          style="display: none;"
+        >
+        
+        <div class="drop-zone" (click)="fileInput.click()">
+          <ion-icon name="cloud-upload-outline" size="large" color="medium"></ion-icon>
+          <p>
+            <strong>Cliquez pour sélectionner</strong> votre CV<br>
+            <small>Formats acceptés : PDF, DOCX (max 10MB)</small>
+          </p>
+        </div>
+        
+        <div *ngIf="selectedFile" class="selected-file">
+          <ion-icon name="document-text-outline" color="primary"></ion-icon>
+          <span>{{ selectedFile.name }}</span>
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            color="primary"
+            (click)="processFile()"
+          >
+            Traiter le fichier
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Zone de traitement en cours -->
+      <div *ngIf="isProcessing" class="processing-zone">
+        <div class="status-icon">
+          <ion-icon [name]="statusIcon" [color]="statusColor" size="large"></ion-icon>
+        </div>
+        
+        <div class="progress-info">
+          <p>{{ currentStep }}</p>
+          <ion-progress-bar type="indeterminate" color="primary"></ion-progress-bar>
+        </div>
+      </div>
+
+      <!-- Zone de succès -->
+      <div *ngIf="uploadStatus === 'success'" class="success-zone">
+        <div class="status-icon">
+          <ion-icon name="checkmark-circle-outline" color="success" size="large"></ion-icon>
+        </div>
+        
+        <div class="success-info">
+          <h3>Extraction réussie !</h3>
+          <p>Le texte de votre CV a été extrait avec succès.</p>
+          <div class="action-buttons">
+            <ion-button 
+              size="small" 
+              fill="outline" 
+              (click)="reset()"
+            >
+              Choisir un autre fichier
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone d'erreur -->
+      <div *ngIf="uploadStatus === 'error'" class="error-zone">
+        <div class="status-icon">
+          <ion-icon name="alert-circle-outline" color="danger" size="large"></ion-icon>
+        </div>
+        
+        <div class="error-info">
+          <h3>Erreur</h3>
+          <p>{{ errorMessage }}</p>
+          <ion-button 
+            size="small" 
+            fill="outline" 
+            color="danger"
+            (click)="reset()"
+          >
+            Réessayer
+          </ion-button>
+        </div>
+      </div>
+
+    </div>
+    
+    <!-- Texte d'aide -->
+    <div class="help-text ion-margin-top">
+      <ion-text color="medium">
+        <small>
+          💡 <strong>Astuce :</strong> L'upload d'un CV existant permet de pré-remplir automatiquement 
+          vos expériences, formations et compétences. Vous pourrez ensuite modifier et compléter ces informations.
+        </small>
+      </ion-text>
+    </div>
+
+  </ion-card-content>
+</ion-card>

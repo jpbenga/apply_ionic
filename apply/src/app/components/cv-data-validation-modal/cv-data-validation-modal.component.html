@@ -1,0 +1,565 @@
+<!-- src/app/components/cv-data-validation-modal/cv-data-validation-modal.component.html -->
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Validation des données extraites</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancel()">
+        <ion-icon name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  
+  <!-- En-tête avec résumé -->
+  <ion-card class="summary-card">
+    <ion-card-header>
+      <ion-card-title>{{ fileName }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="4">
+            <div class="stat-item">
+              <ion-badge color="primary">{{ validatedExperiences.length }}</ion-badge>
+              <small>Expériences</small>
+            </div>
+          </ion-col>
+          <ion-col size="4">
+            <div class="stat-item">
+              <ion-badge color="secondary">{{ validatedFormations.length }}</ion-badge>
+              <small>Formations</small>
+            </div>
+          </ion-col>
+          <ion-col size="4">
+            <div class="stat-item">
+              <ion-badge color="tertiary">{{ validatedCompetences.length }}</ion-badge>
+              <small>Compétences</small>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      
+      <ion-text color="medium">
+        <p>
+          <strong>{{ selectedCount }}</strong> élément(s) sélectionné(s) pour l'import.
+          Vérifiez et modifiez les données ci-dessous avant de les ajouter à votre CV.
+        </p>
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Section Expériences -->
+  <ion-card *ngIf="validatedExperiences.length > 0">
+    <ion-card-header>
+      <ion-card-title class="section-header" (click)="toggleSection('experiences')">
+        <ion-icon name="business-outline" color="primary"></ion-icon>
+        Expériences Professionnelles ({{ validatedExperiences.length }})
+        <ion-icon 
+          [name]="expandedSections.experiences ? 'chevron-up-outline' : 'chevron-down-outline'" 
+          class="expand-icon">
+        </ion-icon>
+      </ion-card-title>
+    </ion-card-header>
+    
+    <ion-card-content *ngIf="expandedSections.experiences">
+      <!-- Contrôles globaux -->
+      <div class="section-controls">
+        <ion-item>
+          <ion-checkbox 
+            [checked]="isAllExperiencesSelected" 
+            (ionChange)="selectAllExperiences($event.detail.checked)">
+          </ion-checkbox>
+          <ion-label class="ion-margin-start">Sélectionner tout</ion-label>
+        </ion-item>
+      </div>
+
+      <!-- Liste des expériences -->
+      <ion-list>
+        <ion-item-group *ngFor="let exp of validatedExperiences; let i = index">
+          <ion-item>
+            <ion-checkbox 
+              slot="start" 
+              [(ngModel)]="exp.selected" 
+              (ionChange)="updateSelectedCount()">
+            </ion-checkbox>
+            
+            <ion-label *ngIf="!exp.isEditing">
+              <h2>{{ exp.data.poste }}</h2>
+              <h3>{{ exp.data.entreprise }}</h3>
+              <p *ngIf="exp.data.lieu">📍 {{ exp.data.lieu }}</p>
+              <p class="date-range">
+                📅 {{ exp.data.dateDebut || 'Date début manquante' }} 
+                - {{ exp.data.enCours ? 'En cours' : (exp.data.dateFin || 'Date fin manquante') }}
+              </p>
+              <p *ngIf="exp.data.description" class="description">{{ exp.data.description }}</p>
+            </ion-label>
+
+            <!-- Mode édition -->
+            <div *ngIf="exp.isEditing" class="edit-form">
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="12" size-md="6">
+                    <ion-item>
+                      <ion-input 
+                        label="Poste *" 
+                        labelPlacement="stacked"
+                        [(ngModel)]="exp.data.poste" 
+                        placeholder="Intitulé du poste">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                  <ion-col size="12" size-md="6">
+                    <ion-item>
+                      <ion-input 
+                        label="Entreprise *" 
+                        labelPlacement="stacked"
+                        [(ngModel)]="exp.data.entreprise" 
+                        placeholder="Nom de l'entreprise">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col size="12" size-md="4">
+                    <ion-item>
+                      <ion-input 
+                        label="Lieu" 
+                        labelPlacement="stacked"
+                        [(ngModel)]="exp.data.lieu" 
+                        placeholder="Ville, Pays">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                  <ion-col size="12" size-md="4">
+                    <ion-item>
+                      <ion-input 
+                        type="date" 
+                        label="Date début" 
+                        labelPlacement="stacked"
+                        [value]="formatDateForInput(exp.data.dateDebut)"
+                        (ionInput)="exp.data.dateDebut = formatDateForSave($event.detail.value!)">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                  <ion-col size="12" size-md="4">
+                    <ion-item>
+                      <ion-input 
+                        type="date" 
+                        label="Date fin" 
+                        labelPlacement="stacked"
+                        [disabled]="exp.data.enCours"
+                        [value]="exp.data.enCours ? '' : formatDateForInput(exp.data.dateFin)"
+                        (ionInput)="exp.data.dateFin = formatDateForSave($event.detail.value!)">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col size="12">
+                    <ion-item>
+                      <ion-checkbox 
+                        [(ngModel)]="exp.data.enCours" 
+                        (ionChange)="exp.data.enCours ? exp.data.dateFin = null : null">
+                      </ion-checkbox>
+                      <ion-label class="ion-margin-start">Poste actuel</ion-label>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col size="12">
+                    <ion-item>
+                      <ion-textarea 
+                        label="Description" 
+                        labelPlacement="stacked"
+                        [(ngModel)]="exp.data.description" 
+                        placeholder="Description des missions et responsabilités..."
+                        rows="3">
+                      </ion-textarea>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </div>
+
+            <!-- Boutons d'action -->
+            <ion-button 
+              slot="end" 
+              fill="clear" 
+              size="small"
+              (click)="toggleExperienceEdit(i)">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button 
+              slot="end" 
+              fill="clear" 
+              size="small" 
+              color="danger"
+              (click)="removeExperience(i)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-item-group>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Section Formations -->
+  <ion-card *ngIf="validatedFormations.length > 0">
+    <ion-card-header>
+      <ion-card-title class="section-header" (click)="toggleSection('formations')">
+        <ion-icon name="school-outline" color="secondary"></ion-icon>
+        Formations ({{ validatedFormations.length }})
+        <ion-icon 
+          [name]="expandedSections.formations ? 'chevron-up-outline' : 'chevron-down-outline'" 
+          class="expand-icon">
+        </ion-icon>
+      </ion-card-title>
+    </ion-card-header>
+    
+    <ion-card-content *ngIf="expandedSections.formations">
+      <!-- Contrôles globaux -->
+      <div class="section-controls">
+        <ion-item>
+          <ion-checkbox 
+            [checked]="isAllFormationsSelected" 
+            (ionChange)="selectAllFormations($event.detail.checked)">
+          </ion-checkbox>
+          <ion-label class="ion-margin-start">Sélectionner tout</ion-label>
+        </ion-item>
+      </div>
+
+      <!-- Liste des formations -->
+      <ion-list>
+        <ion-item-group *ngFor="let form of validatedFormations; let i = index">
+          <ion-item>
+            <ion-checkbox 
+              slot="start" 
+              [(ngModel)]="form.selected" 
+              (ionChange)="updateSelectedCount()">
+            </ion-checkbox>
+            
+            <ion-label *ngIf="!form.isEditing">
+              <h2>{{ form.data.diplome }}</h2>
+              <h3>{{ form.data.etablissement }}</h3>
+              <p *ngIf="form.data.ville">📍 {{ form.data.ville }}</p>
+              <p class="date-range">
+                📅 {{ form.data.dateDebut || 'Date début manquante' }} 
+                - {{ form.data.enCours ? 'En cours' : (form.data.dateFin || 'Date fin manquante') }}
+              </p>
+              <p *ngIf="form.data.description" class="description">{{ form.data.description }}</p>
+            </ion-label>
+
+            <!-- Mode édition -->
+            <div *ngIf="form.isEditing" class="edit-form">
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="12" size-md="6">
+                    <ion-item>
+                      <ion-input 
+                        label="Diplôme *" 
+                        labelPlacement="stacked"
+                        [(ngModel)]="form.data.diplome" 
+                        placeholder="Nom du diplôme">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                  <ion-col size="12" size-md="6">
+                    <ion-item>
+                      <ion-input 
+                        label="Établissement *" 
+                        labelPlacement="stacked"
+                        [(ngModel)]="form.data.etablissement" 
+                        placeholder="Nom de l'établissement">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col size="12" size-md="4">
+                    <ion-item>
+                      <ion-input 
+                        label="Ville" 
+                        labelPlacement="stacked"
+                        [(ngModel)]="form.data.ville" 
+                        placeholder="Ville">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                  <ion-col size="12" size-md="4">
+                    <ion-item>
+                      <ion-input 
+                        type="date" 
+                        label="Date début" 
+                        labelPlacement="stacked"
+                        [value]="formatDateForInput(form.data.dateDebut)"
+                        (ionInput)="form.data.dateDebut = formatDateForSave($event.detail.value!)">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                  <ion-col size="12" size-md="4">
+                    <ion-item>
+                      <ion-input 
+                        type="date" 
+                        label="Date fin" 
+                        labelPlacement="stacked"
+                        [disabled]="form.data.enCours"
+                        [value]="form.data.enCours ? '' : formatDateForInput(form.data.dateFin)"
+                        (ionInput)="form.data.dateFin = formatDateForSave($event.detail.value!)">
+                      </ion-input>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col size="12">
+                    <ion-item>
+                      <ion-checkbox 
+                        [(ngModel)]="form.data.enCours" 
+                        (ionChange)="form.data.enCours ? form.data.dateFin = null : null">
+                      </ion-checkbox>
+                      <ion-label class="ion-margin-start">Formation en cours</ion-label>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+                <ion-row>
+                  <ion-col size="12">
+                    <ion-item>
+                      <ion-textarea 
+                        label="Description" 
+                        labelPlacement="stacked"
+                        [(ngModel)]="form.data.description" 
+                        placeholder="Spécialisation, mention, modules..."
+                        rows="2">
+                      </ion-textarea>
+                    </ion-item>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </div>
+
+            <!-- Boutons d'action -->
+            <ion-button 
+              slot="end" 
+              fill="clear" 
+              size="small"
+              (click)="toggleFormationEdit(i)">
+              <ion-icon name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button 
+              slot="end" 
+              fill="clear" 
+              size="small" 
+              color="danger"
+              (click)="removeFormation(i)">
+              <ion-icon name="trash-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-item-group>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Section Compétences -->
+  <ion-card *ngIf="validatedCompetences.length > 0">
+    <ion-card-header>
+      <ion-card-title class="section-header" (click)="toggleSection('competences')">
+        <ion-icon name="star-outline" color="tertiary"></ion-icon>
+        Compétences ({{ validatedCompetences.length }})
+        <ion-icon 
+          [name]="expandedSections.competences ? 'chevron-up-outline' : 'chevron-down-outline'" 
+          class="expand-icon">
+        </ion-icon>
+      </ion-card-title>
+    </ion-card-header>
+    
+    <ion-card-content *ngIf="expandedSections.competences">
+      <!-- Contrôles globaux -->
+      <div class="section-controls">
+        <ion-item>
+          <ion-checkbox 
+            [checked]="isAllCompetencesSelected" 
+            (ionChange)="selectAllCompetences($event.detail.checked)">
+          </ion-checkbox>
+          <ion-label class="ion-margin-start">Sélectionner tout</ion-label>
+        </ion-item>
+      </div>
+
+      <!-- Liste des compétences -->
+      <ion-list>
+        <ion-item *ngFor="let comp of validatedCompetences; let i = index">
+          <ion-checkbox 
+            slot="start" 
+            [(ngModel)]="comp.selected" 
+            (ionChange)="updateSelectedCount()">
+          </ion-checkbox>
+          
+          <ion-label *ngIf="!comp.isEditing">
+            <h3>{{ comp.data.nom }}</h3>
+            <p *ngIf="comp.data.categorie">
+              <ion-chip color="tertiary" outline>{{ comp.data.categorie }}</ion-chip>
+            </p>
+          </ion-label>
+
+          <!-- Mode édition -->
+          <div *ngIf="comp.isEditing" class="edit-form-compact">
+            <ion-grid>
+              <ion-row>
+                <ion-col size="12" size-md="6">
+                  <ion-item>
+                    <ion-input 
+                      label="Compétence *" 
+                      labelPlacement="stacked"
+                      [(ngModel)]="comp.data.nom" 
+                      placeholder="Nom de la compétence">
+                    </ion-input>
+                  </ion-item>
+                </ion-col>
+                <ion-col size="12" size-md="6">
+                  <ion-item>
+                    <ion-select 
+                      label="Catégorie" 
+                      labelPlacement="stacked"
+                      [(ngModel)]="comp.data.categorie" 
+                      placeholder="Choisir une catégorie">
+                      <ion-select-option value="">Aucune catégorie</ion-select-option>
+                      <ion-select-option *ngFor="let cat of competenceCategories" [value]="cat">
+                        {{ cat }}
+                      </ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </div>
+
+          <!-- Boutons d'action -->
+          <ion-button 
+            slot="end" 
+            fill="clear" 
+            size="small"
+            (click)="toggleCompetenceEdit(i)">
+            <ion-icon name="create-outline"></ion-icon>
+          </ion-button>
+          <ion-button 
+            slot="end" 
+            fill="clear" 
+            size="small" 
+            color="danger"
+            (click)="removeCompetence(i)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Section Informations personnelles (optionnelle) -->
+  <ion-card *ngIf="hasPersonalInfo">
+    <ion-card-header>
+      <ion-card-title class="section-header" (click)="toggleSection('personalInfo')">
+        <ion-icon name="person-outline" color="dark"></ion-icon>
+        Informations personnelles (optionnel)
+        <ion-icon 
+          [name]="expandedSections.personalInfo ? 'chevron-up-outline' : 'chevron-down-outline'" 
+          class="expand-icon">
+        </ion-icon>
+      </ion-card-title>
+    </ion-card-header>
+    
+    <ion-card-content *ngIf="expandedSections.personalInfo">
+      <ion-text color="medium">
+        <p><small>Ces informations ont été détectées dans votre CV. Elles ne seront pas automatiquement ajoutées au système.</small></p>
+      </ion-text>
+      
+      <ion-grid>
+        <ion-row>
+          <ion-col size="12" size-md="6" *ngIf="personalInfo.prenom">
+            <ion-item>
+              <ion-input 
+                label="Prénom" 
+                labelPlacement="stacked"
+                [(ngModel)]="personalInfo.prenom" 
+                readonly>
+              </ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="12" size-md="6" *ngIf="personalInfo.nom">
+            <ion-item>
+              <ion-input 
+                label="Nom" 
+                labelPlacement="stacked"
+                [(ngModel)]="personalInfo.nom" 
+                readonly>
+              </ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="12" size-md="6" *ngIf="personalInfo.email">
+            <ion-item>
+              <ion-input 
+                label="Email" 
+                labelPlacement="stacked"
+                [(ngModel)]="personalInfo.email" 
+                readonly>
+              </ion-input>
+            </ion-item>
+          </ion-col>
+          <ion-col size="12" size-md="6" *ngIf="personalInfo.telephone">
+            <ion-item>
+              <ion-input 
+                label="Téléphone" 
+                labelPlacement="stacked"
+                [(ngModel)]="personalInfo.telephone" 
+                readonly>
+              </ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row *ngIf="personalInfo.adresse">
+          <ion-col size="12">
+            <ion-item>
+              <ion-input 
+                label="Adresse" 
+                labelPlacement="stacked"
+                [(ngModel)]="personalInfo.adresse" 
+                readonly>
+              </ion-input>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Message si aucune donnée -->
+  <ion-card *ngIf="validatedExperiences.length === 0 && validatedFormations.length === 0 && validatedCompetences.length === 0">
+    <ion-card-content class="ion-text-center">
+      <ion-text color="medium">
+        <h3>Aucune donnée extraite</h3>
+        <p>L'analyse du CV n'a pas permis d'extraire d'informations structurées.</p>
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
+
+<!-- Boutons de validation -->
+<div class="validation-buttons">
+  <ion-button 
+    expand="block" 
+    fill="outline" 
+    color="medium"
+    (click)="cancel()">
+    Annuler
+  </ion-button>
+  <ion-button 
+    expand="block" 
+    color="primary"
+    [disabled]="selectedCount === 0"
+    (click)="confirm()">
+    <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+    Ajouter {{ selectedCount }} élément(s)
+  </ion-button>
+</div>

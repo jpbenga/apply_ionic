@@ -1,3 +1,4 @@
+// src/app/pages/my-cv/my-cv.page.ts - Version corrigée
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -5,11 +6,11 @@ import {
   IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
   IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
   IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
-  IonCardTitle, IonCardSubtitle, IonCardContent
+  IonCardTitle, IonCardSubtitle, IonCardContent, IonProgressBar, IonText
 } from '@ionic/angular/standalone';
 import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
 import { HeaderService } from 'src/app/services/header/header.service';
-import { ModalController, ToastController } from '@ionic/angular/standalone';
+import { ModalController, ToastController, AlertController } from '@ionic/angular/standalone';
 import { ExperienceModalComponent } from 'src/app/components/experience-modal/experience-modal.component';
 import { FormationModalComponent } from 'src/app/components/formation-modal/formation-modal.component';
 import { CompetenceModalComponent } from 'src/app/components/competence-modal/competence-modal.component';
@@ -25,7 +26,7 @@ import { addIcons } from 'ionicons';
 import {
   addOutline, listOutline, businessOutline, createOutline, trashOutline,
   schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
-  copyOutline
+  copyOutline, warningOutline
 } from 'ionicons/icons';
 import { GenerateCvModalComponent } from 'src/app/components/generate-cv-modal/generate-cv-modal.component';
 import { CvSelectorComponent } from 'src/app/components/cv-selector/cv-selector.component';
@@ -33,6 +34,9 @@ import { CvPreviewComponent } from 'src/app/components/cv-preview/cv-preview.com
 import { GeneratedCv, CvTemplate } from 'src/app/models/cv-template.model';
 import { CvTemplateService } from 'src/app/services/cv-template/cv-template.service';
 import { CvGenerationService } from 'src/app/services/cv-generation/cv-generation.service';
+import { CvUploadComponent, CvUploadResult } from 'src/app/components/cv-upload/cv-upload.component';
+import { CvParsingService } from 'src/app/services/cv-parsing/cv-parsing.service';
+import { CvDataValidationModalComponent } from 'src/app/components/cv-data-validation-modal/cv-data-validation-modal.component';
 
 @Component({
   selector: 'app-my-cv',
@@ -44,9 +48,10 @@ import { CvGenerationService } from 'src/app/services/cv-generation/cv-generatio
     IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
     IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
     IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
-    IonCardTitle, IonCardSubtitle, IonCardContent,
-    UserHeaderComponent, CvSelectorComponent, CvPreviewComponent
-  ]
+    IonCardTitle, IonCardSubtitle, IonCardContent, IonProgressBar, IonText,
+    UserHeaderComponent, CvSelectorComponent, CvPreviewComponent, 
+    CvUploadComponent, CvDataValidationModalComponent
+  ],
 })
 export class MyCvPage implements OnInit, OnDestroy {
   @ViewChild('cvPreview') cvPreview!: CvPreviewComponent;
@@ -63,10 +68,14 @@ export class MyCvPage implements OnInit, OnDestroy {
   public errorLoadingFormations: string | null = null;
   public errorLoadingCompetences: string | null = null;
 
-  // Nouveau : gestion des CV générés
-  public selectedGeneratedCv: GeneratedCv | null = null;
+  // Gestion des CV générés
+public selectedGeneratedCv: GeneratedCv | null = null;
 
-  private isModalOpening: boolean = false;
+// État d'extraction des données CV - NOUVELLE PROPRIÉTÉ
+public isExtractingCvData: boolean = false;
+public extractionProgress: string = '';
+
+private isModalOpening: boolean = false;
 
   constructor(
     private headerService: HeaderService,
@@ -74,13 +83,15 @@ export class MyCvPage implements OnInit, OnDestroy {
     private authService: AuthService,
     private cvDataService: CvDataService,
     private toastCtrl: ToastController,
+    private alertCtrl: AlertController,
     private cvTemplateService: CvTemplateService,
-    private cvGenerationService: CvGenerationService
+    private cvGenerationService: CvGenerationService,
+    private cvParsingService: CvParsingService
   ) {
     addIcons({
       addOutline, listOutline, businessOutline, createOutline, trashOutline,
       schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
-      copyOutline
+      copyOutline, warningOutline
     });
   }
 
@@ -98,12 +109,176 @@ export class MyCvPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // Nouvelles méthodes pour la gestion des CV générés
+  // Méthode pour gérer le résultat de l'upload
+  async onCvUploadComplete(result: CvUploadResult) {
+    if (result.success && result.extractedText) {
+      console.log('Texte extrait du CV:', result.extractedText);
+      
+      // Appeler OpenAI pour structurer les données (avec spinner intégré)
+      await this.structureCvData(result.extractedText, result.fileName || 'CV importé');
+      
+      // Ne plus afficher de toast ici car le spinner gère le feedback
+      
+    } else if (result.error) {
+      this.presentToast(`Erreur lors de l'import : ${result.error}`, 'danger');
+    }
+  }
+
+  // Méthode pour structurer les données via OpenAI
+  private async structureCvData(extractedText: string, fileName: string) {
+    try {
+      // Démarrer l'état de chargement
+      this.isExtractingCvData = true;
+      this.extractionProgress = 'Analyse du contenu du CV...';
+      
+      console.log('Début de l\'analyse du CV:', fileName);
+      
+      // Appel au service de parsing avec OpenAI
+      const parsedData = await this.cvParsingService.parseCvText(extractedText);
+      
+      this.extractionProgress = 'Structuration des données...';
+      
+      console.log('Données structurées:', parsedData);
+      
+      // Petite pause pour que l'utilisateur voie le progrès
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      this.extractionProgress = 'Préparation de la validation...';
+      
+      // Arrêter le chargement avant d'afficher la modal
+      this.isExtractingCvData = false;
+      this.extractionProgress = '';
+      
+      // Afficher la modal de validation des données extraites
+      await this.showDataValidationModal(parsedData, fileName);
+      
+    } catch (error: any) {
+      console.error('Erreur lors de la structuration:', error);
+      
+      // Arrêter le chargement en cas d'erreur
+      this.isExtractingCvData = false;
+      this.extractionProgress = '';
+      
+      this.presentToast(`Erreur lors de l'analyse : ${error.message}`, 'danger');
+    }
+  }
+
+  // Méthode pour afficher la modal de validation
+  private async showDataValidationModal(parsedData: any, fileName: string) {
+    try {
+      const modal = await this.modalCtrl.create({
+        component: CvDataValidationModalComponent,
+        componentProps: {
+          parsedData: parsedData,
+          fileName: fileName
+        },
+        breakpoints: [0, 0.25, 0.5, 0.75, 0.95],
+        initialBreakpoint: 0.95,
+        handle: true,
+        backdropDismiss: false
+      });
+
+      await modal.present();
+
+      const { data, role } = await modal.onWillDismiss();
+      
+      if (role === 'confirm' && data) {
+        console.log('Données validées par l\'utilisateur:', data);
+        await this.addParsedDataToCv(data);
+      } else {
+        console.log('Import annulé par l\'utilisateur');
+        this.presentToast('Import des données annulé', 'warning');
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'ouverture de la modal:', error);
+      this.presentToast('Erreur lors de l\'affichage des données', 'danger');
+    }
+  }
+
+  // Méthode pour ajouter les données au CV
+  private async addParsedDataToCv(parsedData: any) {
+    console.log('🚀 addParsedDataToCv() appelé');
+    try {
+      let addedCount = 0;
+      let totalAttempts = 0;
+      const errors: string[] = [];
+      
+      // Ajouter les expériences
+      if (parsedData.experiences && Array.isArray(parsedData.experiences)) {
+        for (const exp of parsedData.experiences) {
+          totalAttempts++;
+          try {
+            await this.cvDataService.addExperience(exp);
+            addedCount++;
+          } catch (error: any) {
+            console.error('Erreur ajout expérience:', error);
+            errors.push(`Expérience "${exp.poste}": ${error.message || 'Erreur inconnue'}`);
+          }
+        }
+      }
+      
+      // Ajouter les formations  
+      if (parsedData.formations && Array.isArray(parsedData.formations)) {
+        for (const form of parsedData.formations) {
+          totalAttempts++;
+          try {
+            await this.cvDataService.addFormation(form);
+            addedCount++;
+          } catch (error: any) {
+            console.error('Erreur ajout formation:', error);
+            errors.push(`Formation "${form.diplome}": ${error.message || 'Erreur inconnue'}`);
+          }
+        }
+      }
+      
+      // Ajouter les compétences
+      if (parsedData.competences && Array.isArray(parsedData.competences)) {
+        for (const comp of parsedData.competences) {
+          totalAttempts++;
+          try {
+            await this.cvDataService.addCompetence(comp);
+            addedCount++;
+          } catch (error: any) {
+            console.error('Erreur ajout compétence:', error);
+            errors.push(`Compétence "${comp.nom}": ${error.message || 'Erreur inconnue'}`);
+          }
+        }
+      }
+      
+      // Recharger toutes les données
+      this.loadAllCvData();
+      
+      // Feedback détaillé
+      if (addedCount === totalAttempts) {
+        this.presentToast(
+          `✅ ${addedCount} élément(s) ajouté(s) avec succès !`, 
+          'success'
+        );
+      } else if (addedCount > 0) {
+        this.presentToast(
+          `⚠️ ${addedCount}/${totalAttempts} élément(s) ajouté(s). Certains ont échoué.`, 
+          'warning'
+        );
+        console.warn('Erreurs lors de l\'ajout:', errors);
+      } else {
+        this.presentToast(
+          `❌ Aucun élément n'a pu être ajouté.`, 
+          'danger'
+        );
+        console.error('Toutes les tentatives ont échoué:', errors);
+      }
+      
+    } catch (error: any) {
+      console.error('Erreur lors de l\'ajout des données:', error);
+      this.presentToast('Erreur lors de l\'ajout des données', 'danger');
+    }
+  }
+
+  // Méthodes pour la gestion des CV générés
   onCvSelected(generatedCv: GeneratedCv) {
     this.selectedGeneratedCv = generatedCv;
     console.log('CV sélectionné:', generatedCv);
     
-    // Affiche le CV dans le preview
     if (this.cvPreview) {
       this.cvPreview.displayGeneratedCv(generatedCv);
     }
@@ -120,7 +295,6 @@ export class MyCvPage implements OnInit, OnDestroy {
 
   getSelectedTemplate(): CvTemplate | null {
     if (!this.selectedGeneratedCv) return null;
-    
     return this.cvTemplateService.getTemplateById(this.selectedGeneratedCv.templateId) || null;
   }
 
@@ -131,7 +305,6 @@ export class MyCvPage implements OnInit, OnDestroy {
   async editSelectedCv() {
     if (!this.selectedGeneratedCv) return;
     
-    // Ouvre la modal de génération avec les données du CV sélectionné
     const modal = await this.modalCtrl.create({
       component: GenerateCvModalComponent,
       componentProps: {
@@ -155,7 +328,6 @@ export class MyCvPage implements OnInit, OnDestroy {
     if (!this.selectedGeneratedCv) return;
     
     try {
-      // Duplique le CV avec un nouveau template/thème
       const newCvId = await this.cvGenerationService.saveGeneratedCv(
         this.selectedGeneratedCv.templateId,
         this.selectedGeneratedCv.theme
@@ -168,7 +340,7 @@ export class MyCvPage implements OnInit, OnDestroy {
     }
   }
 
-  // Méthodes existantes...
+  // Méthodes existantes (inchangées)...
   loadAllCvData(event?: any) {
     this.loadExperiences(event && event.target && event.target.id === 'experiencesRefresher' ? event : undefined);
     this.loadFormations(event && event.target && event.target.id === 'formationsRefresher' ? event : undefined);
@@ -395,11 +567,143 @@ export class MyCvPage implements OnInit, OnDestroy {
     if (role === 'generate' && data) {
       console.log('CV généré avec succès:', data);
       this.presentToast(`CV généré avec le template: ${data.template?.name}`, 'success');
-      
-      // Recharge la liste des CV générés
-      // Le cv-selector se mettra à jour automatiquement
     } else {
       console.log('Modal fermée avec le rôle:', role);
     }
   }
+  // Méthodes de suppression en lot
+async deleteAllExperiences() {
+  const alert = await this.alertCtrl.create({
+    header: 'Supprimer toutes les expériences',
+    message: 'Êtes-vous sûr de vouloir supprimer toutes vos expériences professionnelles ? Cette action est irréversible.',
+    buttons: [
+      {
+        text: 'Annuler',
+        role: 'cancel'
+      },
+      {
+        text: 'Supprimer tout',
+        role: 'destructive',
+        handler: async () => {
+          try {
+            const currentUser = this.authService.getCurrentUser();
+            if (!currentUser) {
+              this.presentToast('Utilisateur non authentifié.', 'danger');
+              return;
+            }
+
+            // Récupérer toutes les expériences
+            const experiences = await this.cvDataService.getExperiences().pipe(first()).toPromise();
+            
+            // Supprimer une par une
+            for (const exp of experiences || []) {
+              if (exp.id) {
+                await this.cvDataService.deleteExperience(exp.id);
+              }
+            }
+            
+            this.presentToast(`${experiences?.length || 0} expérience(s) supprimée(s).`, 'success');
+            this.loadExperiences();
+            
+          } catch (error) {
+            console.error('Erreur lors de la suppression des expériences:', error);
+            this.presentToast('Erreur lors de la suppression des expériences.', 'danger');
+          }
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
+
+async deleteAllFormations() {
+  const alert = await this.alertCtrl.create({
+    header: 'Supprimer toutes les formations',
+    message: 'Êtes-vous sûr de vouloir supprimer toutes vos formations ? Cette action est irréversible.',
+    buttons: [
+      {
+        text: 'Annuler',
+        role: 'cancel'
+      },
+      {
+        text: 'Supprimer tout',
+        role: 'destructive',
+        handler: async () => {
+          try {
+            const currentUser = this.authService.getCurrentUser();
+            if (!currentUser) {
+              this.presentToast('Utilisateur non authentifié.', 'danger');
+              return;
+            }
+
+            // Récupérer toutes les formations
+            const formations = await this.cvDataService.getFormations().pipe(first()).toPromise();
+            
+            // Supprimer une par une
+            for (const form of formations || []) {
+              if (form.id) {
+                await this.cvDataService.deleteFormation(form.id);
+              }
+            }
+            
+            this.presentToast(`${formations?.length || 0} formation(s) supprimée(s).`, 'success');
+            this.loadFormations();
+            
+          } catch (error) {
+            console.error('Erreur lors de la suppression des formations:', error);
+            this.presentToast('Erreur lors de la suppression des formations.', 'danger');
+          }
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
+
+async deleteAllCompetences() {
+  const alert = await this.alertCtrl.create({
+    header: 'Supprimer toutes les compétences',
+    message: 'Êtes-vous sûr de vouloir supprimer toutes vos compétences ? Cette action est irréversible.',
+    buttons: [
+      {
+        text: 'Annuler',
+        role: 'cancel'
+      },
+      {
+        text: 'Supprimer tout',
+        role: 'destructive',
+        handler: async () => {
+          try {
+            const currentUser = this.authService.getCurrentUser();
+            if (!currentUser) {
+              this.presentToast('Utilisateur non authentifié.', 'danger');
+              return;
+            }
+
+            // Récupérer toutes les compétences
+            const competences = await this.cvDataService.getCompetences().pipe(first()).toPromise();
+            
+            // Supprimer une par une
+            for (const comp of competences || []) {
+              if (comp.id) {
+                await this.cvDataService.deleteCompetence(comp.id);
+              }
+            }
+            
+            this.presentToast(`${competences?.length || 0} compétence(s) supprimée(s).`, 'success');
+            this.loadCompetences();
+            
+          } catch (error) {
+            console.error('Erreur lors de la suppression des compétences:', error);
+            this.presentToast('Erreur lors de la suppression des compétences.', 'danger');
+          }
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+}
 }

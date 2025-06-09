@@ -1,0 +1,274 @@
+// src/app/components/cv-data-validation-modal/cv-data-validation-modal.component.scss
+
+.summary-card {
+    margin-bottom: 1rem;
+    
+    .stat-item {
+      text-align: center;
+      
+      ion-badge {
+        display: block;
+        margin: 0 auto 0.25rem auto;
+        font-size: 1.1rem;
+        padding: 0.5rem;
+        min-width: 2rem;
+      }
+      
+      small {
+        color: var(--ion-color-medium);
+        font-size: 0.8rem;
+      }
+    }
+  }
+  
+  .section-header {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    user-select: none;
+    
+    ion-icon:first-child {
+      margin-right: 0.75rem;
+    }
+    
+    .expand-icon {
+      margin-left: auto;
+      color: var(--ion-color-medium);
+    }
+    
+    &:hover {
+      color: var(--ion-color-primary);
+      
+      .expand-icon {
+        color: var(--ion-color-primary);
+      }
+    }
+  }
+  
+  .section-controls {
+    margin-bottom: 1rem;
+    background: var(--ion-color-light);
+    border-radius: 8px;
+    
+    ion-item {
+      --background: transparent;
+      --padding-start: 1rem;
+    }
+  }
+  
+  .edit-form {
+    width: 100%;
+    background: var(--ion-color-light);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    
+    ion-item {
+      --background: transparent;
+      --padding-start: 0;
+      --padding-end: 0;
+      margin-bottom: 0.5rem;
+    }
+    
+    ion-input, ion-textarea, ion-select {
+      --background: var(--ion-color-step-50);
+      --border-radius: 6px;
+    }
+  }
+  
+  .edit-form-compact {
+    width: 100%;
+    background: var(--ion-color-light);
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin: 0.25rem 0;
+    
+    ion-item {
+      --background: transparent;
+      --padding-start: 0;
+      --padding-end: 0;
+      margin-bottom: 0.25rem;
+    }
+    
+    ion-input, ion-select {
+      --background: var(--ion-color-step-50);
+      --border-radius: 4px;
+    }
+  }
+  
+  .date-range {
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
+    margin: 0.25rem 0;
+  }
+  
+  .description {
+    color: var(--ion-color-step-600);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin: 0.5rem 0;
+    font-style: italic;
+  }
+  
+  .validation-buttons {
+    position: sticky;
+    bottom: 0;
+    background: var(--ion-background-color);
+    padding: 1rem;
+    border-top: 1px solid var(--ion-color-light);
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1rem;
+    margin-top: auto;
+  }
+  
+  // États des éléments
+  ion-item {
+    &.item-selected {
+      --background: var(--ion-color-primary-tint);
+      --border-color: var(--ion-color-primary);
+    }
+    
+    &.item-editing {
+      --background: var(--ion-color-warning-tint);
+    }
+  }
+  
+  // Animations
+  .expand-icon {
+    transition: transform 0.3s ease;
+  }
+  
+  .section-header:hover .expand-icon {
+    transform: scale(1.1);
+  }
+  
+  // Responsive
+  @media (max-width: 768px) {
+    .validation-buttons {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+    
+    .edit-form {
+      padding: 0.75rem;
+    }
+    
+    .summary-card {
+      ion-grid ion-row ion-col {
+        padding: 0.25rem;
+      }
+      
+      .stat-item {
+        ion-badge {
+          font-size: 1rem;
+          padding: 0.4rem;
+        }
+        
+        small {
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+  
+  // Améliorations visuelles
+  ion-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  ion-chip {
+    font-size: 0.8rem;
+    --background: var(--ion-color-tertiary-tint);
+    --color: var(--ion-color-tertiary-shade);
+  }
+  
+  // Boutons d'action
+  ion-button[fill="clear"] {
+    --color: var(--ion-color-medium);
+    
+    &:hover {
+      --color: var(--ion-color-primary);
+    }
+    
+    &[color="danger"]:hover {
+      --color: var(--ion-color-danger);
+    }
+  }
+  
+  // Amélioration de la lisibilité
+  ion-label {
+    h2, h3 {
+      font-weight: 600;
+      margin: 0.25rem 0;
+    }
+    
+    h2 {
+      color: var(--ion-color-dark);
+      font-size: 1.1rem;
+    }
+    
+    h3 {
+      color: var(--ion-color-step-700);
+      font-size: 1rem;
+    }
+    
+    p {
+      margin: 0.25rem 0;
+      line-height: 1.3;
+    }
+  }
+  
+  // Indicateurs visuels
+  ion-checkbox {
+    --size: 20px;
+    --checkmark-width: 2px;
+    margin-right: 0.5rem;
+  }
+  
+  // Espacement des sections
+  ion-card + ion-card {
+    margin-top: 1rem;
+  }
+  
+  // États de focus améliorés
+  ion-input:focus-within,
+  ion-textarea:focus-within,
+  ion-select:focus-within {
+    --border-color: var(--ion-color-primary);
+    --border-width: 2px;
+  }
+  
+  // Style pour les éléments désactivés
+  ion-input[disabled] {
+    --color: var(--ion-color-medium);
+    --background: var(--ion-color-step-100);
+  }
+  
+  // Amélioration des contrastes
+  .section-controls {
+    border: 1px solid var(--ion-color-step-200);
+  }
+  
+  // Animation pour les sections qui s'ouvrent/ferment
+  ion-card-content {
+    transition: all 0.3s ease;
+  }
+  
+  // Styles pour le mode sombre (si activé)
+  @media (prefers-color-scheme: dark) {
+    .edit-form, .edit-form-compact {
+      background: var(--ion-color-step-100);
+    }
+    
+    .section-controls {
+      background: var(--ion-color-step-150);
+      border-color: var(--ion-color-step-200);
+    }
+  }

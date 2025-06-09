@@ -1,9 +1,32 @@
+<!-- src/app/pages/my-cv/my-cv.page.html - Version corrigée -->
 <ion-header>
   <app-user-header></app-user-header>
 </ion-header>
 
 <ion-content class="ion-padding">
   
+  <!-- Section d'import de CV -->
+  <app-cv-upload 
+    (uploadComplete)="onCvUploadComplete($event)">
+  </app-cv-upload>
+
+  <!-- Spinner d'extraction des données CV -->
+<ion-card *ngIf="isExtractingCvData" class="extraction-loading-card">
+  <ion-card-content class="ion-text-center">
+    <div class="extraction-spinner-container">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <div class="extraction-progress">
+        <h3>🤖 Intelligence Artificielle au travail</h3>
+        <p>{{ extractionProgress }}</p>
+        <ion-progress-bar type="indeterminate" color="primary"></ion-progress-bar>
+      </div>
+    </div>
+    <ion-text color="medium">
+      <p><small>Analyse et structuration automatique de votre CV en cours...</small></p>
+    </ion-text>
+  </ion-card-content>
+</ion-card>
+
   <!-- Sélecteur de CV générés -->
   <app-cv-selector 
     (cvSelected)="onCvSelected($event)"
@@ -40,9 +63,21 @@
   </div>
 
   <!-- Section des données de base -->
-  <ion-list-header>
-    <ion-label>Mes Expériences Professionnelles</ion-label>
-  </ion-list-header>
+  <div class="section-header-with-actions">
+    <ion-list-header>
+      <ion-label>Mes Expériences Professionnelles</ion-label>
+    </ion-list-header>
+    <ion-button 
+      *ngIf="(experiences$ | async)?.length && (experiences$ | async)!.length > 0"
+      fill="clear" 
+      size="small" 
+      color="danger"
+      (click)="deleteAllExperiences()"
+      class="delete-all-button">
+      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+  </div>
+  
 
   <div *ngIf="isLoadingExperiences" class="ion-text-center ion-padding">
     <ion-spinner name="crescent"></ion-spinner>
@@ -82,9 +117,20 @@
     </ng-template>
   </ion-list>
 
-  <ion-list-header class="ion-margin-top">
-    <ion-label>Mes Formations</ion-label>
-  </ion-list-header>
+  <div class="section-header-with-actions ion-margin-top">
+    <ion-list-header>
+      <ion-label>Mes Formations</ion-label>
+    </ion-list-header>
+    <ion-button 
+      *ngIf="(formations$ | async)?.length && (formations$ | async)!.length > 0"
+      fill="clear" 
+      size="small" 
+      color="danger"
+      (click)="deleteAllFormations()"
+      class="delete-all-button">
+      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+  </div>
 
   <div *ngIf="isLoadingFormations" class="ion-text-center ion-padding">
     <ion-spinner name="crescent"></ion-spinner>
@@ -124,9 +170,20 @@
     </ng-template>
   </ion-list>
 
-  <ion-list-header class="ion-margin-top">
-    <ion-label>Mes Compétences</ion-label>
-  </ion-list-header>
+  <div class="section-header-with-actions ion-margin-top">
+    <ion-list-header>
+      <ion-label>Mes Compétences</ion-label>
+    </ion-list-header>
+    <ion-button 
+      *ngIf="(competences$ | async)?.length && (competences$ | async)!.length > 0"
+      fill="clear" 
+      size="small" 
+      color="danger"
+      (click)="deleteAllCompetences()"
+      class="delete-all-button">
+      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+  </div>
   <div *ngIf="isLoadingCompetences" class="ion-text-center ion-padding"><ion-spinner name="crescent"></ion-spinner></div>
   <div *ngIf="errorLoadingCompetences && !isLoadingCompetences" class="ion-text-center ion-padding">
     <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>

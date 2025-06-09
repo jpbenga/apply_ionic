@@ -302,3 +302,101 @@
       }
     }
   }
+
+  // Spinner d'extraction des données CV
+.extraction-loading-card {
+  margin: 16px 0;
+  background: linear-gradient(135deg, #f6f9fc 0%, #e9f4ff 100%);
+  border: 2px solid var(--ion-color-primary-tint);
+  border-radius: 12px;
+  
+  .extraction-spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    
+    ion-spinner {
+      width: 48px;
+      height: 48px;
+    }
+    
+    .extraction-progress {
+      text-align: center;
+      width: 100%;
+      
+      h3 {
+        margin: 0 0 8px 0;
+        color: var(--ion-color-primary);
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+      
+      p {
+        margin: 0 0 12px 0;
+        color: var(--ion-color-dark);
+        font-weight: 500;
+      }
+      
+      ion-progress-bar {
+        margin: 0 auto;
+        max-width: 300px;
+        height: 6px;
+        border-radius: 3px;
+      }
+    }
+  }
+  
+  // Animation pulse pour attirer l'attention
+  animation: extraction-pulse 2s ease-in-out infinite;
+}
+
+@keyframes extraction-pulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(var(--ion-color-primary-rgb), 0.1);
+  }
+  50% {
+    box-shadow: 0 8px 30px rgba(var(--ion-color-primary-rgb), 0.2);
+  }
+}
+.section-header-with-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 16px;
+  
+  ion-list-header {
+    flex: 1;
+    padding-right: 0;
+  }
+  
+  .delete-all-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    margin: 0;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+    
+    &:hover {
+      opacity: 1;
+    }
+    
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+// Animation pour attirer l'attention sur les boutons de suppression
+.delete-all-button {
+  &:hover {
+    animation: delete-wobble 0.5s ease-in-out;
+  }
+}
+
+@keyframes delete-wobble {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  75% { transform: rotate(5deg); }
+}
