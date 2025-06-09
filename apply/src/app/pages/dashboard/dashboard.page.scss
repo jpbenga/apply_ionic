@@ -1,0 +1,46 @@
+// Styles pour les contrôles de sélection
+.selection-controls {
+    background: var(--ion-color-light, #f5f5f5);
+    border-radius: 8px;
+    margin: 16px 0;
+    
+    ion-button {
+      --border-radius: 6px;
+    }
+  }
+  
+  // Animation pour les cartes sélectionnées
+  ion-card {
+    transition: all 0.3s ease;
+    
+    &.selected {
+      transform: scale(0.98);
+      box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.3);
+    }
+  }
+  
+  // Amélioration visuelle pour les checkboxes
+  .selection-checkbox {
+    ion-icon {
+      transition: color 0.2s ease;
+    }
+  }
+  
+  // Responsive design pour les contrôles
+  @media (max-width: 768px) {
+    .selection-controls {
+      div {
+        flex-direction: column;
+        gap: 12px !important;
+        
+        > div:last-child {
+          align-self: stretch;
+          
+          ion-button {
+            flex: 1;
+            min-width: 0;
+          }
+        }
+      }
+    }
+  }

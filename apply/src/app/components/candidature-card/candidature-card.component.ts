@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { 
-  IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, 
-  IonLabel, IonBadge, IonItem, IonIcon 
+import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
+import {
+  IonCard, IonCardContent, IonCardHeader, IonCardTitle,
+  IonBadge, IonButton, IonIcon, IonText
 } from '@ionic/angular/standalone';
 import { Candidature } from 'src/app/models/candidature.model';
+import { addIcons } from 'ionicons';
+import { eyeOutline, trashOutline, checkboxOutline, checkmarkCircle } from 'ionicons/icons';
 
 @Component({
   selector: 'app-candidature-card',
@@ -14,41 +15,67 @@ import { Candidature } from 'src/app/models/candidature.model';
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
     DatePipe,
-    IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent,
-    IonLabel, IonBadge, IonItem, IonIcon
+    TitleCasePipe,
+    IonCard, IonCardContent, IonCardHeader, IonCardTitle,
+    IonBadge, IonButton, IonIcon, IonText
   ]
 })
 export class CandidatureCardComponent {
-  @Input() candidature: Candidature | null = null;
+  @Input() candidature!: Candidature;
+  @Input() isSelectionMode: boolean = false;
+  @Input() isSelected: boolean = false;
   @Output() viewDetails = new EventEmitter<string>();
+  @Output() deleteCandidature = new EventEmitter<string>();
+  @Output() selectionChanged = new EventEmitter<string>();
 
-  constructor() { }
+  constructor() {
+    addIcons({ eyeOutline, trashOutline, checkboxOutline, checkmarkCircle });
+  }
 
   onViewDetails() {
-    if (this.candidature && this.candidature.id) {
+    if (this.isSelectionMode) {
+      this.onToggleSelection();
+    } else if (this.candidature?.id) {
       this.viewDetails.emit(this.candidature.id);
     }
   }
 
-  getBadgeColor(statut: string | undefined): string {
+  onDeleteCandidature(event: Event) {
+    event.stopPropagation();
+    if (this.candidature?.id) {
+      this.deleteCandidature.emit(this.candidature.id);
+    }
+  }
+
+  onToggleSelection() {
+    if (this.candidature?.id) {
+      this.selectionChanged.emit(this.candidature.id);
+    }
+  }
+
+  onCardClick() {
+    if (this.isSelectionMode) {
+      this.onToggleSelection();
+    } else {
+      this.onViewDetails();
+    }
+  }
+
+  getStatusColor(statut: string): string {
     switch (statut) {
-      case 'envoyee':
-      case 'en_cours_rh':
-        return 'medium';
-      case 'entretien_planifie':
-      case 'test_technique':
-        return 'primary';
-      case 'offre_recue':
       case 'acceptee':
         return 'success';
-      case 'refusee_candidat':
+      case 'entretien_planifie':
+      case 'entretien_final':
+        return 'primary';
       case 'refusee_entreprise':
+      case 'refusee_candidat':
         return 'danger';
       case 'archivee':
+        return 'dark';
       case 'standby':
-        return 'light';
+        return 'warning';
       default:
         return 'medium';
     }

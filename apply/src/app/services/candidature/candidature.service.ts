@@ -21,7 +21,7 @@ import { Auth } from '@angular/fire/auth';
 import { Candidature, SuiviCandidature, StatutCandidature } from 'src/app/models/candidature.model';
 import { StorageService } from '../storage/storage.service';
 import { Observable, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, first } from 'rxjs/operators';
 
 export interface GetCandidaturesOptions {
   sortByDate?: 'asc' | 'desc';
@@ -128,13 +128,69 @@ export class CandidatureService {
     return updateDoc(candidatureDocRef, {...data, updatedAt: serverTimestamp()});
   }
 
-  deleteCandidature(id: string): Promise<void> {
+  async deleteCandidature(id: string): Promise<void> {
     const user = this.auth.currentUser;
     if (!user) {
-      return Promise.reject('Utilisateur non authentifié.');
+      throw new Error('Utilisateur non authentifié.');
     }
-    const candidatureDocRef = doc(this.firestore, `${this.basePath}/${id}`);
-    return deleteDoc(candidatureDocRef);
+    
+    if (!id) {
+      throw new Error('ID de candidature non fourni.');
+    }
+
+    try {
+      // Vérifier d'abord que la candidature appartient bien à l'utilisateur
+      const candidature = await this.getCandidatureById(id).pipe(
+        first(),
+        catchError(() => of(undefined))
+      ).toPromise();
+
+      if (!candidature) {
+        throw new Error('Candidature non trouvée ou accès non autorisé.');
+      }
+
+      // Supprimer la candidature
+      const candidatureDocRef = doc(this.firestore, `${this.basePath}/${id}`);
+      await deleteDoc(candidatureDocRef);
+      
+      console.log('Candidature supprimée avec succès:', id);
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la candidature:', error);
+      throw error;
+    }
+  }
+
+  async deleteMultipleCandidatures(candidatureIds: string[]): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) {
+      throw new Error('Utilisateur non authentifié.');
+    }
+    
+    if (!candidatureIds || candidatureIds.length === 0) {
+      throw new Error('Aucun ID de candidature fourni.');
+    }
+
+    const errors: string[] = [];
+    const successes: string[] = [];
+
+    // Supprimer chaque candidature individuellement pour maintenir la sécurité
+    for (const id of candidatureIds) {
+      try {
+        await this.deleteCandidature(id);
+        successes.push(id);
+      } catch (error) {
+        console.error(`Erreur lors de la suppression de la candidature ${id}:`, error);
+        errors.push(id);
+      }
+    }
+
+    if (errors.length > 0 && successes.length === 0) {
+      throw new Error(`Impossible de supprimer toutes les candidatures sélectionnées.`);
+    } else if (errors.length > 0) {
+      console.warn(`Certaines candidatures n'ont pas pu être supprimées: ${errors.join(', ')}`);
+    }
+
+    console.log(`${successes.length} candidature(s) supprimée(s) avec succès.`);
   }
 
   async addSuiviToCandidature(candidatureId: string, suiviItemData: Omit<SuiviCandidature, 'id' | 'date'>): Promise<void> {

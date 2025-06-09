@@ -1,27 +1,65 @@
-<ion-card *ngIf="candidature" (click)="onViewDetails()" button>
+<ion-card (click)="onCardClick()" [style.cursor]="'pointer'" [style.border]="isSelected ? '2px solid var(--ion-color-primary)' : ''">
   <ion-card-header>
-    <ion-card-title>{{ candidature.poste || 'Poste non spécifié' }}</ion-card-title>
-    <ion-card-subtitle>{{ candidature.entreprise || 'Entreprise non spécifiée' }}</ion-card-subtitle>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div style="display: flex; align-items: flex-start; gap: 12px; flex: 1;">
+        <!-- Checkbox pour la sélection multiple -->
+        <div *ngIf="isSelectionMode" style="margin-top: 4px;">
+          <ion-icon 
+            [name]="isSelected ? 'checkmark-circle' : 'checkbox-outline'" 
+            [color]="isSelected ? 'primary' : 'medium'"
+            size="large">
+          </ion-icon>
+        </div>
+        
+        <div style="flex: 1;">
+          <ion-card-title>{{ candidature.entreprise }}</ion-card-title>
+          <p class="ion-text-wrap">{{ candidature.poste }}</p>
+        </div>
+      </div>
+      
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+        <ion-badge [color]="getStatusColor(candidature.statut)">
+          {{ candidature.statut | titlecase }}
+        </ion-badge>
+        
+        <!-- Bouton de suppression individuelle (caché en mode sélection) -->
+        <ion-button 
+          *ngIf="!isSelectionMode"
+          fill="clear" 
+          color="danger" 
+          size="small"
+          (click)="onDeleteCandidature($event)"
+          title="Supprimer cette candidature">
+          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
   </ion-card-header>
+  
   <ion-card-content>
-    <ion-item lines="none">
-      <ion-icon name="calendar-outline" slot="start" color="medium"></ion-icon>
-      <ion-label *ngIf="candidature.dateCandidature">
-        Postulé le : {{ candidature.dateCandidature.toDate() | date:'dd MMM yyyy' }}
-      </ion-label>
-      <ion-label *ngIf="!candidature.dateCandidature">
-        Date non spécifiée
-      </ion-label>
-    </ion-item>
-    <ion-item lines="none">
-      <ion-icon name="pulse-outline" slot="start" color="medium"></ion-icon>
-      <ion-label>
-        Statut : <ion-badge [color]="getBadgeColor(candidature.statut)">{{ candidature.statut || 'Non défini' }}</ion-badge>
-      </ion-label>
-    </ion-item>
-    <ion-item lines="none" *ngIf="candidature.lieu">
-      <ion-icon name="location-outline" slot="start" color="medium"></ion-icon>
-      <ion-label>{{ candidature.lieu }}</ion-label>
-    </ion-item>
-     </ion-card-content>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <p *ngIf="candidature.dateCandidature" class="ion-text-wrap">
+          <ion-text color="medium">
+            <small>Postulé le {{ candidature.dateCandidature.toDate() | date:'dd/MM/yyyy' }}</small>
+          </ion-text>
+        </p>
+        <p *ngIf="candidature.suivi && candidature.suivi.length > 0" class="ion-text-wrap">
+          <ion-text color="medium">
+            <small>{{ candidature.suivi.length }} suivi(s)</small>
+          </ion-text>
+        </p>
+      </div>
+      
+      <!-- Bouton "Voir détails" (caché en mode sélection) -->
+      <ion-button 
+        *ngIf="!isSelectionMode"
+        fill="outline" 
+        size="small" 
+        (click)="onViewDetails()">
+        <ion-icon name="eye-outline" slot="start"></ion-icon>
+        Voir détails
+      </ion-button>
+    </div>
+  </ion-card-content>
 </ion-card>

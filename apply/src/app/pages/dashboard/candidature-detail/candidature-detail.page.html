@@ -21,7 +21,26 @@
             <p>{{ cand.poste }}</p>
             <p *ngIf="cand.dateCandidature"><small>Postulé le {{ cand.dateCandidature.toDate() | date:'dd/MM/yyyy' }}</small></p>
           </div>
-          <ion-badge *ngIf="!isEditing" [color]="cand.statut === 'entretien_planifie' ? 'primary' : (cand.statut === 'acceptee' ? 'success' : 'medium')">{{ cand.statut | titlecase }}</ion-badge>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+            <ion-badge *ngIf="!isEditing" [color]="cand.statut === 'entretien_planifie' ? 'primary' : (cand.statut === 'acceptee' ? 'success' : 'medium')">{{ cand.statut | titlecase }}</ion-badge>
+            
+            <!-- Boutons d'actions -->
+            <div *ngIf="!isEditing" style="display: flex; gap: 8px;">
+              <ion-button fill="outline" size="small" (click)="toggleEditMode()">
+                <ion-icon name="create-outline" slot="start"></ion-icon>
+                Modifier
+              </ion-button>
+              <ion-button 
+                fill="outline" 
+                color="danger" 
+                size="small" 
+                (click)="deleteCandidature()"
+                [disabled]="isDeleting">
+                <ion-icon name="trash-outline" slot="start"></ion-icon>
+                {{ isDeleting ? 'Suppression...' : 'Supprimer' }}
+              </ion-button>
+            </div>
+          </div>
         </div>
         
         <div *ngIf="isEditing" class="ion-margin-top">
@@ -35,9 +54,16 @@
             <ion-label position="stacked">Notes Personnelles</ion-label>
             <ion-textarea [(ngModel)]="editableNotesPersonnelles" rows="4" placeholder="Vos notes ici..."></ion-textarea>
           </ion-item>
-          <ion-button expand="block" (click)="saveCandidatureChanges()" class="ion-margin-top">
-            Enregistrer les Modifications
-          </ion-button>
+          <div style="display: flex; gap: 8px; margin-top: 16px;">
+            <ion-button expand="block" (click)="saveCandidatureChanges()">
+              <ion-icon name="save-outline" slot="start"></ion-icon>
+              Enregistrer
+            </ion-button>
+            <ion-button expand="block" fill="outline" (click)="toggleEditMode()">
+              <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+              Annuler
+            </ion-button>
+          </div>
         </div>
 
         <p *ngIf="!isEditing && cand.notesPersonnelles" style="margin-top: 10px;">

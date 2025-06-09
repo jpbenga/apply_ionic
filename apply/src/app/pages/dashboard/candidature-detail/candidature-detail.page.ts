@@ -7,9 +7,9 @@ import { switchMap, tap, first, catchError } from 'rxjs/operators';
 import {
   IonHeader, IonContent, IonCard, IonCardContent, IonLabel, IonBadge, 
   IonItem, IonIcon, IonList, IonListHeader, IonSpinner, IonButton, 
-  IonModal, IonTextarea, IonSelect, IonSelectOption, IonToolbar, IonTitle, IonButtons, // Pour le Modal
+  IonModal, IonTextarea, IonSelect, IonSelectOption, IonToolbar, IonTitle, IonButtons,
   IonText,
-  ModalController
+  ModalController, AlertController
 } from '@ionic/angular/standalone';
 import { Candidature, SuiviCandidature, TypeSuivi, StatutCandidature } from 'src/app/models/candidature.model';
 import { CandidatureService } from 'src/app/services/candidature/candidature.service';
@@ -20,7 +20,7 @@ import { UserHeaderComponent } from 'src/app/components/user-header/user-header.
 import { addIcons } from 'ionicons';
 import {
   createOutline, closeCircleOutline, saveOutline, mailOutline, callOutline,
-  chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline
+  chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline, trashOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -32,7 +32,7 @@ import {
     CommonModule, DatePipe, RouterModule, FormsModule, TitleCasePipe,
     IonHeader, IonContent, IonCard, IonCardContent, IonLabel, IonBadge, IonItem, IonIcon,
     IonList, IonListHeader, IonSpinner, IonButton, IonModal, IonTextarea,
-    IonSelect, IonSelectOption, IonToolbar, IonTitle, IonButtons, IonText, // Pour le Modal et ion-text
+    IonSelect, IonSelectOption, IonToolbar, IonTitle, IonButtons, IonText,
     UserHeaderComponent
   ]
 })
@@ -64,6 +64,9 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     { value: 'refusee_candidat', label: 'Refusée (par moi)' }, { value: 'refusee_entreprise', label: 'Refusée (par entreprise)' },
     { value: 'archivee', label: 'Archivée' }, { value: 'standby', label: 'Standby' }
   ];
+  
+  // État pour la suppression
+  isDeleting: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -71,11 +74,12 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     public headerService: HeaderService,
     private modalController: ModalController,
     private toastController: ToastController,
+    private alertController: AlertController,
     private router: Router
   ) {
     addIcons({
       createOutline, closeCircleOutline, saveOutline, mailOutline, callOutline,
-      chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline
+      chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline, trashOutline
     });
   }
 
@@ -135,9 +139,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   }
 
   ionViewWillLeave() {
-    // UserHeaderComponent s'abonne à HeaderService, donc pas besoin de réinitialiser le titre ici.
-    // On s'assure juste que le bouton retour est caché pour les pages racines d'onglets.
-    // this.headerService.setShowBackButton(false); // Géré par la page qui devient active
   }
 
   toggleEditMode() {
@@ -257,6 +258,60 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       }
     });
     await modal.present();
+  }
+
+  // Suppression depuis la page de détail
+  async deleteCandidature() {
+    if (!this.candidatureId) {
+      this.presentToast('ID de candidature non défini.', 'warning');
+      return;
+    }
+
+    const candidature = this.candidatureSubject.value;
+    const candidatureName = candidature ? `${candidature.poste} chez ${candidature.entreprise}` : 'cette candidature';
+
+    const alert = await this.alertController.create({
+      header: 'Confirmer la suppression',
+      message: `Êtes-vous sûr de vouloir supprimer la candidature "${candidatureName}" ? Cette action est irréversible et vous serez redirigé vers le tableau de bord.`,
+      buttons: [
+        {
+          text: 'Annuler',
+          role: 'cancel'
+        },
+        {
+          text: 'Supprimer',
+          role: 'destructive',
+          handler: () => {
+            this.confirmDeleteCandidature();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private async confirmDeleteCandidature() {
+    if (!this.candidatureId) {
+      return;
+    }
+
+    this.isDeleting = true;
+
+    try {
+      await this.candidatureService.deleteCandidature(this.candidatureId);
+      this.presentToast('Candidature supprimée avec succès.', 'success');
+      
+      // Redirection vers le dashboard après un court délai
+      setTimeout(() => {
+        this.router.navigate(['/tabs/dashboard']);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Erreur lors de la suppression de la candidature:', error);
+      this.presentToast('Erreur lors de la suppression de la candidature.', 'danger');
+      this.isDeleting = false;
+    }
   }
   
   async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light') {
