@@ -60,7 +60,7 @@ export class AIService {
     try {
       return await this.fileExtractionService.extractTextFromFile(file);
     } catch (error) {
-      console.error('AIService: Erreur lors de l'extraction du texte DOCX via FileExtractionService:', error);
+      console.error('AIService: Erreur lors de l\'extraction du texte DOCX via FileExtractionService:', error);
       // Propager l'erreur ou la reformater si besoin
       throw error;
     }
@@ -81,7 +81,7 @@ export class AIService {
     try {
       return await this.fileExtractionService.extractTextFromFile(file);
     } catch (error) {
-      console.error('AIService: Erreur lors de l'extraction du texte PDF via FileExtractionService:', error);
+      console.error('AIService: Erreur lors de l\'extraction du texte PDF via FileExtractionService:', error);
       // Propager l'erreur ou la reformater si besoin
       throw error;
     }
