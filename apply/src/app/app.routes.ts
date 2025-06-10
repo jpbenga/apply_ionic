@@ -51,11 +51,7 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/postuler/postuler.page').then(m => m.PostulerPage),
         data: { title: 'Postuler', showBackButton: false }
       },
-      {
-        path: 'stats',
-        loadComponent: () => import('./pages/stats/stats.page').then(m => m.StatsPage),
-        data: { title: 'Statistiques', showBackButton: false }
-      },
+      // Route pour 'stats' supprimée
       {
         path: '',
         redirectTo: 'dashboard',

@@ -3,7 +3,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   // Existing icons from app.component.ts
-  home, add, statsChart, arrowBack, createOutline, closeCircleOutline, mailOutline,
+  home, add, arrowBack, createOutline, closeCircleOutline, mailOutline, // statsChart SUPPRIMÉ
   callOutline, chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline,
   saveOutline, personCircle, logOut, settings, addCircleOutline, cloudOfflineOutline,
   fileTrayOutline, copyOutline, documentAttachOutline, sparklesOutline, checkmarkCircle,
@@ -57,7 +57,7 @@ export class AppComponent {
   constructor() {
     addIcons({
       // Existing icons from app.component.ts
-      home, add, statsChart, arrowBack, createOutline, closeCircleOutline, mailOutline,
+      home, add, arrowBack, createOutline, closeCircleOutline, mailOutline, // statsChart SUPPRIMÉ
       callOutline, chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline,
       saveOutline, personCircle, logOut, settings, addCircleOutline, cloudOfflineOutline,
       fileTrayOutline, copyOutline, documentAttachOutline, sparklesOutline, checkmarkCircle,
