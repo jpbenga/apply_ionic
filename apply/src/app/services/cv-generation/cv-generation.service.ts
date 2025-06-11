@@ -6,16 +6,17 @@ import {
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, of, combineLatest } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, first, catchError } from 'rxjs/operators';
 import { CvData, GeneratedCv, CvTheme } from 'src/app/models/cv-template.model';
 import { CvDataService } from '../cv-data/cv-data.service';
-import { ProfileService } from '../../features/profile/services/profile.service'; // MODIFIED
+import { ProfileService } from '../../features/profile/services/profile.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CvGenerationService {
   private readonly generatedCvsPath = 'generated_cvs';
+  private isSaving = false; // Protection contre les appels multiples
 
   constructor(
     private firestore: Firestore,
@@ -61,52 +62,131 @@ export class CvGenerationService {
         };
 
         return cvData;
+      }),
+      catchError(error => {
+        console.error('Erreur lors de la récupération des données CV:', error);
+        return of(null);
       })
     );
   }
 
-  // Sauvegarde un CV généré
+  // Sauvegarde un CV généré - VERSION CORRIGÉE
   async saveGeneratedCv(templateId: string, theme: CvTheme): Promise<string> {
     const user = this.auth.currentUser;
     if (!user) throw new Error('Utilisateur non authentifié.');
 
-    return new Promise((resolve, reject) => {
-      this.getCvData().subscribe({
-        next: async (cvData) => {
-          if (!cvData) {
-            reject(new Error('Aucune donnée CV disponible'));
-            return;
-          }
+    // Protection contre les appels multiples
+    if (this.isSaving) {
+      throw new Error('Une sauvegarde de CV est déjà en cours. Veuillez patienter.');
+    }
 
-          const hasData = cvData.experiences.length > 0 || 
-                         cvData.formations.length > 0 || 
-                         cvData.competences.length > 0;
+    this.isSaving = true;
 
-          if (!hasData) {
-            reject(new Error('Aucune donnée suffisante pour générer un CV'));
-            return;
-          }
+    try {
+      console.log('🔄 Début de sauvegarde CV:', { templateId, theme });
 
-          try {
-            const generatedCvsCollectionRef = this.getUserSubcollectionRef();
-            
-            const dataToSave: Omit<GeneratedCv, 'id'> = {
-              userId: user.uid,
-              templateId,
-              theme,
-              data: { ...cvData, templateId, theme },
-              createdAt: new Date().toISOString()
-            };
+      // Récupérer les données CV (une seule fois)
+      const cvData = await this.getCvData().pipe(
+        first(),
+        catchError(error => {
+          console.error('Erreur getCvData:', error);
+          return of(null);
+        })
+      ).toPromise();
+      
+      if (!cvData) {
+        throw new Error('Aucune donnée CV disponible');
+      }
 
-            const docRef = await addDoc(generatedCvsCollectionRef, dataToSave);
-            resolve(docRef.id);
-          } catch (error) {
-            reject(error);
-          }
-        },
-        error: (error) => reject(error)
-      });
-    });
+      const hasData = cvData.experiences.length > 0 || 
+                     cvData.formations.length > 0 || 
+                     cvData.competences.length > 0;
+
+      if (!hasData) {
+        throw new Error('Aucune donnée suffisante pour générer un CV');
+      }
+
+      // Vérifier s'il existe déjà un CV similaire
+      const existingCvs = await this.getGeneratedCvs().pipe(
+        first(),
+        catchError(error => {
+          console.error('Erreur getGeneratedCvs:', error);
+          return of([]);
+        })
+      ).toPromise();
+
+      const existingCv = this.findSimilarCv(existingCvs || [], templateId, theme, cvData);
+
+      if (existingCv) {
+        console.log('✅ CV similaire trouvé, réutilisation:', existingCv.id);
+        return existingCv.id;
+      }
+
+      // Créer un nouveau CV
+      const generatedCvsCollectionRef = this.getUserSubcollectionRef();
+      
+      const dataToSave: Omit<GeneratedCv, 'id'> = {
+        userId: user.uid,
+        templateId,
+        theme,
+        data: { ...cvData, templateId, theme },
+        createdAt: new Date().toISOString()
+      };
+
+      const docRef = await addDoc(generatedCvsCollectionRef, dataToSave);
+      console.log('✅ Nouveau CV créé avec succès:', docRef.id);
+      return docRef.id;
+
+    } catch (error) {
+      console.error('❌ Erreur lors de la sauvegarde du CV:', error);
+      throw error;
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  // Trouve un CV similaire pour éviter les doublons
+  private findSimilarCv(cvs: GeneratedCv[], templateId: string, theme: CvTheme, currentData: CvData): GeneratedCv | null {
+    return cvs.find(cv => {
+      // Vérifier template et thème
+      const sameTemplate = cv.templateId === templateId;
+      const sameTheme = cv.theme.primaryColor === theme.primaryColor;
+      
+      if (!sameTemplate || !sameTheme) return false;
+
+      // Vérifier si les données sont similaires (pas identiques pour permettre de petites modifications)
+      const dataAge = new Date().getTime() - new Date(cv.createdAt).getTime();
+      const isRecent = dataAge < 60000; // 1 minute
+
+      // Si le CV a moins d'1 minute, considérer comme similaire
+      if (isRecent) {
+        console.log('CV récent trouvé (< 1min):', cv.id);
+        return true;
+      }
+
+      // Sinon, comparer les données de base
+      return this.areDatasSimilar(cv.data, currentData);
+    }) || null;
+  }
+
+  // Compare si deux jeux de données CV sont similaires
+  private areDatasSimilar(data1: CvData, data2: CvData): boolean {
+    try {
+      // Comparer le nombre d'éléments
+      const exp1Count = data1.experiences?.length || 0;
+      const exp2Count = data2.experiences?.length || 0;
+      const form1Count = data1.formations?.length || 0;
+      const form2Count = data2.formations?.length || 0;
+      const comp1Count = data1.competences?.length || 0;
+      const comp2Count = data2.competences?.length || 0;
+
+      return exp1Count === exp2Count && 
+             form1Count === form2Count && 
+             comp1Count === comp2Count;
+    } catch (error) {
+      console.error('Erreur lors de la comparaison des données:', error);
+      return false;
+    }
   }
 
   // Récupère les CVs générés par l'utilisateur
@@ -126,8 +206,14 @@ export class CvGenerationService {
     const user = this.auth.currentUser;
     if (!user || !cvId) throw new Error('Utilisateur non authentifié ou ID de CV manquant.');
     
-    const cvDocRef = doc(this.firestore, `users/${user.uid}/${this.generatedCvsPath}/${cvId}`);
-    return deleteDoc(cvDocRef);
+    try {
+      const cvDocRef = doc(this.firestore, `users/${user.uid}/${this.generatedCvsPath}/${cvId}`);
+      await deleteDoc(cvDocRef);
+      console.log('✅ CV supprimé:', cvId);
+    } catch (error) {
+      console.error('❌ Erreur suppression CV:', error);
+      throw error;
+    }
   }
 
   // Met à jour un CV généré
@@ -135,7 +221,75 @@ export class CvGenerationService {
     const user = this.auth.currentUser;
     if (!user || !cvId) throw new Error('Utilisateur non authentifié ou ID de CV manquant.');
     
-    const cvDocRef = doc(this.firestore, `users/${user.uid}/${this.generatedCvsPath}/${cvId}`);
-    return updateDoc(cvDocRef, updates);
+    try {
+      const cvDocRef = doc(this.firestore, `users/${user.uid}/${this.generatedCvsPath}/${cvId}`);
+      const updateData = { ...updates, updatedAt: new Date().toISOString() };
+      await updateDoc(cvDocRef, updateData);
+      console.log('✅ CV mis à jour:', cvId);
+    } catch (error) {
+      console.error('❌ Erreur mise à jour CV:', error);
+      throw error;
+    }
+  }
+
+  // Nettoie les CVs en double (méthode utilitaire)
+  async cleanupDuplicateCvs(): Promise<{ deleted: number; kept: number }> {
+    try {
+      console.log('🧹 Début du nettoyage des doublons...');
+      
+      const cvs = await this.getGeneratedCvs().pipe(first()).toPromise();
+      if (!cvs || cvs.length <= 1) {
+        console.log('✅ Aucun doublon à nettoyer');
+        return { deleted: 0, kept: cvs?.length || 0 };
+      }
+
+      // Grouper par templateId + couleur
+      const groups = cvs.reduce((acc, cv) => {
+        const key = `${cv.templateId}-${cv.theme.primaryColor}`;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(cv);
+        return acc;
+      }, {} as Record<string, GeneratedCv[]>);
+
+      let deletedCount = 0;
+      let keptCount = 0;
+
+      // Supprimer les doublons (garder le plus récent)
+      for (const group of Object.values(groups)) {
+        if (group.length > 1) {
+          // Trier par date de création (plus récent en premier)
+          group.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          
+          // Garder le premier (le plus récent)
+          keptCount++;
+          
+          // Supprimer tous les autres
+          for (let i = 1; i < group.length; i++) {
+            await this.deleteGeneratedCv(group[i].id!);
+            deletedCount++;
+          }
+        } else {
+          keptCount++;
+        }
+      }
+
+      console.log(`✅ Nettoyage terminé: ${deletedCount} supprimés, ${keptCount} conservés`);
+      return { deleted: deletedCount, kept: keptCount };
+
+    } catch (error) {
+      console.error('❌ Erreur lors du nettoyage des doublons:', error);
+      throw error;
+    }
+  }
+
+  // Vérifie l'état du service
+  isSavingCv(): boolean {
+    return this.isSaving;
+  }
+
+  // Force le reset du verrou de sauvegarde (en cas de problème)
+  resetSavingState(): void {
+    console.log('🔓 Reset du verrou de sauvegarde');
+    this.isSaving = false;
   }
 }
