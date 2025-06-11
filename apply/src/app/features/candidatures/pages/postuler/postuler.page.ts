@@ -15,7 +15,7 @@ import { CvGenerationService } from '../../../../services/cv-generation/cv-gener
 import { CvTemplateService } from '../../../../services/cv-template/cv-template.service'; // MODIFIED
 import { CvDataService } from '../../../../services/cv-data/cv-data.service'; // MODIFIED
 import { GeneratedCv, CvTemplate, CvTheme, CvData } from '../../../../models/cv-template.model'; // MODIFIED
-import { Candidature } from '../../models/candidature.model'; // MODIFIED
+import { Candidature, StatutCandidature } from '../../models/candidature.model'; // MODIFIED
 import { Router } from '@angular/router';
 import { UserHeaderComponent } from '../../../../shared/components/user-header/user-header.component'; // MODIFIED
 import { CvPreviewComponent } from '../../../../components/cv-preview/cv-preview.component'; // MODIFIED
@@ -458,15 +458,19 @@ export class PostulerPage implements OnInit, OnDestroy {
     this.isSavingCandidature = true;
   
     const candidatureDetails: Omit<Candidature, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'dateCandidature'> = {
-      poste: jobTitle,
-      entreprise: company,
-      offreTexteComplet: this.jobOfferText,
-      cvOriginalNom: `CV Structuré Amélioré (${this.selectedTemplate?.name || 'Template inconnu'})`,
-      cvOriginalUrl: `structured_cv_improved_${this.selectedTemplate?.id || 'unknown'}`,
-      cvTexteExtrait: this.generateTextFromCvData(this.currentCvData),
-      analyseATS: this.atsAnalysisResult.analysisText,
-      lettreMotivationGeneree: this.generatedCoverLetter,
-      statut: 'envoyee',
+      // PROPRIÉTÉS OBLIGATOIRES
+      intitulePoste: jobTitle,                                    // CORRIGÉ: utilise jobTitle de l'analyse ATS
+      entreprise: company,                                        // CORRIGÉ: utilise company de l'analyse ATS
+      statut: 'envoyee' as StatutCandidature,
+      
+      // PROPRIÉTÉS OPTIONNELLES
+      poste: jobTitle,                                           // Pour compatibilité
+      offreTexteComplet: this.jobOfferText,                      // CORRIGÉ: utilise jobOfferText
+      cvOriginalNom: 'CV_' + new Date().getTime() + '.pdf',     // CORRIGÉ: génère un nom
+      cvOriginalUrl: undefined,                                  // CORRIGÉ: pas d'URL pour l'instant
+      cvTexteExtrait: this.generateTextFromCvData(this.currentCvData), // CORRIGÉ: utilise la méthode existante
+      analyseATS: this.atsAnalysisResult.analysisText,          // CORRIGÉ: utilise analysisText
+      lettreMotivationGeneree: this.generatedCoverLetter        // CORRIGÉ: utilise generatedCoverLetter
     };
   
     try {
@@ -477,7 +481,7 @@ export class PostulerPage implements OnInit, OnDestroy {
           this.selectedTheme
         );
       }
-
+  
       await this.candidatureService.createCandidature(candidatureDetails);
       
       this.presentToast('Candidature sauvegardée avec succès !', 'success');

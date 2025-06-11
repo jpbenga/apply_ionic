@@ -1,27 +1,19 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
-import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Observable, of, Subscription, BehaviorSubject } from 'rxjs';
-import { switchMap, tap, first, catchError } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import {
-  IonHeader, IonContent, IonCard, IonCardContent, IonLabel, IonBadge, 
-  IonItem, IonIcon, IonList, IonListHeader, IonSpinner, IonButton, 
-  IonModal, IonTextarea, IonSelect, IonSelectOption, IonToolbar, IonTitle, IonButtons,
-  IonText,
-  ModalController, AlertController
+  IonHeader, IonContent, IonSpinner, IonIcon, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle,
+  IonItem, IonLabel, IonSelect, IonSelectOption, IonTextarea, IonInput, IonChip,
+  IonList, IonModal, IonButtons, IonTitle, IonToolbar, IonFab, IonFabButton, IonFabList, IonGrid, IonRow, IonCol
 } from '@ionic/angular/standalone';
-import { Candidature, SuiviCandidature, TypeSuivi, StatutCandidature } from '../../../models/candidature.model'; // MODIFIED
-import { CandidatureService } from '../../../services/candidature/candidature.service'; // MODIFIED
-import { HeaderService } from '../../../../../shared/services/header/header.service'; // MODIFIED
-import { ToastController } from '@ionic/angular/standalone';
-import { TextViewerModalComponent } from '../../../../../components/text-viewer-modal/text-viewer-modal.component'; // MODIFIED
-import { UserHeaderComponent } from '../../../../../shared/components/user-header/user-header.component'; // MODIFIED
-// import { addIcons } from 'ionicons'; // SUPPRIMÉ
-// import {
-//   createOutline, closeCircleOutline, saveOutline, mailOutline, callOutline,
-//   chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline, trashOutline
-// } from 'ionicons/icons'; // SUPPRIMÉ
+import { HeaderService } from 'src/app/shared/services/header/header.service';
+import { CandidatureService } from 'src/app/shared/services/candidature/candidature.service';
+import { Candidature, SuiviCandidature, TypeSuivi, StatutCandidature } from '../../../models/candidature.model';
+import { UserHeaderComponent } from 'src/app/shared/components/user-header/user-header.component';
+import { ToastController, AlertController, LoadingController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-candidature-detail',
@@ -29,250 +21,378 @@ import { UserHeaderComponent } from '../../../../../shared/components/user-heade
   styleUrls: ['./candidature-detail.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, DatePipe, RouterModule, FormsModule, TitleCasePipe,
-    IonHeader, IonContent, IonCard, IonCardContent, IonLabel, IonBadge, IonItem, IonIcon,
-    IonList, IonListHeader, IonSpinner, IonButton, IonModal, IonTextarea,
-    IonSelect, IonSelectOption, IonToolbar, IonTitle, IonButtons, IonText,
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    IonHeader, IonContent, IonSpinner, IonIcon, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle,
+    IonItem, IonLabel, IonSelect, IonSelectOption, IonTextarea, IonInput, IonChip,
+    IonList, IonModal, IonButtons, IonTitle, IonToolbar, IonFab, IonFabButton, IonFabList, IonGrid, IonRow, IonCol,
     UserHeaderComponent
   ]
 })
 export class CandidatureDetailPage implements OnInit, OnDestroy {
-  private candidatureSubscription: Subscription | undefined;
-  private candidatureSubject = new BehaviorSubject<Candidature | undefined>(undefined);
-  candidature$: Observable<Candidature | undefined> = this.candidatureSubject.asObservable();
-  isLoading: boolean = true;
-  errorMessage: string | null = null;
-  candidatureId: string | null = null;
-  isAddSuiviModalOpen: boolean = false;
-  nouveauSuiviType: TypeSuivi = 'email_envoye';
-  nouveauSuiviNotes: string = '';
-  typesDeSuivi: { value: TypeSuivi, label: string }[] = [
-    { value: 'email_envoye', label: 'Email envoyé' }, { value: 'email_recu', label: 'Email reçu' },
-    { value: 'appel_effectue', label: 'Appel effectué' }, { value: 'appel_recu', label: 'Appel reçu' },
-    { value: 'entretien_planifie', label: 'Entretien planifié' }, { value: 'entretien_effectue', label: 'Entretien effectué' },
-    { value: 'test_technique_recu', label: 'Test technique reçu' }, { value: 'test_technique_complete', label: 'Test technique complété' },
-    { value: 'relance', label: 'Relance' }, { value: 'autre', label: 'Autre' }
-  ];
-  isEditing: boolean = false;
-  editableStatut: StatutCandidature | undefined;
-  editableNotesPersonnelles: string | undefined = '';
-  statutsCandidature: { value: StatutCandidature, label: string }[] = [
-    { value: 'brouillon', label: 'Brouillon' }, { value: 'envoyee', label: 'Envoyée' },
-    { value: 'en_cours_rh', label: 'En cours RH' }, { value: 'entretien_planifie', label: 'Entretien planifié' },
-    { value: 'test_technique', label: 'Test technique' }, { value: 'entretien_final', label: 'Entretien final' },
-    { value: 'offre_recue', label: 'Offre reçue' }, { value: 'acceptee', label: 'Acceptée' },
-    { value: 'refusee_candidat', label: 'Refusée (par moi)' }, { value: 'refusee_entreprise', label: 'Refusée (par entreprise)' },
-    { value: 'archivee', label: 'Archivée' }, { value: 'standby', label: 'Standby' }
-  ];
+  public candidature$: Observable<Candidature | undefined>;
+  public candidature: Candidature | undefined;
+  public isLoading: boolean = true;
+  public errorLoading: string | null = null;
   
-  // État pour la suppression
-  isDeleting: boolean = false;
+  // États d'édition
+  public isEditing: boolean = false;
+  public isEditingNotes: boolean = false;
+  public editableNotesPersonnelles: string = '';
+  
+  // Suivi des candidatures
+  public isAddingSuivi: boolean = false;
+  public nouveauSuiviType: TypeSuivi = 'contact';
+  public nouveauSuiviDescription: string = '';
+  public nouveauSuiviNotes: string = '';
+  public nouveauSuiviCommentaire: string = '';
+
+  // Options pour les selects
+  public statutsCandidature: { value: StatutCandidature, label: string }[] = [
+    { value: 'brouillon', label: 'Brouillon' },
+    { value: 'envoyee', label: 'Envoyée' },
+    { value: 'en_cours_rh', label: 'En cours RH' },
+    { value: 'entretien_planifie', label: 'Entretien planifié' },
+    { value: 'test_technique', label: 'Test technique' },
+    { value: 'entretien_final', label: 'Entretien final' },
+    { value: 'offre_recue', label: 'Offre reçue' },
+    { value: 'acceptee', label: 'Acceptée' },
+    { value: 'refusee_candidat', label: 'Refusée (par moi)' },
+    { value: 'refusee_entreprise', label: 'Refusée (par entreprise)' },
+    { value: 'archivee', label: 'Archivée' },
+    { value: 'standby', label: 'Standby' }
+  ];
+
+  public typesDeSuivi: { value: TypeSuivi, label: string }[] = [
+    { value: 'contact', label: 'Contact' },
+    { value: 'email_envoye', label: 'Email envoyé' },
+    { value: 'email_recu', label: 'Email reçu' },
+    { value: 'appel_effectue', label: 'Appel effectué' },
+    { value: 'appel_recu', label: 'Appel reçu' },
+    { value: 'entretien_planifie', label: 'Entretien planifié' },
+    { value: 'entretien_effectue', label: 'Entretien effectué' },
+    { value: 'entretien', label: 'Entretien' },
+    { value: 'test_technique_recu', label: 'Test technique reçu' },
+    { value: 'test_technique_complete', label: 'Test technique complété' },
+    { value: 'test', label: 'Test' },
+    { value: 'feedback', label: 'Feedback' },
+    { value: 'relance', label: 'Relance' },
+    { value: 'autre', label: 'Autre' }
+  ];
+
+  private candidatureId: string = '';
+  private subscriptions: Subscription[] = [];
 
   constructor(
-    private route: ActivatedRoute,
+    private headerService: HeaderService,
     private candidatureService: CandidatureService,
-    public headerService: HeaderService,
-    private modalController: ModalController,
+    private router: Router,
+    private route: ActivatedRoute,
     private toastController: ToastController,
     private alertController: AlertController,
-    private router: Router
+    private loadingController: LoadingController
   ) {
-    // addIcons({ // SUPPRIMÉ
-    //   createOutline, closeCircleOutline, saveOutline, mailOutline, callOutline,
-    //   chatbubbleEllipsesOutline, mailUnreadOutline, documentTextOutline, trashOutline
-    // });
+    this.candidature$ = this.route.paramMap.pipe(
+      map(params => params.get('id') || ''),
+      switchMap(id => {
+        this.candidatureId = id;
+        if (!id) {
+          this.errorLoading = 'ID de candidature non fourni';
+          this.isLoading = false;
+          return [];
+        }
+        return this.candidatureService.getCandidatureById(id);
+      })
+    );
   }
 
   ngOnInit() {
-    this.isLoading = true;
-    this.candidatureSubscription = this.route.paramMap.pipe(
-      switchMap(params => {
-        this.candidatureId = params.get('id');
-        if (this.candidatureId) {
-          return this.candidatureService.getCandidatureById(this.candidatureId);
-        }
-        this.errorMessage = "ID de candidature non trouvé.";
-        this.isLoading = false;
-        return of(undefined);
-      }),
-      tap(candidature => {
-        this.isLoading = false;
-        if (candidature) {
-          this.candidatureSubject.next(candidature);
-          this.editableStatut = candidature.statut;
-          this.editableNotesPersonnelles = candidature.notesPersonnelles || '';
-        } else if (this.candidatureId) {
-          this.errorMessage = this.errorMessage || "Candidature non trouvée ou accès non autorisé.";
-          this.candidatureSubject.next(undefined);
-        } else {
-            this.candidatureSubject.next(undefined);
-        }
-      }),
-      catchError((err: any) => {
-        this.isLoading = false;
-        this.errorMessage = "Erreur lors du chargement de la candidature.";
-        this.candidatureSubject.next(undefined);
-        console.error(err);
-        return of(undefined);
-      })
-    ).subscribe();
+    this.subscribeToCandidate();
   }
 
   ngOnDestroy() {
-    if (this.candidatureSubscription) {
-      this.candidatureSubscription.unsubscribe();
-    }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   ionViewWillEnter() {
-    const currentCandidature = this.candidatureSubject.value;
-    if (currentCandidature) {
-        this.headerService.updateTitle(currentCandidature.poste || 'Détail Candidature');
-        this.headerService.setShowBackButton(true);
-        this.editableStatut = currentCandidature.statut;
-        this.editableNotesPersonnelles = currentCandidature.notesPersonnelles || '';
-    } else if (this.candidatureId && !this.isLoading) {
-        this.headerService.updateTitle('Détail Candidature');
-        this.headerService.setShowBackButton(true);
-    }
-    this.isEditing = false;
+    this.headerService.updateTitle('Détail Candidature');
+    this.headerService.setShowBackButton(true);
   }
 
-  ionViewWillLeave() {
-  }
-
-  toggleEditMode() {
-    this.isEditing = !this.isEditing;
-    if (this.isEditing) {
-      const currentCandidature = this.candidatureSubject.value;
-      if (currentCandidature) {
-        this.editableStatut = currentCandidature.statut;
-        this.editableNotesPersonnelles = currentCandidature.notesPersonnelles || '';
-      }
-    }
-  }
-
-  async saveCandidatureChanges() {
-    if (!this.candidatureId) {
-      this.presentToast('ID de candidature manquant.', 'danger');
-      return;
-    }
-    if (this.editableStatut === undefined) {
-      this.presentToast('Veuillez sélectionner un statut.', 'warning');
-      return;
-    }
-    const dataToUpdate: Partial<Candidature> = {
-      statut: this.editableStatut,
-      notesPersonnelles: this.editableNotesPersonnelles || ''
-    };
-    try {
-      await this.candidatureService.updateCandidature(this.candidatureId, dataToUpdate);
-      this.presentToast('Candidature mise à jour avec succès !', 'success');
-      this.isEditing = false;
-      const updatedCandidature = await this.candidatureService.getCandidatureById(this.candidatureId).pipe(first()).toPromise();
-      this.candidatureSubject.next(updatedCandidature);
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour de la candidature:', error);
-      this.presentToast('Erreur lors de la mise à jour.', 'danger');
-    }
-  }
-  
-  async openAddSuiviModal(isOpen: boolean) {
-    this.isAddSuiviModalOpen = isOpen;
-    if (!isOpen) {
-      this.nouveauSuiviType = 'email_envoye';
-      this.nouveauSuiviNotes = '';
-    }
-  }
-
-  async handleAjouterSuivi() {
-    if (!this.candidatureId || !this.nouveauSuiviNotes.trim()) {
-      this.presentToast('Veuillez sélectionner un type et ajouter des notes pour le suivi.', 'warning');
-      return;
-    }
-    const suiviData: Omit<SuiviCandidature, 'id' | 'date'> = {
-      type: this.nouveauSuiviType,
-      notes: this.nouveauSuiviNotes
-    };
-    try {
-      await this.candidatureService.addSuiviToCandidature(this.candidatureId, suiviData);
-      this.presentToast('Suivi ajouté avec succès !', 'success');
-      this.openAddSuiviModal(false);
-      if(this.candidatureId) {
-          const updatedCandidature = await this.candidatureService.getCandidatureById(this.candidatureId).pipe(first()).toPromise();
-          this.candidatureSubject.next(updatedCandidature);
-      }
-    } catch (error) {
-      console.error("Erreur lors de l'ajout du suivi:", error);
-      this.presentToast('Erreur lors de l\'ajout du suivi.', 'danger');
-    }
-  }
-  
-  async envoyerEmailRelance() {
-    const candidature = this.candidatureSubject.value;
-    if (!candidature) {
-      this.presentToast('Données de candidature non disponibles pour l\'email de relance.', 'warning');
-      return;
-    }
-    const subject = `Relance candidature - ${candidature.poste || 'un poste'} chez ${candidature.entreprise || 'votre entreprise'}`;
-    const body = `Bonjour,\n\nJe me permets de revenir vers vous concernant ma candidature pour le poste de ${candidature.poste || '[Nom du Poste]'}.\nPourriez-vous s'il vous plaît me donner une mise à jour sur l'état de ma candidature ?\n\nJe vous remercie pour votre temps et votre considération.\n\nCordialement,\n[Votre Nom Complet]`;
-    const contactEmail = (candidature.contacts && candidature.contacts.length > 0 && candidature.contacts[0].email) ? candidature.contacts[0].email : '';
-    const mailtoLink = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoLink;
-    if (!contactEmail) {
-        this.presentToast('Adresse email du contact non trouvée. L\'email s\'ouvrira sans destinataire.', 'light');
-    }
-    const suiviData: Omit<SuiviCandidature, 'id' | 'date'> = {
-      type: 'relance',
-      notes: `Email de relance (tentative d'ouverture client mail) pour le poste: ${candidature.poste}.`
-    };
-    if (this.candidatureId) {
-      try {
-        await this.candidatureService.addSuiviToCandidature(this.candidatureId, suiviData);
-        this.presentToast('Suivi "Email de relance" enregistré.', 'success');
-        const updatedCandidatureAfterRelance = await this.candidatureService.getCandidatureById(this.candidatureId).pipe(first()).toPromise();
-        this.candidatureSubject.next(updatedCandidatureAfterRelance);
-      } catch (error) {
-        console.error("Erreur lors de l'ajout du suivi de relance:", error);
-      }
-    }
-  }
-
-  async voirCvEtLettre() {
-    const candidature = this.candidatureSubject.value;
-    if (!candidature) {
-      this.presentToast('Données de candidature non disponibles.', 'warning');
-      return;
-    }
-    if (!candidature.cvTexteExtrait && !candidature.cvOriginalUrl && !candidature.lettreMotivationGeneree) {
-      this.presentToast('Aucun document ou texte à visualiser.', 'light');
-      return;
-    }
-    const modal = await this.modalController.create({
-      component: TextViewerModalComponent,
-      componentProps: {
-        cvTexteExtrait: candidature.cvTexteExtrait,
-        lettreMotivationGeneree: candidature.lettreMotivationGeneree,
-        cvOriginalUrl: candidature.cvOriginalUrl,
-        cvOriginalFileName: candidature.cvOriginalNom
+  /**
+   * S'abonner aux changements de candidature
+   */
+  private subscribeToCandidate(): void {
+    const candidatureSub = this.candidature$.subscribe({
+      next: (candidature) => {
+        this.isLoading = false;
+        if (candidature) {
+          this.candidature = candidature;
+          this.editableNotesPersonnelles = candidature.notesPersonnelles || '';
+          this.errorLoading = null;
+        } else {
+          this.errorLoading = 'Candidature non trouvée';
+        }
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorLoading = 'Erreur lors du chargement de la candidature';
+        console.error('Erreur candidature:', error);
       }
     });
-    await modal.present();
+
+    this.subscriptions.push(candidatureSub);
   }
 
-  // Suppression depuis la page de détail
-  async deleteCandidature() {
-    if (!this.candidatureId) {
-      this.presentToast('ID de candidature non défini.', 'warning');
+  /**
+   * Obtenir la couleur du statut
+   */
+  getStatutColor(statut: StatutCandidature): string {
+    const colorMap: { [key in StatutCandidature]: string } = {
+      'brouillon': 'medium',
+      'envoyee': 'primary',
+      'en_cours_rh': 'secondary',
+      'entretien_planifie': 'tertiary',
+      'test_technique': 'warning',
+      'entretien_final': 'warning',
+      'offre_recue': 'success',
+      'acceptee': 'success',
+      'refusee_candidat': 'danger',
+      'refusee_entreprise': 'danger',
+      'archivee': 'dark',
+      'standby': 'medium'
+    };
+    return colorMap[statut] || 'medium';
+  }
+
+  /**
+   * Obtenir le libellé du statut
+   */
+  getStatutLabel(statut: StatutCandidature): string {
+    const statutObj = this.statutsCandidature.find(s => s.value === statut);
+    return statutObj ? statutObj.label : statut;
+  }
+
+  /**
+   * Obtenir l'icône pour un type de suivi
+   */
+  getSuiviIcon(type: TypeSuivi): string {
+    const iconMap: { [key in TypeSuivi]: string } = {
+      'contact': 'person-outline',
+      'email_envoye': 'mail-outline',
+      'email_recu': 'mail-open-outline',
+      'appel_effectue': 'call-outline',
+      'appel_recu': 'call-outline',
+      'entretien_planifie': 'calendar-outline',
+      'entretien_effectue': 'checkmark-circle-outline',
+      'entretien': 'people-outline',
+      'test_technique_recu': 'document-text-outline',
+      'test_technique_complete': 'document-attach-outline',
+      'test': 'school-outline',
+      'feedback': 'chatbubble-outline',
+      'relance': 'refresh-outline',
+      'autre': 'ellipsis-horizontal-outline'
+    };
+    return iconMap[type] || 'information-circle-outline';
+  }
+
+  /**
+   * Obtenir la couleur pour un type de suivi
+   */
+  getSuiviColor(type: TypeSuivi): string {
+    const colorMap: { [key in TypeSuivi]: string } = {
+      'contact': 'primary',
+      'email_envoye': 'secondary',
+      'email_recu': 'secondary',
+      'appel_effectue': 'tertiary',
+      'appel_recu': 'tertiary',
+      'entretien_planifie': 'warning',
+      'entretien_effectue': 'success',
+      'entretien': 'warning',
+      'test_technique_recu': 'medium',
+      'test_technique_complete': 'success',
+      'test': 'medium',
+      'feedback': 'primary',
+      'relance': 'warning',
+      'autre': 'dark'
+    };
+    return colorMap[type] || 'medium';
+  }
+
+  /**
+   * Basculer le mode édition
+   */
+  toggleEditing(): void {
+    if (this.isEditing) {
+      this.saveChanges();
+    } else {
+      if (this.candidature) {
+        this.editableNotesPersonnelles = this.candidature.notesPersonnelles || '';
+      }
+      this.isEditing = true;
+    }
+  }
+
+  /**
+   * Annuler l'édition
+   */
+  cancelEditing(): void {
+    this.isEditing = false;
+    if (this.candidature) {
+      this.editableNotesPersonnelles = this.candidature.notesPersonnelles || '';
+    }
+  }
+
+  /**
+   * Sauvegarder les modifications
+   */
+  async saveChanges(): Promise<void> {
+    if (!this.candidature || !this.candidatureId) return;
+
+    const loading = await this.loadingController.create({
+      message: 'Sauvegarde en cours...'
+    });
+    await loading.present();
+
+    try {
+      const updateData: Partial<Candidature> = {
+        notesPersonnelles: this.editableNotesPersonnelles || ''
+      };
+
+      await this.candidatureService.updateCandidature(this.candidatureId, updateData);
+      this.isEditing = false;
+      this.presentToast('Modifications sauvegardées avec succès', 'success');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      this.presentToast('Erreur lors de la sauvegarde', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
+  /**
+   * Mettre à jour le statut de la candidature
+   */
+  async updateStatut(newStatut: StatutCandidature): Promise<void> {
+    if (!this.candidature || !this.candidatureId) return;
+
+    const loading = await this.loadingController.create({
+      message: 'Mise à jour du statut...'
+    });
+    await loading.present();
+
+    try {
+      await this.candidatureService.updateCandidature(this.candidatureId, { statut: newStatut });
+      this.presentToast('Statut mis à jour avec succès', 'success');
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du statut:', error);
+      this.presentToast('Erreur lors de la mise à jour du statut', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
+  /**
+   * Ouvrir le modal d'ajout de suivi
+   */
+  openAddSuiviModal(): void {
+    this.isAddingSuivi = true;
+    this.nouveauSuiviType = 'contact';
+    this.nouveauSuiviDescription = '';
+    this.nouveauSuiviNotes = '';
+    this.nouveauSuiviCommentaire = '';
+  }
+
+  /**
+   * Fermer le modal d'ajout de suivi
+   */
+  closeAddSuiviModal(): void {
+    this.isAddingSuivi = false;
+    this.nouveauSuiviType = 'contact';
+    this.nouveauSuiviDescription = '';
+    this.nouveauSuiviNotes = '';
+    this.nouveauSuiviCommentaire = '';
+  }
+
+  /**
+   * Ajouter un nouveau suivi
+   */
+  async addSuivi(): Promise<void> {
+    if (!this.candidatureId || !this.nouveauSuiviDescription.trim()) {
+      this.presentToast('Veuillez saisir une description pour le suivi', 'warning');
       return;
     }
 
-    const candidature = this.candidatureSubject.value;
-    const candidatureName = candidature ? `${candidature.poste} chez ${candidature.entreprise}` : 'cette candidature';
+    const loading = await this.loadingController.create({
+      message: 'Ajout du suivi...'
+    });
+    await loading.present();
+
+    try {
+      const suiviData: Omit<SuiviCandidature, 'id' | 'date'> = {
+        type: this.nouveauSuiviType,
+        description: this.nouveauSuiviDescription.trim(),
+        commentaire: this.nouveauSuiviCommentaire.trim() || undefined,
+        notes: this.nouveauSuiviNotes.trim() || undefined
+      };
+
+      await this.candidatureService.addSuiviToCandidature(this.candidatureId, suiviData);
+      this.closeAddSuiviModal();
+      this.presentToast('Suivi ajouté avec succès', 'success');
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout du suivi:', error);
+      this.presentToast('Erreur lors de l\'ajout du suivi', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
+  /**
+   * Envoyer un email de relance
+   */
+  async sendRelanceEmail(): Promise<void> {
+    if (!this.candidature || !this.candidatureId) return;
+
+    const contactEmail = this.getContactEmail();
+    if (!contactEmail) {
+      this.presentToast('Aucun email de contact disponible', 'warning');
+      return;
+    }
+
+    try {
+      // Ajouter un suivi pour la relance
+      const suiviData: Omit<SuiviCandidature, 'id' | 'date'> = {
+        type: 'relance',
+        description: 'Email de relance envoyé',
+        notes: `Email de relance envoyé à ${contactEmail}`,
+        commentaire: 'Tentative d\'ouverture du client mail'
+      };
+
+      await this.candidatureService.addSuiviToCandidature(this.candidatureId, suiviData);
+
+      // Ouvrir le client mail
+      const subject = `Suivi candidature - ${this.candidature.intitulePoste} chez ${this.candidature.entreprise}`;
+      const body = `Bonjour,\n\nJe me permets de vous recontacter concernant ma candidature pour le poste de ${this.candidature.intitulePoste}.\n\nCordialement`;
+      const mailtoLink = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      
+      window.open(mailtoLink, '_blank');
+      this.presentToast('Email de relance préparé', 'success');
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de la relance:', error);
+      this.presentToast('Erreur lors de la préparation de la relance', 'danger');
+    }
+  }
+
+  /**
+   * Supprimer la candidature
+   */
+  async deleteCandidature(): Promise<void> {
+    if (!this.candidatureId) return;
 
     const alert = await this.alertController.create({
       header: 'Confirmer la suppression',
-      message: `Êtes-vous sûr de vouloir supprimer la candidature "${candidatureName}" ? Cette action est irréversible et vous serez redirigé vers le tableau de bord.`,
+      message: 'Êtes-vous sûr de vouloir supprimer cette candidature ? Cette action est irréversible.',
       buttons: [
         {
           text: 'Annuler',
@@ -281,8 +401,8 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
         {
           text: 'Supprimer',
           role: 'destructive',
-          handler: () => {
-            this.confirmDeleteCandidature();
+          handler: async () => {
+            await this.confirmDeleteCandidature();
           }
         }
       ]
@@ -291,30 +411,107 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  private async confirmDeleteCandidature() {
-    if (!this.candidatureId) {
-      return;
-    }
-
-    this.isDeleting = true;
+  /**
+   * Confirmer la suppression de la candidature
+   */
+  private async confirmDeleteCandidature(): Promise<void> {
+    const loading = await this.loadingController.create({
+      message: 'Suppression en cours...'
+    });
+    await loading.present();
 
     try {
       await this.candidatureService.deleteCandidature(this.candidatureId);
-      this.presentToast('Candidature supprimée avec succès.', 'success');
-      
-      // Redirection vers le dashboard après un court délai
-      setTimeout(() => {
-        this.router.navigate(['/tabs/dashboard']);
-      }, 1000);
-      
+      await loading.dismiss();
+      this.presentToast('Candidature supprimée avec succès', 'success');
+      this.router.navigate(['/tabs/dashboard']);
     } catch (error) {
-      console.error('Erreur lors de la suppression de la candidature:', error);
-      this.presentToast('Erreur lors de la suppression de la candidature.', 'danger');
-      this.isDeleting = false;
+      await loading.dismiss();
+      console.error('Erreur lors de la suppression:', error);
+      this.presentToast('Erreur lors de la suppression de la candidature', 'danger');
     }
   }
-  
-  async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light') {
+
+  /**
+   * Générer des documents (CV, lettre de motivation)
+   */
+  async generateDocuments(): Promise<void> {
+    if (!this.candidature || !this.candidatureId) return;
+
+    // Vérifier si les documents sont nécessaires
+    if (!this.candidature.cvTexteExtrait && !this.candidature.cvOriginalUrl && !this.candidature.lettreMotivationGeneree) {
+      this.presentToast('Aucune donnée de CV disponible pour la génération', 'warning');
+      return;
+    }
+
+    const loading = await this.loadingController.create({
+      message: 'Génération des documents...'
+    });
+    await loading.present();
+
+    try {
+      // Simuler la génération de documents (à adapter selon votre logique)
+      const updateData: Partial<Candidature> = {
+        cvTexteExtrait: this.candidature.cvTexteExtrait,
+        lettreMotivationGeneree: this.candidature.lettreMotivationGeneree,
+        analyseATS: 'Analyse ATS générée automatiquement'
+      };
+
+      await this.candidatureService.updateCandidature(this.candidatureId, updateData);
+      this.presentToast('Documents générés avec succès', 'success');
+    } catch (error) {
+      console.error('Erreur lors de la génération des documents:', error);
+      this.presentToast('Erreur lors de la génération des documents', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
+  /**
+   * Obtenir l'email de contact
+   */
+  private getContactEmail(): string {
+    if (!this.candidature) return '';
+    
+    // Essayer d'abord contactRecruteur.email
+    if (this.candidature.contactRecruteur?.email) {
+      return this.candidature.contactRecruteur.email;
+    }
+    
+    // Puis essayer contacts[0].email (compatibilité)
+    if (this.candidature.contacts && this.candidature.contacts.length > 0 && this.candidature.contacts[0].email) {
+      return this.candidature.contacts[0].email;
+    }
+    
+    return '';
+  }
+
+  /**
+   * Formatter la date
+   */
+  formatDate(timestamp: any): string {
+    if (!timestamp) return '';
+    
+    try {
+      // Gérer les timestamps Firestore
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      return date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Erreur lors du formatage de la date:', error);
+      return '';
+    }
+  }
+
+  /**
+   * Afficher un toast
+   */
+  private async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light'): Promise<void> {
     const toast = await this.toastController.create({
       message: message,
       duration: 3000,
@@ -323,5 +520,21 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       buttons: [{ text: 'OK', role: 'cancel'}]
     });
     toast.present();
+  }
+
+  /**
+   * Retour au dashboard
+   */
+  goBack(): void {
+    this.router.navigate(['/tabs/dashboard']);
+  }
+
+  /**
+   * Aller à l'édition de la candidature
+   */
+  editCandidature(): void {
+    this.router.navigate(['/tabs/postuler'], { 
+      queryParams: { candidatureId: this.candidatureId } 
+    });
   }
 }

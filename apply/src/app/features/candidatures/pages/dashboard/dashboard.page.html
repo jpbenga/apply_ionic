@@ -7,7 +7,8 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <ion-item lines="full">
+  <!-- Section de tri (simplifiée) -->
+  <ion-item lines="full" class="sort-section">
     <ion-label position="stacked">Trier par date</ion-label>
     <ion-select [(ngModel)]="sortByDate" (ionChange)="onSortChange()" interface="popover">
       <ion-select-option *ngFor="let sortOpt of optionsDeTri" [value]="sortOpt.value">
@@ -16,20 +17,27 @@
     </ion-select>
   </ion-item>
 
+  <!-- Composant de filtrage style Spotify -->
+  <app-filter-panel 
+    [resultsCount]="resultsCount"
+    class="filter-panel-container">
+  </app-filter-panel>
+
   <!-- Contrôles de sélection multiple -->
-  <div *ngIf="candidatures.length && !isLoading && !errorLoading" class="selection-controls ion-padding-horizontal">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+  <div *ngIf="filteredCandidatures.length && !isLoading && !errorLoading" class="selection-controls ion-padding-horizontal">
+    <div class="selection-controls-container">
       <ion-button 
         fill="outline" 
         size="small" 
         (click)="toggleSelectionMode()"
-        [color]="isSelectionMode ? 'primary' : 'medium'">
+        [color]="isSelectionMode ? 'primary' : 'medium'"
+        class="selection-toggle-btn">
         <ion-icon [name]="isSelectionMode ? 'checkmark-circle-outline' : 'checkbox-outline'" slot="start"></ion-icon>
         {{ isSelectionMode ? 'Annuler sélection' : 'Sélectionner' }}
       </ion-button>
 
-      <div *ngIf="isSelectionMode" style="display: flex; gap: 8px; align-items: center;">
-        <span *ngIf="selectedCount > 0" style="font-size: 14px; color: var(--ion-color-medium);">
+      <div *ngIf="isSelectionMode" class="selection-actions">
+        <span *ngIf="selectedCount > 0" class="selection-count">
           {{ selectedCount }} sélectionnée(s)
         </span>
         
@@ -37,8 +45,9 @@
           fill="outline" 
           size="small" 
           (click)="selectAllCandidatures()"
-          [disabled]="isAllSelected">
-          Tout sélectionner
+          [disabled]="isAllSelected"
+          class="select-all-btn">
+          {{ isAllSelected ? 'Tout sélectionné' : 'Tout sélectionner' }}
         </ion-button>
         
         <ion-button 
@@ -46,45 +55,80 @@
           color="danger" 
           size="small" 
           (click)="deleteSelectedCandidatures()"
-          [disabled]="selectedCount === 0 || isDeletingSelected">
+          [disabled]="selectedCount === 0 || isDeletingSelected"
+          class="delete-selected-btn">
           <ion-icon name="trash-outline" slot="start"></ion-icon>
-          {{ isDeletingSelected ? 'Suppression...' : 'Supprimer' }}
+          {{ isDeletingSelected ? 'Suppression...' : `Supprimer (${selectedCount})` }}
         </ion-button>
       </div>
     </div>
   </div>
 
-  <div *ngIf="isLoading" class="ion-text-center ion-padding">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Chargement des candidatures...</p>
+  <!-- États de chargement et d'erreur -->
+  <div *ngIf="isLoading" class="state-container loading-state">
+    <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+    <p class="state-message">Chargement des candidatures...</p>
   </div>
 
-  <div *ngIf="errorLoading && !isLoading" class="ion-text-center ion-padding">
-    <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
-    <p style="color: var(--ion-color-danger);">{{ errorLoading }}</p>
-    <ion-button fill="outline" (click)="loadCandidatures()">Réessayer</ion-button>
+  <div *ngIf="errorLoading && !isLoading" class="state-container error-state">
+    <ion-icon name="cloud-offline-outline" size="large" color="danger" class="state-icon"></ion-icon>
+    <p class="state-message error-message">{{ errorLoading }}</p>
+    <ion-button fill="outline" (click)="loadCandidaturesWithFilters()" class="retry-btn">
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Réessayer
+    </ion-button>
   </div>
 
-  <div *ngIf="!candidatures.length && !isLoading && !errorLoading" class="ion-text-center ion-padding">
-    <ion-icon name="file-tray-outline" size="large" color="medium"></ion-icon>
-    <p>Aucune candidature pour le moment.</p>
-    <ion-button fill="outline" (click)="goToPostulerPage()">Créer une candidature</ion-button>
+  <!-- État vide (aucune candidature) -->
+  <div *ngIf="!filteredCandidatures.length && !isLoading && !errorLoading" class="state-container empty-state">
+    <ion-icon name="file-tray-outline" size="large" color="medium" class="state-icon"></ion-icon>
+    <div class="empty-content">
+      <h3 class="empty-title">
+        {{ filterOptions.selectedStatuts.length > 0 || filterOptions.searchText ? 'Aucun résultat' : 'Aucune candidature' }}
+      </h3>
+      <p class="empty-description">
+        {{ filterOptions.selectedStatuts.length > 0 || filterOptions.searchText 
+           ? 'Essayez de modifier vos filtres pour voir plus de résultats.' 
+           : 'Commencez par créer votre première candidature.' }}
+      </p>
+      <ion-button 
+        *ngIf="!filterOptions.selectedStatuts.length && !filterOptions.searchText"
+        fill="outline" 
+        (click)="goToPostulerPage()"
+        class="create-btn">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Créer une candidature
+      </ion-button>
+    </div>
   </div>
 
-  <div *ngIf="candidatures.length && !isLoading && !errorLoading" class="ion-margin-top">
-    <app-candidature-card
-      *ngFor="let candidature of candidatures"
-      [candidature]="candidature"
-      [isSelectionMode]="isSelectionMode"
-      [isSelected]="selectedCandidatures.has(candidature.id || '')"
-      (viewDetails)="viewCandidatureDetail($event)"
-      (deleteCandidature)="deleteCandidature($event)"
-      (selectionChanged)="toggleCandidatureSelection($event)">
-    </app-candidature-card>
+  <!-- Liste des candidatures -->
+  <div *ngIf="filteredCandidatures.length && !isLoading && !errorLoading" class="candidatures-container">
+    <!-- En-tête des résultats -->
+    <div class="results-header" *ngIf="filterOptions.selectedStatuts.length > 0 || filterOptions.searchText">
+      <ion-text color="medium">
+        <h6>{{ resultsCount }} candidature(s) trouvée(s)</h6>
+      </ion-text>
+    </div>
+
+    <!-- Cartes des candidatures -->
+    <div class="candidatures-list">
+      <app-candidature-card
+        *ngFor="let candidature of filteredCandidatures; trackBy: trackByCandidatureId"
+        [candidature]="candidature"
+        [isSelectionMode]="isSelectionMode"
+        [isSelected]="selectedCandidatures.has(candidature.id || '')"
+        (viewDetails)="viewCandidatureDetail($event)"
+        (deleteCandidature)="deleteCandidature($event)"
+        (selectionChanged)="toggleCandidatureSelection($event)"
+        class="candidature-card-item">
+      </app-candidature-card>
+    </div>
   </div>
 
-  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-    <ion-fab-button (click)="goToPostulerPage()">
+  <!-- Bouton flottant d'ajout -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="add-fab">
+    <ion-fab-button (click)="goToPostulerPage()" color="primary">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>

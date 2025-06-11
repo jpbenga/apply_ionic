@@ -1,0 +1,169 @@
+<div class="filter-panel">
+  <!-- Groupes de filtres rapides (style onglets Spotify) -->
+  <div class="filter-tabs">
+    <div class="filter-tabs-container">
+      <ion-button
+        *ngFor="let group of filterGroups"
+        [fill]="getGroupFill(group.key)"
+        [color]="getGroupColor(group.key)"
+        size="small"
+        class="filter-tab"
+        [class.active]="activeGroup === group.key"
+        (click)="onGroupSelect(group.key)">
+        {{ group.label }}
+        <ion-badge 
+          *ngIf="getGroupStatutsCount(group.key) > 0" 
+          class="filter-badge"
+          [color]="activeGroup === group.key ? 'light' : 'primary'">
+          {{ getGroupStatutsCount(group.key) }}
+        </ion-badge>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Ligne des contrôles secondaires -->
+  <div class="filter-controls" *ngIf="activeGroup !== 'all' || isSearchVisible || hasActiveFilters">
+    
+    <!-- Bouton de filtrage par statut individuel -->
+    <ion-button
+      id="statut-filter-trigger"
+      fill="outline"
+      size="small"
+      class="control-button"
+      [color]="isCustomMode && customStatuts.length > 0 ? 'primary' : 'medium'">
+      <ion-icon name="funnel-outline" slot="start"></ion-icon>
+      {{ statutButtonText }}
+      <ion-badge 
+        *ngIf="selectedStatutsCount > 0" 
+        color="primary" 
+        class="control-badge">
+        {{ selectedStatutsCount }}
+      </ion-badge>
+    </ion-button>
+
+    <!-- Popover pour la sélection de statuts -->
+    <ion-popover 
+      trigger="statut-filter-trigger" 
+      [isOpen]="isStatutPopoverOpen"
+      (ionPopoverDidDismiss)="onStatutPopoverToggle(false)"
+      (ionPopoverWillPresent)="onStatutPopoverToggle(true)"
+      side="bottom"
+      alignment="start"
+      class="statut-popover">
+      <ng-template>
+        <ion-content class="statut-popover-content">
+          <!-- En-tête avec actions globales -->
+          <div class="statut-header">
+            <ion-text color="medium">
+              <h6>Filtrer par statut</h6>
+            </ion-text>
+            <ion-button 
+              fill="clear" 
+              size="small"
+              (click)="toggleAllStatuts()">
+              {{ areAllStatutsSelected ? 'Tout désélectionner' : 'Tout sélectionner' }}
+            </ion-button>
+          </div>
+
+          <!-- Liste des statuts -->
+          <ion-list class="statut-list">
+            <ion-item 
+              *ngFor="let statutItem of availableStatuts" 
+              button 
+              (click)="onStatutToggle(statutItem.value)"
+              class="statut-item">
+              <ion-checkbox 
+                slot="start"
+                [checked]="isStatutSelected(statutItem.value)"
+                (ionChange)="onStatutToggle(statutItem.value)">
+              </ion-checkbox>
+              <ion-label>
+                <h3>{{ statutItem.label }}</h3>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-content>
+      </ng-template>
+    </ion-popover>
+
+    <!-- Bouton de recherche -->
+    <ion-button
+      fill="outline"
+      size="small"
+      class="control-button"
+      [color]="searchTerm ? 'primary' : 'medium'"
+      (click)="toggleSearch()">
+      <ion-icon [name]="isSearchVisible ? 'close-outline' : 'search-outline'" slot="start"></ion-icon>
+      Rechercher
+      <ion-badge 
+        *ngIf="searchTerm" 
+        color="primary" 
+        class="control-badge">
+        1
+      </ion-badge>
+    </ion-button>
+
+    <!-- Bouton de réinitialisation -->
+    <ion-button
+      *ngIf="hasActiveFilters"
+      fill="clear"
+      size="small"
+      color="medium"
+      class="reset-button"
+      (click)="resetFilters()">
+      <ion-icon name="refresh-outline" slot="start"></ion-icon>
+      Effacer
+    </ion-button>
+  </div>
+
+  <!-- Barre de recherche (affichage conditionnel) -->
+  <div class="search-container" *ngIf="isSearchVisible">
+    <ion-searchbar
+      [(ngModel)]="searchTerm"
+      (ionInput)="onSearchChange($event)"
+      placeholder="Rechercher par entreprise, poste ou lieu..."
+      show-clear-button="focus"
+      class="custom-searchbar">
+    </ion-searchbar>
+  </div>
+
+  <!-- Chips des filtres actifs -->
+  <div class="active-filters" *ngIf="hasActiveFilters">
+    <div class="active-filters-container">
+      
+      <!-- Chip groupe actif -->
+      <ion-chip 
+        *ngIf="activeGroup !== 'all' && activeGroup !== 'custom'"
+        color="primary" 
+        class="filter-chip">
+        <ion-label>{{ getGroupLabel(activeGroup) }}</ion-label>
+        <ion-icon name="close-circle" (click)="onGroupSelect('all')"></ion-icon>
+      </ion-chip>
+
+      <!-- Chips statuts personnalisés -->
+      <ion-chip 
+        *ngFor="let statut of customStatuts"
+        color="primary" 
+        class="filter-chip">
+        <ion-label>{{ filterService.getStatutLabel(statut) }}</ion-label>
+        <ion-icon name="close-circle" (click)="onStatutToggle(statut)"></ion-icon>
+      </ion-chip>
+
+      <!-- Chip recherche -->
+      <ion-chip 
+        *ngIf="searchTerm"
+        color="primary" 
+        class="filter-chip">
+        <ion-label>Recherche: "{{ searchTerm }}"</ion-label>
+        <ion-icon name="close-circle" (click)="filterService.setSearchTerm('')"></ion-icon>
+      </ion-chip>
+    </div>
+
+    <!-- Compteur de résultats -->
+    <div class="results-info" *ngIf="resultsCount >= 0">
+      <ion-text color="medium">
+        <small>{{ resultsCount }} candidature(s) trouvée(s)</small>
+      </ion-text>
+    </div>
+  </div>
+</div>

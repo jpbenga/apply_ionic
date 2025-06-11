@@ -1,0 +1,577 @@
+// Variables de design
+:host {
+    --detail-bg: var(--ion-background-color);
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --transition-speed: 0.3s;
+    --border-radius: 12px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+  }
+  
+  // États de l'interface (chargement, erreur)
+  .state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-md);
+    min-height: 300px;
+  
+    .state-icon {
+      margin-bottom: var(--spacing-md);
+      opacity: 0.7;
+    }
+  
+    .state-message {
+      font-size: 16px;
+      color: var(--ion-color-medium);
+      margin: var(--spacing-sm) 0;
+      line-height: 1.5;
+    }
+  
+    &.loading-state {
+      .loading-spinner {
+        margin-bottom: var(--spacing-md);
+        --color: var(--ion-color-primary);
+      }
+  
+      .state-message {
+        animation: pulse 2s infinite;
+      }
+  
+      @keyframes pulse {
+        0%, 100% { opacity: 0.7; }
+        50% { opacity: 1; }
+      }
+    }
+  
+    &.error-state {
+      .error-message {
+        color: var(--ion-color-danger);
+        font-weight: 500;
+      }
+  
+      .back-btn {
+        --border-radius: 20px;
+        margin-top: var(--spacing-md);
+        
+        &:hover {
+          transform: translateY(-1px);
+        }
+      }
+    }
+  }
+  
+  // Contenu principal
+  .candidature-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 80px; // Espace pour les FAB
+  }
+  
+  // En-tête de la candidature
+  .detail-header {
+    background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+    color: var(--ion-color-primary-contrast);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+  
+    // Effet de fond subtil
+    &::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+  
+    .header-info {
+      flex: 1;
+      z-index: 1;
+  
+      .candidature-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 var(--spacing-xs) 0;
+        line-height: 1.2;
+      }
+  
+      .candidature-company {
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0 0 var(--spacing-md) 0;
+        opacity: 0.9;
+      }
+  
+      .statut-chip {
+        --background: rgba(255, 255, 255, 0.2);
+        --color: var(--ion-color-primary-contrast);
+        backdrop-filter: blur(10px);
+      }
+    }
+  
+    .header-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+      z-index: 1;
+  
+      ion-button {
+        --border-color: rgba(255, 255, 255, 0.3);
+        --color: var(--ion-color-primary-contrast);
+        --border-radius: 20px;
+        backdrop-filter: blur(10px);
+        
+        &:hover {
+          --background: rgba(255, 255, 255, 0.1);
+          transform: translateY(-1px);
+        }
+  
+        &[color="danger"] {
+          --border-color: rgba(var(--ion-color-danger-rgb), 0.7);
+          --color: var(--ion-color-danger);
+        }
+      }
+    }
+  }
+  
+  // Cartes d'information
+  ion-card {
+    --background: var(--ion-color-light);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    margin-bottom: var(--spacing-lg);
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+  
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+  
+    ion-card-header {
+      padding-bottom: var(--spacing-sm);
+  
+      ion-card-title {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+  
+        ion-icon {
+          font-size: 20px;
+          color: var(--ion-color-primary);
+        }
+  
+        ion-button {
+          margin-left: auto;
+          --border-radius: 50%;
+          --padding-start: 8px;
+          --padding-end: 8px;
+        }
+      }
+    }
+  
+    ion-card-content {
+      padding-top: var(--spacing-sm);
+  
+      ion-item {
+        --padding-start: 0;
+        --padding-end: 0;
+        --inner-padding-end: 0;
+        --border-color: transparent;
+  
+        ion-label {
+          h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ion-color-medium);
+            margin-bottom: var(--spacing-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+  
+          p {
+            font-size: 16px;
+            color: var(--ion-color-dark);
+            margin: 0;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+  
+  // Cartes spécifiques
+  .info-card {
+    ion-grid {
+      --ion-grid-padding: 0;
+  
+      ion-col {
+        padding: var(--spacing-xs);
+      }
+    }
+  }
+  
+  .status-card {
+    ion-item {
+      --background: transparent;
+      border: 1px solid var(--ion-color-light-shade);
+      border-radius: 8px;
+      margin-top: var(--spacing-sm);
+  
+      ion-select {
+        --placeholder-color: var(--ion-color-medium);
+      }
+    }
+  }
+  
+  .contact-card {
+    ion-button[fill="clear"] {
+      --color: var(--ion-color-primary);
+      
+      &:hover {
+        --background: rgba(var(--ion-color-primary-rgb), 0.1);
+      }
+    }
+  }
+  
+  // Notes personnelles
+  .notes-card {
+    .notes-display {
+      background: var(--ion-color-light-tint);
+      border-radius: 8px;
+      padding: var(--spacing-md);
+      border-left: 4px solid var(--ion-color-primary);
+  
+      p {
+        margin: 0;
+        line-height: 1.6;
+        color: var(--ion-color-dark);
+      }
+    }
+  
+    .notes-empty {
+      text-align: center;
+      padding: var(--spacing-lg);
+      color: var(--ion-color-medium);
+  
+      p {
+        margin-bottom: var(--spacing-md);
+      }
+    }
+  
+    .notes-edit {
+      ion-textarea {
+        margin-bottom: var(--spacing-md);
+        --background: var(--ion-color-light-tint);
+      }
+  
+      .edit-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+        justify-content: flex-end;
+  
+        ion-button {
+          --border-radius: 20px;
+        }
+      }
+    }
+  }
+  
+  // Suivi de la candidature
+  .suivi-card {
+    .suivi-empty {
+      text-align: center;
+      padding: var(--spacing-lg);
+      color: var(--ion-color-medium);
+  
+      p {
+        margin-bottom: var(--spacing-md);
+      }
+    }
+  
+    .suivi-list {
+      padding: 0;
+      background: transparent;
+  
+      .suivi-item {
+        --background: var(--ion-color-light-tint);
+        --border-color: var(--ion-color-light-shade);
+        border-radius: 8px;
+        margin-bottom: var(--spacing-sm);
+        transition: all var(--transition-speed) ease;
+  
+        &:hover {
+          --background: var(--ion-color-light);
+          transform: translateX(4px);
+        }
+  
+        ion-icon {
+          font-size: 20px;
+          margin-right: var(--spacing-sm);
+        }
+  
+        ion-label {
+          h3 {
+            font-weight: 600;
+            color: var(--ion-color-dark);
+            margin-bottom: var(--spacing-xs);
+          }
+  
+          p {
+            font-size: 14px;
+            color: var(--ion-color-medium);
+            margin: var(--spacing-xs) 0;
+            line-height: 1.4;
+  
+            &.suivi-notes {
+              font-style: italic;
+              background: rgba(var(--ion-color-primary-rgb), 0.1);
+              padding: var(--spacing-xs) var(--spacing-sm);
+              border-radius: 4px;
+              color: var(--ion-color-dark);
+            }
+  
+            &.suivi-date {
+              font-size: 12px;
+              font-weight: 500;
+              color: var(--ion-color-medium);
+              margin-top: var(--spacing-sm);
+            }
+          }
+        }
+  
+        ion-chip {
+          --background: rgba(var(--ion-color-primary-rgb), 0.1);
+          --color: var(--ion-color-primary);
+          font-size: 10px;
+          height: 24px;
+        }
+      }
+    }
+  }
+  
+  // Documents
+  .documents-card {
+    .documents-actions {
+      margin-top: var(--spacing-md);
+      padding-top: var(--spacing-md);
+      border-top: 1px solid var(--ion-color-light-shade);
+      text-align: center;
+    }
+  
+    ion-item {
+      --background: var(--ion-color-light-tint);
+      border-radius: 8px;
+      margin-bottom: var(--spacing-sm);
+  
+      &:last-child {
+        margin-bottom: 0;
+      }
+  
+      ion-icon[slot="start"] {
+        color: var(--ion-color-primary);
+        margin-right: var(--spacing-sm);
+      }
+  
+      ion-button {
+        --color: var(--ion-color-primary);
+      }
+    }
+  }
+  
+  // Modal d'ajout de suivi
+  .modal-content {
+    --background: var(--ion-color-light);
+  
+    .modal-form {
+      padding: var(--spacing-md);
+  
+      ion-item {
+        --background: var(--ion-background-color);
+        border-radius: 8px;
+        margin-bottom: var(--spacing-md);
+        border: 1px solid var(--ion-color-light-shade);
+  
+        ion-label {
+          font-weight: 600;
+          color: var(--ion-color-medium);
+        }
+  
+        ion-input, ion-textarea, ion-select {
+          --padding-start: var(--spacing-sm);
+          --padding-end: var(--spacing-sm);
+        }
+      }
+  
+      .modal-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        justify-content: flex-end;
+        margin-top: var(--spacing-lg);
+  
+        ion-button {
+          --border-radius: 20px;
+          flex: 1;
+  
+          @media (min-width: 576px) {
+            flex: none;
+            min-width: 120px;
+          }
+        }
+      }
+    }
+  }
+  
+  // Boutons d'action flottants
+  ion-fab {
+    ion-fab-button {
+      --background: var(--ion-color-primary);
+      --color: var(--ion-color-primary-contrast);
+      --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.4);
+      transition: all var(--transition-speed) ease;
+  
+      &:hover {
+        transform: scale(1.1);
+        --box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.5);
+      }
+  
+      &[color="secondary"] {
+        --background: var(--ion-color-secondary);
+        --box-shadow: 0 4px 16px rgba(var(--ion-color-secondary-rgb), 0.4);
+      }
+  
+      &[color="tertiary"] {
+        --background: var(--ion-color-tertiary);
+        --box-shadow: 0 4px 16px rgba(var(--ion-color-tertiary-rgb), 0.4);
+      }
+  
+      &[color="warning"] {
+        --background: var(--ion-color-warning);
+        --box-shadow: 0 4px 16px rgba(var(--ion-color-warning-rgb), 0.4);
+      }
+    }
+  
+    ion-fab-list {
+      ion-fab-button {
+        margin-bottom: var(--spacing-sm);
+      }
+    }
+  }
+  
+  // Responsive design
+  @media (max-width: 768px) {
+    .detail-header {
+      flex-direction: column;
+      align-items: flex-start;
+  
+      .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+  
+      .candidature-title {
+        font-size: 20px;
+      }
+  
+      .candidature-company {
+        font-size: 16px;
+      }
+    }
+  
+    .modal-content .modal-form .modal-actions {
+      flex-direction: column;
+  
+      ion-button {
+        margin: var(--spacing-xs) 0;
+      }
+    }
+  
+    ion-card {
+      margin-bottom: var(--spacing-md);
+  
+      &:hover {
+        transform: none; // Désactiver les effets hover sur mobile
+      }
+    }
+  }
+  
+  // Mode sombre
+  @media (prefers-color-scheme: dark) {
+    :host {
+      --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+  
+    ion-card {
+      --background: var(--ion-color-dark-tint);
+      
+      &:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      }
+    }
+  
+    .detail-header {
+      background: linear-gradient(135deg, var(--ion-color-primary-shade) 0%, var(--ion-color-primary-tint) 100%);
+    }
+  
+    .notes-card .notes-display,
+    .suivi-card .suivi-list .suivi-item {
+      --background: var(--ion-color-dark);
+      border-color: var(--ion-color-dark-shade);
+    }
+  }
+  
+  // Animations
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .candidature-detail > * {
+    animation: slideInUp 0.4s ease-out;
+    animation-fill-mode: both;
+  
+    @for $i from 1 through 10 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.1}s;
+      }
+    }
+  }
+  
+  // Performance et accessibilité
+  * {
+    will-change: transform;
+  }
+  
+  ion-button:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+  }
+  
+  // Styles pour les pipes (si nécessaires)
+  .text-with-breaks {
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }

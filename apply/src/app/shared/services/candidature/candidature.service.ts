@@ -18,15 +18,15 @@ import {
   QueryConstraint
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { Candidature, SuiviCandidature, StatutCandidature, TypeSuivi } from 'src/app/features/candidatures/models/candidature.model';
-import { StorageService } from 'src/app/shared/services/storage/storage.service';
+import { Candidature, SuiviCandidature, StatutCandidature } from 'src/app/features/candidatures/models/candidature.model';
+import { StorageService } from '../storage/storage.service';
 import { Observable, of } from 'rxjs';
 import { map, catchError, first } from 'rxjs/operators';
 
 export interface GetCandidaturesOptions {
   sortByDate?: 'asc' | 'desc';
-  statuts?: StatutCandidature[];
-  searchText?: string;
+  statuts?: StatutCandidature[];  // Filtrer par statuts
+  searchText?: string;            // Recherche textuelle
 }
 
 @Injectable({
@@ -50,8 +50,8 @@ export class CandidatureService {
       throw new Error('Utilisateur non authentifié. Impossible de créer une candidature.');
     }
 
-    let cvOriginalUrl: string | undefined = candidatureData.cvOriginalUrl;
-    let cvOriginalNom: string | undefined = candidatureData.cvOriginalNom;
+    let cvOriginalUrl: string | undefined = candidatureData['cvOriginalUrl'];
+    let cvOriginalNom: string | undefined = candidatureData['cvOriginalNom'];
 
     if (cvFileToUpload && (!cvOriginalUrl || (cvOriginalNom && cvFileToUpload.name !== cvOriginalNom) || !cvOriginalUrl?.includes('candidatures_cvs')) ) {
       try {

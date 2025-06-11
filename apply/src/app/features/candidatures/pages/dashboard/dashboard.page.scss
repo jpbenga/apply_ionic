@@ -1,46 +1,357 @@
-// Styles pour les contrôles de sélection
+// Variables de design
+:host {
+  --dashboard-bg: var(--ion-background-color);
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --transition-speed: 0.3s;
+  --border-radius: 12px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+}
+
+// Section de tri simplifiée
+.sort-section {
+  --background: var(--ion-color-light);
+  --border-radius: var(--border-radius);
+  margin: var(--spacing-md) 0 var(--spacing-sm) 0;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+
+  ion-label {
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+
+  ion-select {
+    --placeholder-color: var(--ion-color-medium);
+  }
+}
+
+// Conteneur du composant de filtrage
+.filter-panel-container {
+  margin: var(--spacing-sm) 0 var(--spacing-md) 0;
+  
+  // Animation d'entrée pour le panel de filtres
+  animation: slideInFromTop 0.4s ease-out;
+
+  @keyframes slideInFromTop {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+// Contrôles de sélection multiple (améliorés)
 .selection-controls {
-    background: var(--ion-color-light, #f5f5f5);
-    border-radius: 8px;
-    margin: 16px 0;
-    
-    ion-button {
-      --border-radius: 6px;
+  background: linear-gradient(135deg, var(--ion-color-light) 0%, var(--ion-color-light-tint) 100%);
+  border-radius: var(--border-radius);
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-md);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--ion-color-light-shade);
+
+  .selection-controls-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .selection-toggle-btn {
+    --border-radius: 20px;
+    --padding-start: var(--spacing-md);
+    --padding-end: var(--spacing-md);
+    transition: all var(--transition-speed) ease;
+
+    &:hover {
+      transform: translateY(-1px);
     }
   }
-  
-  // Animation pour les cartes sélectionnées
-  ion-card {
-    transition: all 0.3s ease;
-    
-    &.selected {
-      transform: scale(0.98);
-      box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.3);
+
+  .selection-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+
+    .selection-count {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      font-weight: 500;
+      white-space: nowrap;
     }
-  }
-  
-  // Amélioration visuelle pour les checkboxes
-  .selection-checkbox {
-    ion-icon {
-      transition: color 0.2s ease;
+
+    .select-all-btn, .delete-selected-btn {
+      --border-radius: 16px;
+      --padding-start: 12px;
+      --padding-end: 12px;
+      transition: all var(--transition-speed) ease;
+
+      &:hover:not([disabled]) {
+        transform: translateY(-1px);
+      }
+
+      &[disabled] {
+        opacity: 0.5;
+      }
     }
-  }
-  
-  // Responsive design pour les contrôles
-  @media (max-width: 768px) {
-    .selection-controls {
-      div {
-        flex-direction: column;
-        gap: 12px !important;
-        
-        > div:last-child {
-          align-self: stretch;
-          
-          ion-button {
-            flex: 1;
-            min-width: 0;
-          }
-        }
+
+    .delete-selected-btn {
+      --box-shadow: 0 2px 8px rgba(var(--ion-color-danger-rgb), 0.3);
+
+      &:hover:not([disabled]) {
+        --box-shadow: 0 4px 12px rgba(var(--ion-color-danger-rgb), 0.4);
       }
     }
   }
+}
+
+// États de l'interface (chargement, erreur, vide)
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  min-height: 200px;
+
+  .state-icon {
+    margin-bottom: var(--spacing-md);
+    opacity: 0.7;
+  }
+
+  .state-message {
+    font-size: 16px;
+    color: var(--ion-color-medium);
+    margin: var(--spacing-sm) 0;
+    line-height: 1.5;
+  }
+
+  &.loading-state {
+    .loading-spinner {
+      margin-bottom: var(--spacing-md);
+      --color: var(--ion-color-primary);
+    }
+
+    .state-message {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+  }
+
+  &.error-state {
+    .error-message {
+      color: var(--ion-color-danger);
+      font-weight: 500;
+    }
+
+    .retry-btn {
+      --border-radius: 20px;
+      margin-top: var(--spacing-md);
+      
+      &:hover {
+        transform: translateY(-1px);
+      }
+    }
+  }
+
+  &.empty-state {
+    .empty-content {
+      max-width: 300px;
+    }
+
+    .empty-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+      margin: var(--spacing-md) 0 var(--spacing-sm) 0;
+    }
+
+    .empty-description {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      line-height: 1.6;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .create-btn {
+      --border-radius: 20px;
+      --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+      
+      &:hover {
+        transform: translateY(-2px);
+        --box-shadow: 0 6px 16px rgba(var(--ion-color-primary-rgb), 0.4);
+      }
+    }
+  }
+}
+
+// Conteneur des candidatures
+.candidatures-container {
+  .results-header {
+    margin-bottom: var(--spacing-md);
+    padding: 0 var(--spacing-xs);
+
+    h6 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+  }
+
+  .candidatures-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+
+    .candidature-card-item {
+      animation: fadeInUp 0.4s ease-out;
+      animation-fill-mode: both;
+
+      // Animation échelonnée pour les cartes
+      @for $i from 1 through 20 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{$i * 0.05}s;
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      // Effet hover pour les cartes
+      &:hover {
+        transform: translateY(-2px);
+        transition: transform var(--transition-speed) ease;
+      }
+
+      // Animation pour les cartes sélectionnées
+      &.selected {
+        transform: scale(0.98);
+        box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.3);
+      }
+    }
+  }
+}
+
+// Bouton flottant d'ajout (amélioré)
+.add-fab {
+  ion-fab-button {
+    --background: var(--ion-color-primary);
+    --color: var(--ion-color-primary-contrast);
+    --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.4);
+    --border-radius: 50%;
+    transition: all var(--transition-speed) ease;
+
+    &:hover {
+      transform: scale(1.1);
+      --box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.5);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    ion-icon {
+      font-size: 28px;
+      font-weight: bold;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .selection-controls {
+    padding: var(--spacing-sm);
+
+    .selection-controls-container {
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--spacing-md);
+    }
+
+    .selection-actions {
+      justify-content: center;
+      
+      .selection-count {
+        order: -1;
+        text-align: center;
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .select-all-btn, .delete-selected-btn {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  }
+
+  .candidatures-list {
+    gap: var(--spacing-sm);
+  }
+
+  .state-container {
+    padding: var(--spacing-md) var(--spacing-sm);
+    min-height: 150px;
+
+    .state-message {
+      font-size: 14px;
+    }
+
+    &.empty-state .empty-title {
+      font-size: 18px;
+    }
+  }
+}
+
+// Amélioration pour le mode sombre
+@media (prefers-color-scheme: dark) {
+  :host {
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .sort-section {
+    --background: var(--ion-color-dark-tint);
+  }
+
+  .selection-controls {
+    background: linear-gradient(135deg, var(--ion-color-dark) 0%, var(--ion-color-dark-tint) 100%);
+    border-color: var(--ion-color-dark-shade);
+  }
+}
+
+// Performance et accessibilité
+.candidatures-container, .selection-controls, .state-container {
+  will-change: transform;
+}
+
+// Focus states pour l'accessibilité
+ion-button:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+// Animation de chargement pour le refresh
+ion-content.refreshing {
+  --background: var(--ion-color-light);
+  transition: background-color 0.3s ease;
+}
