@@ -7,13 +7,16 @@ import { map, switchMap } from 'rxjs/operators';
 import {
   IonHeader, IonContent, IonSpinner, IonIcon, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle,
   IonItem, IonLabel, IonSelect, IonSelectOption, IonTextarea, IonInput, IonChip,
-  IonList, IonModal, IonButtons, IonTitle, IonToolbar, IonFab, IonFabButton, IonFabList, IonGrid, IonRow, IonCol
+  IonList, IonModal, IonButtons, IonTitle, IonToolbar, IonFab, IonFabButton, IonFabList, IonGrid, IonRow, IonCol,
+  IonCardSubtitle
+  
 } from '@ionic/angular/standalone';
 import { HeaderService } from 'src/app/shared/services/header/header.service';
 import { CandidatureService } from 'src/app/shared/services/candidature/candidature.service';
 import { Candidature, SuiviCandidature, TypeSuivi, StatutCandidature } from '../../../models/candidature.model';
 import { UserHeaderComponent } from 'src/app/shared/components/user-header/user-header.component';
 import { ToastController, AlertController, LoadingController } from '@ionic/angular/standalone';
+import { CvReconstructionService, ReconstructedCv } from 'src/app/services/cv-reconstruction/cv-reconstruction.service';
 
 @Component({
   selector: 'app-candidature-detail',
@@ -27,7 +30,7 @@ import { ToastController, AlertController, LoadingController } from '@ionic/angu
     IonHeader, IonContent, IonSpinner, IonIcon, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle,
     IonItem, IonLabel, IonSelect, IonSelectOption, IonTextarea, IonInput, IonChip,
     IonList, IonModal, IonButtons, IonTitle, IonToolbar, IonFab, IonFabButton, IonFabList, IonGrid, IonRow, IonCol,
-    UserHeaderComponent
+    UserHeaderComponent, IonGrid, IonRow, IonCol, IonChip, IonCardSubtitle
   ]
 })
 export class CandidatureDetailPage implements OnInit, OnDestroy {
@@ -47,6 +50,12 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   public nouveauSuiviDescription: string = '';
   public nouveauSuiviNotes: string = '';
   public nouveauSuiviCommentaire: string = '';
+
+  // ✅ NOUVELLES PROPRIÉTÉS pour la reconstruction CV
+  reconstructedCv: ReconstructedCv | null = null;
+  isReconstructingCv: boolean = false;
+  showCvPreview: boolean = false;
+  cvPreviewText: string = '';
 
   // Options pour les selects
   public statutsCandidature: { value: StatutCandidature, label: string }[] = [
@@ -91,7 +100,8 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private toastController: ToastController,
     private alertController: AlertController,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private cvReconstructionService: CvReconstructionService
   ) {
     this.candidature$ = this.route.paramMap.pipe(
       map(params => params.get('id') || ''),
@@ -536,5 +546,89 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     this.router.navigate(['/tabs/postuler'], { 
       queryParams: { candidatureId: this.candidatureId } 
     });
+  }
+   /**
+   * Reconstruire le CV de la candidature
+   */
+   async reconstructCandidatureCv() {
+    if (!this.candidature) return;
+
+    this.isReconstructingCv = true;
+    
+    try {
+      console.log('🔧 Reconstruction du CV pour candidature:', this.candidature.id);
+      
+      // Utiliser le service de reconstruction
+      this.reconstructedCv = this.cvReconstructionService.reconstructCvFromCandidature(this.candidature);
+      
+      if (this.reconstructedCv.hasValidData) {
+        // Générer le texte de prévisualisation
+        this.cvPreviewText = this.cvReconstructionService.generateCvPreviewText(this.reconstructedCv);
+        this.showCvPreview = true;
+        
+        console.log('✅ CV reconstruit avec succès');
+        // Réutiliser votre méthode toast existante si elle existe
+        // this.presentToast('CV reconstruit avec succès !', 'success');
+      } else {
+        console.warn('❌ Impossible de reconstruire le CV:', this.reconstructedCv.missingFields);
+        // this.presentToast('Impossible de reconstruire le CV de cette candidature', 'warning');
+      }
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de la reconstruction:', error);
+      // this.presentToast('Erreur lors de la reconstruction du CV', 'danger');
+    } finally {
+      this.isReconstructingCv = false;
+    }
+  }
+
+  /**
+   * Vérifier si la reconstruction est possible
+   */
+  canReconstructCv(): boolean {
+    return this.candidature ? this.cvReconstructionService.canReconstructCv(this.candidature) : false;
+  }
+
+  /**
+   * Obtenir les stats du CV
+   */
+  getCvStats(): { experiences: number; formations: number; competences: number; total: number } {
+    return this.candidature ? this.cvReconstructionService.getCvDataStats(this.candidature) : 
+           { experiences: 0, formations: 0, competences: 0, total: 0 };
+  }
+
+  /**
+   * Obtenir les infos template
+   */
+  getTemplateInfo(): { templateName: string; themeName: string } {
+    return this.candidature ? this.cvReconstructionService.getCandidatureTemplateInfo(this.candidature) :
+           { templateName: 'Inconnu', themeName: '#007bff' };
+  }
+
+  /**
+   * Fermer la prévisualisation
+   */
+  closeCvPreview() {
+    this.showCvPreview = false;
+    this.reconstructedCv = null;
+    this.cvPreviewText = '';
+  }
+
+  /**
+   * Télécharger le CV reconstruit (placeholder pour l'instant)
+   */
+  async downloadReconstructedCv() {
+    if (!this.reconstructedCv || !this.reconstructedCv.hasValidData) {
+      // this.presentToast('Aucun CV à télécharger', 'warning');
+      return;
+    }
+
+    // TODO: Implémenter la génération PDF avec le CV reconstruit
+    // Utiliser votre logique de génération PDF existante avec :
+    // - this.reconstructedCv.cvData
+    // - this.reconstructedCv.template  
+    // - this.reconstructedCv.theme
+    console.log('📄 CV à télécharger:', this.reconstructedCv);
+    // this.presentToast('Fonctionnalité de téléchargement à implémenter', 'primary');
   }
 }

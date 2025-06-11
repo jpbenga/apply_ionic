@@ -499,9 +499,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Sauvegarde la candidature
-   */
   async saveCandidature() {
     if (this.isInteractionDisabled) return;
     
@@ -528,20 +525,21 @@ export class PostulerPage implements OnInit, OnDestroy {
       poste: jobTitle,
       offreTexteComplet: this.jobOfferText,
       cvOriginalNom: `CV_${jobTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.pdf`,
-      // cvOriginalUrl omis car pas de fichier uploadé
       cvTexteExtrait: this.generateTextFromCvData(this.currentCvData),
       analyseATS: this.atsAnalysisResult.analysisText,
-      lettreMotivationGeneree: this.generatedCoverLetter
+      lettreMotivationGeneree: this.generatedCoverLetter,
+      
+      // ✅ NOUVEAU : Sauvegarder le snapshot CV pour reconstruction
+      cvDataSnapshot: {
+        experiences: this.currentCvData.experiences,
+        formations: this.currentCvData.formations,
+        competences: this.currentCvData.competences
+      },
+      cvTemplateId: this.selectedTemplate?.id || 'modern',
+      cvTheme: this.selectedTheme
     };
   
     try {
-      // Générer le CV final avec les données améliorées
-      if (this.selectedTemplate) {
-        await this.cvGenerationService.saveGeneratedCv(
-          this.selectedTemplate.id, 
-          this.selectedTheme
-        );
-      }
   
       await this.candidatureService.createCandidature(candidatureDetails);
       
@@ -553,8 +551,6 @@ export class PostulerPage implements OnInit, OnDestroy {
       let errorMessage = "Erreur lors de la sauvegarde de la candidature.";
       if (error instanceof Error) {
         errorMessage = error.message;
-      } else if (typeof error === 'string') { 
-        errorMessage = error; 
       }
       this.presentToast(errorMessage, 'danger');
     } finally {

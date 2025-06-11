@@ -1,4 +1,8 @@
 import { Timestamp } from '@angular/fire/firestore';
+import { Competence } from 'src/app/models/competence.model';
+import { CvTheme } from 'src/app/models/cv-template.model';
+import { Experience } from 'src/app/models/experience.model';
+import { Formation } from 'src/app/models/formation.model';
 
 export type StatutCandidature = 
   | 'brouillon'
@@ -89,6 +93,14 @@ export interface Candidature {
   notesPersonnelles?: string;
   salairePropose?: number;
   dateReponseAttendue?: Timestamp;
+
+  cvDataSnapshot?: {
+    experiences: Experience[];
+    formations: Formation[];
+    competences: Competence[];
+  };
+  cvTemplateId?: string;
+  cvTheme?: CvTheme;
   
   // Timestamps
   createdAt: any;

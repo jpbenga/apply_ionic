@@ -5,7 +5,7 @@ import {
   IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
   IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
   IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
-  IonCardTitle, IonCardSubtitle, IonCardContent, IonProgressBar, IonText
+  IonCardTitle, IonCardSubtitle, IonCardContent
 } from '@ionic/angular/standalone';
 import { UserHeaderComponent } from '../../shared/components/user-header/user-header.component';
 import { HeaderService } from '../../shared/services/header/header.service';
@@ -38,12 +38,12 @@ import { CvDataValidationModalComponent } from 'src/app/components/cv-data-valid
   standalone: true,
   imports: [
     CommonModule, FormsModule, DatePipe,
-    IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
-    IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
-    IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
-    IonCardTitle, IonCardSubtitle, IonCardContent, IonProgressBar, IonText,
-    UserHeaderComponent, CvSelectorComponent, CvPreviewComponent, 
-    CvUploadComponent, CvDataValidationModalComponent
+  IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
+  IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
+  IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
+  IonCardTitle, IonCardSubtitle, IonCardContent,
+  UserHeaderComponent, CvSelectorComponent, CvPreviewComponent, 
+  CvUploadComponent
   ],
 })
 export class MyCvPage implements OnInit, OnDestroy {
@@ -64,6 +64,11 @@ export class MyCvPage implements OnInit, OnDestroy {
 
   public selectedGeneratedCv: GeneratedCv | null = null;
 
+  // ✅ NOUVELLES PROPRIÉTÉS pour gestion contrôlée du CvGenerationService
+  public isGeneratingCv: boolean = false;
+  public hasGeneratedCvs: boolean = false;
+  public generatedCvsCount: number = 0;
+
   private isModalOpening: boolean = false;
   private loadingElement: HTMLIonLoadingElement | null = null;
 
@@ -76,17 +81,19 @@ export class MyCvPage implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private loadingCtrl: LoadingController,
     private cvTemplateService: CvTemplateService,
-    private cvGenerationService: CvGenerationService,
+    private cvGenerationService: CvGenerationService, // ✅ GARDÉ pour usage contrôlé
     private cvParsingService: CvParsingService
   ) {}
 
   ngOnInit() {
+    this.checkExistingGeneratedCvs();
   }
 
   ionViewWillEnter() {
     this.headerService.updateTitle('Mon CV Structuré');
     this.headerService.setShowBackButton(true);
     this.loadAllCvData();
+    this.checkExistingGeneratedCvs();
   }
 
   ngOnDestroy() {
@@ -94,6 +101,106 @@ export class MyCvPage implements OnInit, OnDestroy {
     this.destroy$.complete();
     if (this.loadingElement) {
       this.loadingElement.dismiss();
+    }
+  }
+
+  // ✅ NOUVELLE MÉTHODE - Vérifier les CV générés existants
+  private checkExistingGeneratedCvs() {
+    this.cvGenerationService.getGeneratedCvs().pipe(
+      first(),
+      catchError(error => {
+        console.error('Erreur chargement CV générés:', error);
+        return of([]);
+      })
+    ).subscribe(cvs => {
+      this.hasGeneratedCvs = cvs.length > 0;
+      this.generatedCvsCount = cvs.length;
+      
+      if (cvs.length > 1) {
+        console.warn(`⚠️ ${cvs.length} CV générés trouvés - nettoyage recommandé`);
+      }
+    });
+  }
+
+  // ✅ NOUVELLE MÉTHODE - Nettoyage des doublons (à exécuter manuellement)
+  async cleanupDuplicateCvs() {
+    const alert = await this.alertCtrl.create({
+      header: 'Nettoyer les CV en double',
+      message: `Vous avez ${this.generatedCvsCount} CV générés. Voulez-vous supprimer les doublons et ne garder que le plus récent ?`,
+      buttons: [
+        {
+          text: 'Annuler',
+          role: 'cancel'
+        },
+        {
+          text: 'Nettoyer',
+          role: 'confirm',
+          handler: async () => {
+            await this.performCleanup();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private async performCleanup() {
+    try {
+      this.presentToast('Nettoyage en cours...', 'primary');
+      
+      const result = await this.cvGenerationService.cleanupDuplicateCvs();
+      
+      this.presentToast(
+        `✅ Nettoyage terminé: ${result.deleted} supprimés, ${result.kept} conservés`, 
+        'success'
+      );
+      
+      // Recharger l'état
+      this.checkExistingGeneratedCvs();
+      
+    } catch (error) {
+      console.error('❌ Erreur lors du nettoyage:', error);
+      this.presentToast('Erreur lors du nettoyage des CV', 'danger');
+    }
+  }
+
+  // ✅ NOUVELLE MÉTHODE - Génération contrôlée de CV
+  async generateControlledCv() {
+    // Vérifier qu'il n'y a pas déjà une génération en cours
+    if (this.cvGenerationService.isSavingCv() || this.isGeneratingCv) {
+      this.presentToast('Génération déjà en cours...', 'warning');
+      return;
+    }
+
+    // Vérifier qu'il y a des données
+    const [experiences, formations, competences] = await Promise.all([
+      this.cvDataService.getExperiences().pipe(first()).toPromise(),
+      this.cvDataService.getFormations().pipe(first()).toPromise(),
+      this.cvDataService.getCompetences().pipe(first()).toPromise()
+    ]);
+
+    const hasData = (experiences?.length || 0) + (formations?.length || 0) + (competences?.length || 0) > 0;
+    
+    if (!hasData) {
+      this.presentToast('Ajoutez au moins une expérience, formation ou compétence avant de générer un CV', 'warning');
+      return;
+    }
+
+    this.isGeneratingCv = true;
+
+    try {
+      // Générer UN seul CV avec template par défaut
+      const cvId = await this.cvGenerationService.saveGeneratedCv('modern', { primaryColor: '#007bff' });
+      
+      this.presentToast('CV de prévisualisation généré avec succès !', 'success');
+      this.checkExistingGeneratedCvs();
+      
+    } catch (error) {
+      console.error('Erreur génération CV:', error);
+      this.presentToast('Erreur lors de la génération du CV', 'danger');
+    } finally {
+      this.isGeneratingCv = false;
     }
   }
 
@@ -307,12 +414,39 @@ export class MyCvPage implements OnInit, OnDestroy {
     const { data, role } = await modal.onWillDismiss();
     if (role === 'generate') {
       this.presentToast('CV mis à jour avec succès !', 'success');
+      this.checkExistingGeneratedCvs();
     }
   }
 
+  // ✅ MÉTHODE MODIFIÉE - Plus de duplication automatique
   async generateNewCvFromSelected() {
     if (!this.selectedGeneratedCv) return;
     
+    // Avertir l'utilisateur avant de créer un nouveau CV
+    const alert = await this.alertCtrl.create({
+      header: 'Générer un nouveau CV',
+      message: 'Voulez-vous vraiment générer un nouveau CV ? Cela créera une copie du CV sélectionné.',
+      buttons: [
+        {
+          text: 'Annuler',
+          role: 'cancel'
+        },
+        {
+          text: 'Générer',
+          role: 'confirm',
+          handler: async () => {
+            await this.performCvDuplication();
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private async performCvDuplication() {
+    if (!this.selectedGeneratedCv) return;
+
     try {
       const newCvId = await this.cvGenerationService.saveGeneratedCv(
         this.selectedGeneratedCv.templateId,
@@ -320,6 +454,7 @@ export class MyCvPage implements OnInit, OnDestroy {
       );
       
       this.presentToast('CV dupliqué avec succès !', 'success');
+      this.checkExistingGeneratedCvs();
     } catch (error) {
       console.error('Erreur lors de la duplication:', error);
       this.presentToast('Erreur lors de la duplication du CV', 'danger');
@@ -533,11 +668,12 @@ export class MyCvPage implements OnInit, OnDestroy {
   private isPartialCompetenceData(data: any): data is Partial<Omit<Competence, 'userId'>> { return data && data.nom; }
   private isEditableCompetence(comp?: Competence): comp is Competence & { id: string } { return !!(comp && comp.id); }
 
-  async presentToast(message: string, color: 'success' | 'danger' | 'warning') {
+  async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary') {
     const toast = await this.toastCtrl.create({ message, duration: 2000, position: 'bottom', color });
     toast.present();
   }
 
+  // ✅ MÉTHODE MODIFIÉE - Génération contrôlée via modal
   async generateCv() {
     const modal = await this.modalCtrl.create({
       component: GenerateCvModalComponent,
@@ -552,6 +688,7 @@ export class MyCvPage implements OnInit, OnDestroy {
     if (role === 'generate' && data) {
       console.log('CV généré avec succès:', data);
       this.presentToast(`CV généré avec le template: ${data.template?.name}`, 'success');
+      this.checkExistingGeneratedCvs();
     } else {
       console.log('Modal fermée avec le rôle:', role);
     }
