@@ -18,8 +18,8 @@ import {
   QueryConstraint
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { Candidature, SuiviCandidature, StatutCandidature } from '../models/candidature.model'; // MODIFIED
-import { StorageService } from '../../../shared/services/storage/storage.service'; // MODIFIED
+import { Candidature, SuiviCandidature, StatutCandidature } from '../../models/candidature.model'; // CORRECTED
+import { StorageService } from '../../../../shared/services/storage/storage.service'; // CORRECTED
 import { Observable, of } from 'rxjs';
 import { map, catchError, first } from 'rxjs/operators';
 
@@ -45,8 +45,8 @@ export class CandidatureService {
       throw new Error('Utilisateur non authentifié. Impossible de créer une candidature.');
     }
 
-    let cvOriginalUrl: string | undefined = candidatureData.cvOriginalUrl;
-    let cvOriginalNom: string | undefined = candidatureData.cvOriginalNom;
+    let cvOriginalUrl: string | undefined = candidatureData['cvOriginalUrl'];
+    let cvOriginalNom: string | undefined = candidatureData['cvOriginalNom'];
 
     if (cvFileToUpload && (!cvOriginalUrl || (cvOriginalNom && cvFileToUpload.name !== cvOriginalNom) || !cvOriginalUrl?.includes('candidatures_cvs')) ) {
       try {

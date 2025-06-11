@@ -9,10 +9,10 @@ import {
   IonFab, IonFabButton,
   IonModal, IonButtons
 } from '@ionic/angular/standalone';
-import { HeaderService } from '../../../services/header/header.service';
+import { HeaderService } from '../../../shared/services/header/header.service'; // CORRECTED
 import { ProfileService } from '../services/profile.service';
 import { UserProfile } from '../models/user-profile.model';
-import { AuthService } from '../../../services/auth/auth.service';
+import { AuthService } from '../../auth/services/auth/auth.service'; // CORRECTED
 import { User } from '@angular/fire/auth';
 import { UserHeaderComponent } from '../../../shared/components/user-header/user-header.component'; // MODIFIED
 import { ToastController, ModalController } from '@ionic/angular/standalone';
