@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Functions, httpsCallable, HttpsCallableResult } from '@angular/fire/functions';
 // import { StorageService } from '../storage/storage.service'; // SUPPRIMÉ
-import { FileExtractionService } from '../file-extraction/file-extraction.service';
+import { FileExtractionService } from '../../shared/services/file-extraction/file-extraction.service'; // MODIFIED
 import { getAtsAnalysisPrompt } from './prompts/ats-analysis.prompt';
 import { getCoverLetterPrompt } from './prompts/cover-letter.prompt';
 import { getCvImprovementPrompt } from './prompts/cv-improvement.prompt';

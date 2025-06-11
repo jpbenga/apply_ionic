@@ -12,7 +12,7 @@ import {
 // } from 'ionicons/icons'; // SUPPRIMÉ
 // import { Functions, httpsCallable } from '@angular/fire/functions'; // SUPPRIMÉ
 // import { StorageService } from 'src/app/services/storage/storage.service'; // SUPPRIMÉ
-import { FileExtractionService } from 'src/app/services/file-extraction/file-extraction.service'; // AJOUTÉ
+import { FileExtractionService } from '../../shared/services/file-extraction/file-extraction.service'; // MODIFIED
 
 export interface CvUploadResult {
   success: boolean;

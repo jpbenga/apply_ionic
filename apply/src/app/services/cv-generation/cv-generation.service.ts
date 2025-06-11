@@ -9,7 +9,7 @@ import { Observable, of, combineLatest } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { CvData, GeneratedCv, CvTheme } from 'src/app/models/cv-template.model';
 import { CvDataService } from '../cv-data/cv-data.service';
-import { ProfileService } from '../profile/profile.service';
+import { ProfileService } from '../../features/profile/services/profile.service'; // MODIFIED
 
 @Injectable({
   providedIn: 'root'
