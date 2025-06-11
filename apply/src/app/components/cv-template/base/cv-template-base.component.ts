@@ -1,7 +1,7 @@
 // src/app/components/cv-templates/base/cv-template-base.component.ts
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CvData, CvTheme } from 'src/app/models/cv-template.model';
-import { UserProfile } from 'src/app/models/user-profile.model';
+import { UserProfile } from '../../../features/profile/models/user-profile.model'; // MODIFIED
 
 @Component({
   selector: 'app-cv-template-base',

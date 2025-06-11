@@ -5,13 +5,14 @@ import {
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonButton, IonIcon, IonProgressBar, IonText
 } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import {
-  cloudUploadOutline, documentTextOutline, checkmarkCircleOutline,
-  alertCircleOutline, closeCircleOutline
-} from 'ionicons/icons';
-import { Functions, httpsCallable } from '@angular/fire/functions';
-import { StorageService } from 'src/app/services/storage/storage.service';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import {
+//   cloudUploadOutline, documentTextOutline, checkmarkCircleOutline,
+//   alertCircleOutline, closeCircleOutline
+// } from 'ionicons/icons'; // SUPPRIMÉ
+// import { Functions, httpsCallable } from '@angular/fire/functions'; // SUPPRIMÉ
+// import { StorageService } from 'src/app/services/storage/storage.service'; // SUPPRIMÉ
+import { FileExtractionService } from '../../shared/services/file-extraction/file-extraction.service'; // MODIFIED
 
 export interface CvUploadResult {
   success: boolean;
@@ -43,13 +44,14 @@ export class CvUploadComponent {
   public currentStep: string = '';
 
   constructor(
-    private storageService: StorageService,
-    private functions: Functions
+    // private storageService: StorageService, // SUPPRIMÉ
+    // private functions: Functions,           // SUPPRIMÉ
+    private fileExtractionService: FileExtractionService, // AJOUTÉ
   ) {
-    addIcons({
-      cloudUploadOutline, documentTextOutline, checkmarkCircleOutline,
-      alertCircleOutline, closeCircleOutline
-    });
+    // addIcons({ // SUPPRIMÉ
+    //   cloudUploadOutline, documentTextOutline, checkmarkCircleOutline,
+    //   alertCircleOutline, closeCircleOutline
+    // });
   }
 
   onFileSelected(event: any) {
@@ -78,25 +80,11 @@ export class CvUploadComponent {
     if (!this.selectedFile) return;
 
     try {
-      this.uploadStatus = 'uploading';
-      this.currentStep = 'Upload du fichier...';
+      this.uploadStatus = 'extracting'; // Ou 'processing' si on veut être plus générique
+      this.currentStep = 'Traitement du fichier...';
 
-      // Upload vers Firebase Storage
-      const fileUrl = await this.storageService.uploadFile(
-        this.selectedFile,
-        'temp_cvs'
-      );
-
-      this.uploadStatus = 'extracting';
-      this.currentStep = 'Extraction du texte...';
-
-      // Extraction du texte selon le type de fichier
-      let extractedText = '';
-      if (this.selectedFile.type === 'application/pdf') {
-        extractedText = await this.extractPdfText(fileUrl, this.selectedFile.name);
-      } else {
-        extractedText = await this.extractDocxText(fileUrl, this.selectedFile.name);
-      }
+      // Appel au nouveau service pour l'upload ET l'extraction
+      const extractedText = await this.fileExtractionService.extractTextFromFile(this.selectedFile);
 
       this.extractedText = extractedText;
       this.uploadStatus = 'success';
@@ -115,35 +103,7 @@ export class CvUploadComponent {
     }
   }
 
-  private async extractPdfText(fileUrl: string, fileName: string): Promise<string> {
-    const extractPdfFunction = httpsCallable(this.functions, 'extractPdfText');
-    const result = await extractPdfFunction({
-      pdfUrl: fileUrl,
-      fileName: fileName
-    });
-
-    const data = result.data as any;
-    if (!data.success) {
-      throw new Error(data.message || 'Erreur lors de l\'extraction PDF');
-    }
-
-    return data.text;
-  }
-
-  private async extractDocxText(fileUrl: string, fileName: string): Promise<string> {
-    const extractDocxFunction = httpsCallable(this.functions, 'extractDocxText');
-    const result = await extractDocxFunction({
-      docxUrl: fileUrl,
-      fileName: fileName
-    });
-
-    const data = result.data as any;
-    if (!data.success) {
-      throw new Error(data.message || 'Erreur lors de l\'extraction DOCX');
-    }
-
-    return data.text;
-  }
+  // Les méthodes extractPdfText et extractDocxText sont supprimées.
 
   private showError(message: string) {
     this.uploadStatus = 'error';

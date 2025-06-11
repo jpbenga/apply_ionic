@@ -8,8 +8,8 @@ import {
   IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
   IonCardTitle, IonCardSubtitle, IonCardContent, IonProgressBar, IonText
 } from '@ionic/angular/standalone';
-import { UserHeaderComponent } from 'src/app/components/user-header/user-header.component';
-import { HeaderService } from 'src/app/services/header/header.service';
+import { UserHeaderComponent } from '../../shared/components/user-header/user-header.component'; // MODIFIED
+import { HeaderService } from '../../shared/services/header/header.service'; // MODIFIED
 import { ModalController, ToastController, AlertController } from '@ionic/angular/standalone';
 import { ExperienceModalComponent } from 'src/app/components/experience-modal/experience-modal.component';
 import { FormationModalComponent } from 'src/app/components/formation-modal/formation-modal.component';
@@ -17,17 +17,17 @@ import { CompetenceModalComponent } from 'src/app/components/competence-modal/co
 import { Experience } from 'src/app/models/experience.model';
 import { Formation } from 'src/app/models/formation.model';
 import { Competence } from 'src/app/models/competence.model';
-import { AuthService } from 'src/app/services/auth/auth.service';
+import { AuthService } from '../../features/auth/services/auth/auth.service'; // MODIFIED
 import { CvDataService } from 'src/app/services/cv-data/cv-data.service';
 import { Observable, of, Subject } from 'rxjs';
 import { catchError, finalize, takeUntil, first, timeout } from 'rxjs/operators';
 import { Timestamp } from '@angular/fire/firestore';
-import { addIcons } from 'ionicons';
-import {
-  addOutline, listOutline, businessOutline, createOutline, trashOutline,
-  schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
-  copyOutline, warningOutline
-} from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import {
+//   addOutline, listOutline, businessOutline, createOutline, trashOutline,
+//   schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
+//   copyOutline, warningOutline
+// } from 'ionicons/icons'; // SUPPRIMÉ
 import { GenerateCvModalComponent } from 'src/app/components/generate-cv-modal/generate-cv-modal.component';
 import { CvSelectorComponent } from 'src/app/components/cv-selector/cv-selector.component';
 import { CvPreviewComponent } from 'src/app/components/cv-preview/cv-preview.component';
@@ -88,11 +88,11 @@ private isModalOpening: boolean = false;
     private cvGenerationService: CvGenerationService,
     private cvParsingService: CvParsingService
   ) {
-    addIcons({
-      addOutline, listOutline, businessOutline, createOutline, trashOutline,
-      schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
-      copyOutline, warningOutline
-    });
+    // addIcons({ // SUPPRIMÉ
+    //   addOutline, listOutline, businessOutline, createOutline, trashOutline,
+    //   schoolOutline, starOutline, cloudOfflineOutline, documentTextOutline,
+    //   copyOutline, warningOutline
+    // });
   }
 
   ngOnInit() {

@@ -7,8 +7,8 @@ import {
 } from '@ionic/angular/standalone'; // IonTextarea et IonCheckbox non requis ici
 import { ModalController, ToastController } from '@ionic/angular/standalone';
 import { Competence } from 'src/app/models/competence.model';
-import { addIcons } from 'ionicons';
-import { closeCircleOutline, saveOutline } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { closeCircleOutline, saveOutline } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-competence-modal',
@@ -35,7 +35,7 @@ export class CompetenceModalComponent implements OnInit {
     private toastCtrl: ToastController,
     private fb: FormBuilder
   ) {
-    addIcons({ closeCircleOutline, saveOutline });
+    // addIcons({ closeCircleOutline, saveOutline }); // SUPPRIMÉ
     this.competenceForm = this.fb.group({
       nom: ['', Validators.required],
       categorie: [''] // Optionnel

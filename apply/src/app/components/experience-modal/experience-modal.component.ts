@@ -4,8 +4,8 @@ import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, Validators } 
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon, IonItem, IonLabel, IonInput, IonTextarea, IonCheckbox, IonDatetime, IonDatetimeButton, IonModal as IonModalController } from '@ionic/angular/standalone'; // Renommé IonModal en IonModalController pour éviter conflit
 import { ModalController, ToastController } from '@ionic/angular/standalone';
 import { Experience } from 'src/app/models/experience.model'; 
-import { addIcons } from 'ionicons';
-import { closeCircleOutline, saveOutline, trashOutline } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { closeCircleOutline, saveOutline, trashOutline } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-experience-modal',
@@ -31,7 +31,7 @@ export class ExperienceModalComponent implements OnInit {
     private toastCtrl: ToastController,
     private fb: FormBuilder
   ) {
-    addIcons({ closeCircleOutline, saveOutline, trashOutline });
+    // addIcons({ closeCircleOutline, saveOutline, trashOutline }); // SUPPRIMÉ
     this.experienceForm = this.fb.group({
       poste: ['', Validators.required],
       entreprise: ['', Validators.required],

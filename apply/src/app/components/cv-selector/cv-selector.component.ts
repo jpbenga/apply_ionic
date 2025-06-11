@@ -8,8 +8,8 @@ import { CvGenerationService } from 'src/app/services/cv-generation/cv-generatio
 import { CvTemplateService } from 'src/app/services/cv-template/cv-template.service';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { addIcons } from 'ionicons';
-import { documentTextOutline, trashOutline, createOutline, eyeOutline } from 'ionicons/icons';
+// import { addIcons } from 'ionicons'; // SUPPRIMÉ
+// import { documentTextOutline, trashOutline, createOutline, eyeOutline } from 'ionicons/icons'; // SUPPRIMÉ
 
 @Component({
   selector: 'app-cv-selector',
@@ -42,7 +42,7 @@ export class CvSelectorComponent implements OnInit, OnDestroy {
     private cvGenerationService: CvGenerationService,
     private cvTemplateService: CvTemplateService
   ) {
-    addIcons({ documentTextOutline, trashOutline, createOutline, eyeOutline });
+    // addIcons({ documentTextOutline, trashOutline, createOutline, eyeOutline }); // SUPPRIMÉ
     this.generatedCvs$ = this.cvGenerationService.getGeneratedCvs();
   }
 
