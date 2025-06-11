@@ -1,18 +1,10 @@
-// src/app/components/cv-upload/cv-upload.component.ts
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
   IonButton, IonIcon, IonProgressBar, IonText
 } from '@ionic/angular/standalone';
-// import { addIcons } from 'ionicons'; // SUPPRIMÉ
-// import {
-//   cloudUploadOutline, documentTextOutline, checkmarkCircleOutline,
-//   alertCircleOutline, closeCircleOutline
-// } from 'ionicons/icons'; // SUPPRIMÉ
-// import { Functions, httpsCallable } from '@angular/fire/functions'; // SUPPRIMÉ
-// import { StorageService } from 'src/app/services/storage/storage.service'; // SUPPRIMÉ
-import { FileExtractionService } from '../../shared/services/file-extraction/file-extraction.service'; // MODIFIED
+import { FileExtractionService } from '../../shared/services/file-extraction/file-extraction.service';
 
 export interface CvUploadResult {
   success: boolean;
@@ -35,6 +27,7 @@ type UploadStatus = 'idle' | 'uploading' | 'extracting' | 'success' | 'error';
   ]
 })
 export class CvUploadComponent {
+  @Output() processingStarted = new EventEmitter<void>();
   @Output() uploadComplete = new EventEmitter<CvUploadResult>();
 
   public uploadStatus: UploadStatus = 'idle';
@@ -44,28 +37,19 @@ export class CvUploadComponent {
   public currentStep: string = '';
 
   constructor(
-    // private storageService: StorageService, // SUPPRIMÉ
-    // private functions: Functions,           // SUPPRIMÉ
-    private fileExtractionService: FileExtractionService, // AJOUTÉ
-  ) {
-    // addIcons({ // SUPPRIMÉ
-    //   cloudUploadOutline, documentTextOutline, checkmarkCircleOutline,
-    //   alertCircleOutline, closeCircleOutline
-    // });
-  }
+    private fileExtractionService: FileExtractionService,
+  ) {}
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Vérifier le type de fichier
     const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (!allowedTypes.includes(file.type)) {
       this.showError('Veuillez sélectionner un fichier PDF ou DOCX.');
       return;
     }
 
-    // Vérifier la taille (limite à 10MB)
     if (file.size > 10 * 1024 * 1024) {
       this.showError('Le fichier ne doit pas dépasser 10MB.');
       return;
@@ -79,18 +63,18 @@ export class CvUploadComponent {
   async processFile() {
     if (!this.selectedFile) return;
 
+    this.processingStarted.emit();
+
     try {
-      this.uploadStatus = 'extracting'; // Ou 'processing' si on veut être plus générique
+      this.uploadStatus = 'extracting';
       this.currentStep = 'Traitement du fichier...';
 
-      // Appel au nouveau service pour l'upload ET l'extraction
       const extractedText = await this.fileExtractionService.extractTextFromFile(this.selectedFile);
 
       this.extractedText = extractedText;
       this.uploadStatus = 'success';
       this.currentStep = 'Extraction terminée !';
 
-      // Émettre le résultat
       this.uploadComplete.emit({
         success: true,
         extractedText: extractedText,
@@ -102,8 +86,6 @@ export class CvUploadComponent {
       this.showError(error.message || 'Erreur lors du traitement du fichier');
     }
   }
-
-  // Les méthodes extractPdfText et extractDocxText sont supprimées.
 
   private showError(message: string) {
     this.uploadStatus = 'error';

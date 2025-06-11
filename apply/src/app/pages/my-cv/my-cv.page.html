@@ -1,39 +1,19 @@
-<!-- src/app/pages/my-cv/my-cv.page.html - Version corrigée -->
 <ion-header>
   <app-user-header></app-user-header>
 </ion-header>
 
 <ion-content class="ion-padding">
   
-  <!-- Section d'import de CV -->
   <app-cv-upload 
-    (uploadComplete)="onCvUploadComplete($event)">
-  </app-cv-upload>
+  (processingStarted)="onCvProcessingStarted()"
+  (uploadComplete)="onCvUploadComplete($event)">
+</app-cv-upload>
 
-  <!-- Spinner d'extraction des données CV -->
-<ion-card *ngIf="isExtractingCvData" class="extraction-loading-card">
-  <ion-card-content class="ion-text-center">
-    <div class="extraction-spinner-container">
-      <ion-spinner name="crescent" color="primary"></ion-spinner>
-      <div class="extraction-progress">
-        <h3>🤖 Intelligence Artificielle au travail</h3>
-        <p>{{ extractionProgress }}</p>
-        <ion-progress-bar type="indeterminate" color="primary"></ion-progress-bar>
-      </div>
-    </div>
-    <ion-text color="medium">
-      <p><small>Analyse et structuration automatique de votre CV en cours...</small></p>
-    </ion-text>
-  </ion-card-content>
-</ion-card>
-
-  <!-- Sélecteur de CV générés -->
   <app-cv-selector 
     (cvSelected)="onCvSelected($event)"
     (createNewCv)="generateCv()">
   </app-cv-selector>
 
-  <!-- Aperçu du CV sélectionné -->
   <div *ngIf="selectedGeneratedCv" class="cv-preview-section">
     <ion-card>
       <ion-card-header>
@@ -62,7 +42,6 @@
     </ion-card>
   </div>
 
-  <!-- Section des données de base -->
   <div class="section-header-with-actions">
     <ion-list-header>
       <ion-label>Mes Expériences Professionnelles</ion-label>

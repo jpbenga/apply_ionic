@@ -1,4 +1,3 @@
-// src/app/components/cv-data-validation-modal/cv-data-validation-modal.component.ts
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,12 +9,6 @@ import {
   IonSelect, IonSelectOption, IonText,
   ModalController
 } from '@ionic/angular/standalone';
-// import { addIcons } from 'ionicons'; // SUPPRIMÉ
-// import {
-//   checkmarkOutline, closeOutline, businessOutline, schoolOutline,
-//   starOutline, personOutline, createOutline, trashOutline,
-//   chevronDownOutline, chevronUpOutline
-// } from 'ionicons/icons'; // SUPPRIMÉ
 import { ParsedCvData } from 'src/app/services/cv-parsing/cv-parsing.service';
 
 interface ValidatedExperience {
@@ -76,13 +69,7 @@ export class CvDataValidationModalComponent implements OnInit {
     'Autres'
   ];
 
-  constructor(private modalCtrl: ModalController) {
-    // addIcons({ // SUPPRIMÉ
-    //   checkmarkOutline, closeOutline, businessOutline, schoolOutline,
-    //   starOutline, personOutline, createOutline, trashOutline,
-    //   chevronDownOutline, chevronUpOutline
-    // });
-  }
+  constructor(private modalCtrl: ModalController) {}
 
   ngOnInit() {
     this.initializeData();
@@ -90,28 +77,24 @@ export class CvDataValidationModalComponent implements OnInit {
   }
 
   private initializeData() {
-    // Initialiser les expériences
     this.validatedExperiences = (this.parsedData.experiences || []).map(exp => ({
       selected: true,
       data: { ...exp },
       isEditing: false
     }));
 
-    // Initialiser les formations
     this.validatedFormations = (this.parsedData.formations || []).map(form => ({
       selected: true,
       data: { ...form },
       isEditing: false
     }));
 
-    // Initialiser les compétences
     this.validatedCompetences = (this.parsedData.competences || []).map(comp => ({
       selected: true,
       data: { ...comp },
       isEditing: false
     }));
 
-    // Initialiser les infos personnelles
     this.personalInfo = { ...(this.parsedData.personalInfo || {}) };
   }
 
@@ -171,17 +154,14 @@ export class CvDataValidationModalComponent implements OnInit {
   formatDateForInput(dateStr: string | null): string {
     if (!dateStr) return '';
     
-    // Si c'est au format YYYY-MM-DD, on le garde
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return dateStr;
     }
     
-    // Si c'est au format YYYY-MM, on ajoute -01
     if (/^\d{4}-\d{2}$/.test(dateStr)) {
       return `${dateStr}-01`;
     }
     
-    // Si c'est au format YYYY, on ajoute -01-01
     if (/^\d{4}$/.test(dateStr)) {
       return `${dateStr}-01-01`;
     }
@@ -192,7 +172,6 @@ export class CvDataValidationModalComponent implements OnInit {
   formatDateForSave(dateStr: string): string {
     if (!dateStr) return '';
     
-    // Retourner au format YYYY-MM-DD
     return dateStr;
   }
 

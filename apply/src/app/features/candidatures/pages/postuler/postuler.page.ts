@@ -89,6 +89,9 @@ export class PostulerPage implements OnInit, OnDestroy {
   comparisonView: 'original' | 'improved' | 'split' = 'split';
   sliderPosition: number = 50; // Position du slider en %
 
+  // Spinner global et messages
+  globalSpinnerMessage: string = '';
+
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -117,10 +120,52 @@ export class PostulerPage implements OnInit, OnDestroy {
   }
 
   /**
+   * Détermine si l'overlay de spinner global doit être affiché
+   */
+  get isGlobalLoading(): boolean {
+    return this.isGeneratingAIContent || 
+           this.isImprovingCv || 
+           this.isGeneratingCoverLetter || 
+           this.isSavingCandidature || 
+           this.isSavingImprovements ||
+           this.isLoadingCvData;
+  }
+
+  /**
+   * Détermine si les interactions doivent être désactivées
+   */
+  get isInteractionDisabled(): boolean {
+    return this.isGlobalLoading;
+  }
+
+  /**
+   * Met à jour le message du spinner global
+   */
+  private updateGlobalSpinnerMessage() {
+    if (this.isGeneratingAIContent) {
+      this.globalSpinnerMessage = 'Analyse de l\'offre d\'emploi en cours...';
+    } else if (this.isImprovingCv) {
+      this.globalSpinnerMessage = 'Analyse et amélioration de votre CV...';
+    } else if (this.isGeneratingCoverLetter) {
+      this.globalSpinnerMessage = 'Génération de la lettre de motivation...';
+    } else if (this.isSavingCandidature) {
+      this.globalSpinnerMessage = 'Sauvegarde de votre candidature...';
+    } else if (this.isSavingImprovements) {
+      this.globalSpinnerMessage = 'Sauvegarde des améliorations...';
+    } else if (this.isLoadingCvData) {
+      this.globalSpinnerMessage = 'Chargement de vos données CV...';
+    } else {
+      this.globalSpinnerMessage = 'Traitement en cours...';
+    }
+  }
+
+  /**
    * Charge les templates disponibles
    */
   async loadAvailableTemplates() {
     this.isLoadingTemplates = true;
+    this.updateGlobalSpinnerMessage();
+    
     const subscription = this.cvTemplateService.getAvailableTemplates().subscribe({
       next: (templates) => {
         this.availableTemplates = templates;
@@ -143,6 +188,7 @@ export class PostulerPage implements OnInit, OnDestroy {
    */
   checkStructuredCvData() {
     this.isLoadingCvData = true;
+    this.updateGlobalSpinnerMessage();
     
     const subscription = combineLatest([
       this.cvDataService.getExperiences(),
@@ -182,6 +228,7 @@ export class PostulerPage implements OnInit, OnDestroy {
    * Redirige vers la page Mon CV si pas de données
    */
   goToMyCv() {
+    if (this.isInteractionDisabled) return;
     this.router.navigate(['/tabs/my-cv']);
   }
 
@@ -189,6 +236,7 @@ export class PostulerPage implements OnInit, OnDestroy {
    * Gestion du changement de template
    */
   onTemplateChange(template: CvTemplate) {
+    if (this.isInteractionDisabled) return;
     this.selectedTemplate = template;
     this.updateCvData();
   }
@@ -197,6 +245,7 @@ export class PostulerPage implements OnInit, OnDestroy {
    * Gestion du changement de thème
    */
   onThemeChange(theme: CvTheme) {
+    if (this.isInteractionDisabled) return;
     this.selectedTheme = theme;
     this.updateCvData();
   }
@@ -215,6 +264,8 @@ export class PostulerPage implements OnInit, OnDestroy {
    * Génère SEULEMENT l'analyse ATS (pas la lettre)
    */
   async generateApplication() {
+    if (this.isInteractionDisabled) return;
+    
     this.aiError = null;
     
     if (!this.jobOfferText.trim()) {
@@ -228,6 +279,7 @@ export class PostulerPage implements OnInit, OnDestroy {
     }
 
     this.isGeneratingAIContent = true;
+    this.updateGlobalSpinnerMessage();
     this.atsAnalysisResult = null;
 
     try {
@@ -256,12 +308,15 @@ export class PostulerPage implements OnInit, OnDestroy {
    * Lance l'amélioration du CV structuré
    */
   async improveCv() {
+    if (this.isInteractionDisabled) return;
+    
     if (!this.jobOfferText || !this.currentCvData) {
       this.presentToast('Offre d\'emploi et données CV requises pour l\'amélioration', 'warning');
       return;
     }
 
     this.isImprovingCv = true;
+    this.updateGlobalSpinnerMessage();
     this.structuredCvImprovements = null;
 
     try {
@@ -301,6 +356,7 @@ export class PostulerPage implements OnInit, OnDestroy {
    * Applique les améliorations sélectionnées
    */
   async applySelectedImprovements() {
+    if (this.isInteractionDisabled) return;
     if (!this.structuredCvImprovements || !this.currentCvData) return;
 
     try {
@@ -354,9 +410,11 @@ export class PostulerPage implements OnInit, OnDestroy {
    * Sauvegarde les améliorations et marque comme validé
    */
   async saveImprovements() {
+    if (this.isInteractionDisabled) return;
     if (!this.improvedCvData || !this.selectedTemplate) return;
 
     this.isSavingImprovements = true;
+    this.updateGlobalSpinnerMessage();
 
     try {
       // Sauvegarder les données améliorées en base
@@ -411,12 +469,15 @@ export class PostulerPage implements OnInit, OnDestroy {
    * Génère la lettre de motivation (séparée)
    */
   async generateCoverLetter() {
+    if (this.isInteractionDisabled) return;
+    
     if (!this.jobOfferText || !this.currentCvData) {
       this.presentToast('Données requises manquantes pour la lettre', 'warning');
       return;
     }
 
     this.isGeneratingCoverLetter = true;
+    this.updateGlobalSpinnerMessage();
     this.generatedCoverLetter = null;
 
     try {
@@ -442,6 +503,8 @@ export class PostulerPage implements OnInit, OnDestroy {
    * Sauvegarde la candidature
    */
   async saveCandidature() {
+    if (this.isInteractionDisabled) return;
+    
     if (!this.jobOfferText || !this.atsAnalysisResult || !this.generatedCoverLetter) {
       this.presentToast('Veuillez d\'abord générer l\'analyse ATS et la lettre de motivation.', 'warning');
       return;
@@ -456,21 +519,19 @@ export class PostulerPage implements OnInit, OnDestroy {
     const company = this.atsAnalysisResult.company || 'Entreprise non spécifiée';
   
     this.isSavingCandidature = true;
+    this.updateGlobalSpinnerMessage();
   
-    const candidatureDetails: Omit<Candidature, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'dateCandidature'> = {
-      // PROPRIÉTÉS OBLIGATOIRES
-      intitulePoste: jobTitle,                                    // CORRIGÉ: utilise jobTitle de l'analyse ATS
-      entreprise: company,                                        // CORRIGÉ: utilise company de l'analyse ATS
+    const candidatureDetails = {
+      intitulePoste: jobTitle,
+      entreprise: company,
       statut: 'envoyee' as StatutCandidature,
-      
-      // PROPRIÉTÉS OPTIONNELLES
-      poste: jobTitle,                                           // Pour compatibilité
-      offreTexteComplet: this.jobOfferText,                      // CORRIGÉ: utilise jobOfferText
-      cvOriginalNom: 'CV_' + new Date().getTime() + '.pdf',     // CORRIGÉ: génère un nom
-      cvOriginalUrl: undefined,                                  // CORRIGÉ: pas d'URL pour l'instant
-      cvTexteExtrait: this.generateTextFromCvData(this.currentCvData), // CORRIGÉ: utilise la méthode existante
-      analyseATS: this.atsAnalysisResult.analysisText,          // CORRIGÉ: utilise analysisText
-      lettreMotivationGeneree: this.generatedCoverLetter        // CORRIGÉ: utilise generatedCoverLetter
+      poste: jobTitle,
+      offreTexteComplet: this.jobOfferText,
+      cvOriginalNom: `CV_${jobTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.pdf`,
+      // cvOriginalUrl omis car pas de fichier uploadé
+      cvTexteExtrait: this.generateTextFromCvData(this.currentCvData),
+      analyseATS: this.atsAnalysisResult.analysisText,
+      lettreMotivationGeneree: this.generatedCoverLetter
     };
   
     try {
@@ -611,6 +672,7 @@ export class PostulerPage implements OnInit, OnDestroy {
 
   // Méthodes utilitaires pour les améliorations
   selectAllImprovements(select: boolean) {
+    if (this.isInteractionDisabled) return;
     if (!this.structuredCvImprovements) return;
 
     this.structuredCvImprovements.improvements.experiences.forEach(section => {
@@ -689,6 +751,7 @@ export class PostulerPage implements OnInit, OnDestroy {
   }
 
   onImprovementToggle() {
+    if (this.isInteractionDisabled) return;
     // Méthode appelée lors du toggle d'une amélioration
     // Logique supplémentaire si nécessaire
   }

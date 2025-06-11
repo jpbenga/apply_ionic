@@ -255,7 +255,7 @@ export class AIService {
   }
 
   // ===================================
-  // AMÉLIORATION CV STRUCTURÉ (Nouveau)
+  // AMÉLIORATION CV STRUCTURÉ (Nouveau) - VERSION AMÉLIORÉE
   // ===================================
 
   /**
@@ -267,16 +267,32 @@ export class AIService {
 
     try {
       console.log('🤖 Envoi de la demande d\'amélioration CV structuré à l\'IA...');
+      console.log('📝 Prompt envoyé (taille):', prompt.length, 'caractères');
+      
       const result = await callOpenAiFn({ prompt }) as HttpsCallableResult;
       const data = result.data as OpenAIResponse;
 
       if (data.success && data.response) {
+        console.log('✅ Réponse reçue de l\'IA (taille):', data.response.length, 'caractères');
+        console.log('📝 Réponse brute (premiers 1000 caractères):', data.response.substring(0, 1000));
+        
         try {
-          // Parse la réponse JSON de l'IA
-          const aiResponse = JSON.parse(data.response);
-          console.log('📊 Réponse IA reçue:', aiResponse);
+          // Nettoyer et parser la réponse JSON
+          const cleanedResponse = this.cleanJsonResponse(data.response);
+          console.log('🧹 Réponse nettoyée (premiers 500 caractères):', cleanedResponse.substring(0, 500));
           
-          // Validation et nettoyage des données avec meilleure gestion d'erreurs
+          const aiResponse = JSON.parse(cleanedResponse);
+          console.log('📊 JSON parsé avec succès:', {
+            hasImprovements: !!aiResponse.improvements,
+            sectionsCount: {
+              experiences: aiResponse.improvements?.experiences?.length || 0,
+              formations: aiResponse.improvements?.formations?.length || 0,
+              competences: aiResponse.improvements?.competences?.length || 0,
+              suggested: aiResponse.improvements?.suggestedCompetences?.length || 0
+            }
+          });
+          
+          // Validation et nettoyage des données
           const improvements = {
             experiences: this.validateSectionImprovements(aiResponse.improvements?.experiences || [], 'experience'),
             formations: this.validateSectionImprovements(aiResponse.improvements?.formations || [], 'formation'),
@@ -284,36 +300,69 @@ export class AIService {
             suggestedCompetences: this.validateSuggestedCompetences(aiResponse.improvements?.suggestedCompetences || [])
           };
 
-          // Validation du summary avec valeurs par défaut
+          // Calcul du summary
           const summary = {
-            totalSuggestions: aiResponse.summary?.totalSuggestions || this.countTotalSuggestions(improvements),
-            criticalIssues: aiResponse.summary?.criticalIssues || this.countCriticalIssues(improvements),
-            enhancementSuggestions: aiResponse.summary?.enhancementSuggestions || this.countEnhancementSuggestions(improvements),
-            newCompetencesSuggested: aiResponse.summary?.newCompetencesSuggested || improvements.suggestedCompetences.length,
-            atsKeywordsIntegrated: aiResponse.summary?.atsKeywordsIntegrated || this.countAtsKeywords(improvements)
+            totalSuggestions: this.countTotalSuggestions(improvements),
+            criticalIssues: this.countCriticalIssues(improvements),
+            enhancementSuggestions: this.countEnhancementSuggestions(improvements),
+            newCompetencesSuggested: improvements.suggestedCompetences.length,
+            atsKeywordsIntegrated: this.countAtsKeywords(improvements)
           };
 
-          // Log pour debugging en développement
-          console.log('📊 Améliorations CV structuré analysées:', {
-            totalSuggestions: summary.totalSuggestions,
-            sections: {
-              experiences: improvements.experiences.length,
-              formations: improvements.formations.length,
-              competences: improvements.competences.length,
-              newCompetences: improvements.suggestedCompetences.length
-            }
-          });
+          console.log('📊 Résumé final des améliorations:', summary);
 
           return {
             success: true,
             improvements,
             summary
           };
-        } catch (parseError) {
-          console.error('AIService: Erreur parsing JSON de l\'amélioration CV structuré:', parseError);
-          console.log('Réponse brute de l\'IA:', data.response?.substring(0, 500) + '...');
           
-          // Fallback avec réponse vide mais valide
+        } catch (parseError) {
+          console.error('❌ Erreur parsing JSON:', parseError);
+          console.log('📝 Réponse complète pour debug:', data.response);
+          
+          // Tentative de réparation automatique
+          const repairedResponse = this.tryRepairJson(data.response);
+          if (repairedResponse) {
+            console.log('🔧 Tentative de réparation du JSON...');
+            try {
+              const aiResponse = JSON.parse(repairedResponse);
+              console.log('✅ JSON réparé avec succès !');
+              
+              const improvements = {
+                experiences: this.validateSectionImprovements(aiResponse.improvements?.experiences || [], 'experience'),
+                formations: this.validateSectionImprovements(aiResponse.improvements?.formations || [], 'formation'),
+                competences: this.validateSectionImprovements(aiResponse.improvements?.competences || [], 'competence'),
+                suggestedCompetences: this.validateSuggestedCompetences(aiResponse.improvements?.suggestedCompetences || [])
+              };
+
+              const summary = {
+                totalSuggestions: this.countTotalSuggestions(improvements),
+                criticalIssues: this.countCriticalIssues(improvements),
+                enhancementSuggestions: this.countEnhancementSuggestions(improvements),
+                newCompetencesSuggested: improvements.suggestedCompetences.length,
+                atsKeywordsIntegrated: this.countAtsKeywords(improvements)
+              };
+
+              return {
+                success: true,
+                improvements,
+                summary
+              };
+            } catch (repairError) {
+              console.error('❌ Échec de la réparation:', repairError);
+            }
+          }
+          
+          // Extraction de suggestions basiques en dernier recours
+          const basicSuggestions = this.extractBasicSuggestions(data.response);
+          if (basicSuggestions.summary.totalSuggestions > 0) {
+            console.log('📋 Suggestions basiques extraites:', basicSuggestions.summary.totalSuggestions);
+            return basicSuggestions;
+          }
+          
+          // Fallback final
+          console.warn('⚠️ Aucune amélioration détectée - retour d\'une réponse vide');
           return {
             success: true,
             improvements: {
@@ -335,7 +384,7 @@ export class AIService {
         throw new Error(data.message || "L'amélioration du CV structuré a échoué ou la réponse est invalide.");
       }
     } catch (error) {
-      console.error('AIService: Erreur lors de l\'appel d\'amélioration CV structuré:', error);
+      console.error('❌ Erreur complète:', error);
       if (error instanceof Error) {
         throw new Error(`Échec de l'amélioration du CV structuré : ${error.message}`);
       }
@@ -525,7 +574,125 @@ export class AIService {
   }
 
   // ===================================
-  // MÉTHODES UTILITAIRES PRIVÉES
+  // MÉTHODES UTILITAIRES POUR LE NETTOYAGE JSON (NOUVELLES)
+  // ===================================
+
+  /**
+   * Nettoie la réponse JSON en supprimant les caractères parasites
+   */
+  private cleanJsonResponse(response: string): string {
+    let cleaned = response.trim();
+    
+    // Supprimer les éventuels préfixes/suffixes non-JSON
+    const jsonStart = cleaned.indexOf('{');
+    const jsonEnd = cleaned.lastIndexOf('}');
+    
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+      cleaned = cleaned.substring(jsonStart, jsonEnd + 1);
+    }
+    
+    // Remplacer les guillemets typographiques
+    cleaned = cleaned.replace(/[""]/g, '"');
+    cleaned = cleaned.replace(/['']/g, "'");
+    
+    // Supprimer les virgules orphelines
+    cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+    
+    // Supprimer les commentaires JavaScript
+    cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, '');
+    cleaned = cleaned.replace(/\/\/.*$/gm, '');
+    
+    return cleaned;
+  }
+
+  /**
+   * Tente de réparer un JSON malformé
+   */
+  private tryRepairJson(response: string): string | null {
+    try {
+      let repaired = this.cleanJsonResponse(response);
+      
+      // Compter les accolades et crochets
+      const openBraces = (repaired.match(/{/g) || []).length;
+      const closeBraces = (repaired.match(/}/g) || []).length;
+      const openBrackets = (repaired.match(/\[/g) || []).length;
+      const closeBrackets = (repaired.match(/\]/g) || []).length;
+      
+      // Ajouter les fermetures manquantes
+      for (let i = 0; i < openBraces - closeBraces; i++) {
+        repaired += '}';
+      }
+      for (let i = 0; i < openBrackets - closeBrackets; i++) {
+        repaired += ']';
+      }
+      
+      // Tenter de parser pour valider
+      JSON.parse(repaired);
+      return repaired;
+    } catch (error) {
+      console.log('🔧 Impossible de réparer automatiquement le JSON');
+      return null;
+    }
+  }
+
+  /**
+   * Extrait des suggestions basiques du texte en cas d'échec total
+   */
+  private extractBasicSuggestions(response: string): StructuredCvImprovementResponse {
+    console.log('📋 Extraction de suggestions basiques depuis le texte...');
+    
+    const suggestions: SuggestedCompetence[] = [];
+    
+    // Patterns pour détecter des suggestions
+    const patterns = [
+      /(?:suggér[eé]e?|recommand[eé]e?|ajout[eé]?r?)\s*:?\s*([^.\n,]{3,50})/gi,
+      /(?:compétence|skill|technologie)\s*:?\s*([^.\n,]{3,50})/gi,
+      /(?:manque|absent|nécessaire)\s*:?\s*([^.\n,]{3,50})/gi
+    ];
+    
+    let count = 0;
+    for (const pattern of patterns) {
+      const matches = response.matchAll(pattern);
+      for (const match of matches) {
+        if (match[1] && count < 3) { // Limiter à 3 suggestions
+          const competence = match[1].trim();
+          if (competence.length > 2 && competence.length < 50) {
+            suggestions.push({
+              id: `basic_${count}`,
+              nom: competence,
+              categorie: 'Technique',
+              raison: 'Compétence détectée dans l\'analyse IA',
+              impact: 'moyen' as const,
+              accepted: false
+            });
+            count++;
+          }
+        }
+      }
+    }
+    
+    console.log(`📋 ${suggestions.length} suggestion(s) basique(s) extraite(s)`);
+    
+    return {
+      success: true,
+      improvements: {
+        experiences: [],
+        formations: [],
+        competences: [],
+        suggestedCompetences: suggestions
+      },
+      summary: {
+        totalSuggestions: suggestions.length,
+        criticalIssues: 0,
+        enhancementSuggestions: 0,
+        newCompetencesSuggested: suggestions.length,
+        atsKeywordsIntegrated: 0
+      }
+    };
+  }
+
+  // ===================================
+  // MÉTHODES UTILITAIRES PRIVÉES (EXISTANTES)
   // ===================================
 
   /**

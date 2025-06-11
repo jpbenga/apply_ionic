@@ -4,21 +4,17 @@ import { GeneratedCv } from 'src/app/models/cv-template.model';
 export function getStructuredCvImprovementPrompt(jobOfferText: string, cvData: GeneratedCv): string {
   const cvDataJson = JSON.stringify(cvData.data, null, 2);
   
-  return `Tu es un expert en optimisation de CV et en recrutement. Analyse ce CV structuré par rapport à cette offre d'emploi et suggère des améliorations PRÉCISES pour maximiser les chances de passage des systèmes ATS et d'attirer les recruteurs.
+  return `Tu es un expert en optimisation de CV. Analyse ce CV par rapport à l'offre d'emploi et propose des améliorations précises.
 
-**OFFRE D'EMPLOI :**
+OFFRE D'EMPLOI:
 ${jobOfferText}
 
-**CV STRUCTURÉ (format JSON) :**
+CV ACTUEL:
 ${cvDataJson}
 
-**INSTRUCTIONS :**
-1. Analyse chaque section du CV (expériences, formations, compétences)
-2. Pour chaque élément, identifie les améliorations possibles sur les champs spécifiques
-3. Suggère de NOUVELLES compétences clés manquantes qui correspondent à l'offre
-4. Fournis des améliorations concrètes et applicables
+IMPORTANT: Réponds UNIQUEMENT en JSON valide. Pas de texte avant/après. Vérifie la syntaxe JSON.
 
-**FORMAT DE RÉPONSE (JSON STRICT) :**
+STRUCTURE ATTENDUE:
 {
   "improvements": {
     "experiences": [
@@ -26,95 +22,49 @@ ${cvDataJson}
         "id": "exp_0",
         "sectionType": "experience",
         "itemIndex": 0,
-        "itemId": "id_si_disponible",
-        "itemTitle": "Titre du poste - Entreprise",
+        "itemTitle": "Poste - Entreprise",
         "improvements": [
           {
             "id": "exp_0_improve_1",
-            "type": "mots-cles|reformulation|orthographe|structure",
-            "field": "poste|entreprise|description|lieu",
-            "titre": "Titre court de l'amélioration",
-            "originalValue": "Valeur actuelle du champ",
-            "improvedValue": "Valeur améliorée proposée",
-            "explication": "Pourquoi cette amélioration est importante",
-            "impact": "faible|moyen|fort"
+            "type": "mots-cles",
+            "field": "description",
+            "titre": "Ajouter mots-clés ATS",
+            "originalValue": "Texte actuel",
+            "improvedValue": "Texte avec mots-clés",
+            "explication": "Raison de l'amélioration",
+            "impact": "fort"
           }
         ]
       }
     ],
-    "formations": [
-      {
-        "id": "form_0",
-        "sectionType": "formation", 
-        "itemIndex": 0,
-        "itemId": "id_si_disponible",
-        "itemTitle": "Diplôme - Établissement",
-        "improvements": [
-          {
-            "id": "form_0_improve_1",
-            "type": "mots-cles|reformulation|orthographe|structure",
-            "field": "diplome|etablissement|description|ville",
-            "titre": "Titre court de l'amélioration",
-            "originalValue": "Valeur actuelle",
-            "improvedValue": "Valeur améliorée",
-            "explication": "Justification de l'amélioration",
-            "impact": "faible|moyen|fort"
-          }
-        ]
-      }
-    ],
-    "competences": [
-      {
-        "id": "comp_0",
-        "sectionType": "competence",
-        "itemIndex": 0, 
-        "itemId": "id_si_disponible",
-        "itemTitle": "Nom de la compétence",
-        "improvements": [
-          {
-            "id": "comp_0_improve_1",
-            "type": "reformulation|mots-cles",
-            "field": "nom|categorie",
-            "titre": "Titre de l'amélioration",
-            "originalValue": "Valeur actuelle",
-            "improvedValue": "Valeur améliorée", 
-            "explication": "Pourquoi cette amélioration",
-            "impact": "faible|moyen|fort"
-          }
-        ]
-      }
-    ],
+    "formations": [],
+    "competences": [],
     "suggestedCompetences": [
       {
         "id": "new_comp_1",
-        "nom": "Nom de la nouvelle compétence",
-        "categorie": "Technique|Soft Skills|Outils|Langues|Autre",
-        "raison": "Pourquoi cette compétence est importante pour ce poste",
-        "impact": "faible|moyen|fort"
+        "nom": "React",
+        "categorie": "Technique",
+        "raison": "Requis dans l'offre",
+        "impact": "fort"
       }
     ]
   },
   "summary": {
-    "totalSuggestions": 0,
+    "totalSuggestions": 2,
     "criticalIssues": 0,
-    "enhancementSuggestions": 0,
-    "newCompetencesSuggested": 0,
-    "atsKeywordsIntegrated": 0
+    "enhancementSuggestions": 1,
+    "newCompetencesSuggested": 1,
+    "atsKeywordsIntegrated": 1
   }
 }
 
-**RÈGLES IMPORTANTES :**
-- Chaque amélioration doit être ACTIONNABLE et SPÉCIFIQUE
-- Utilise les mots-clés EXACTS de l'offre d'emploi quand pertinent
-- Privilégie les améliorations avec impact "fort" pour les éléments critiques
-- Les nouvelles compétences doivent être directement liées à l'offre
-- Si aucune amélioration n'est nécessaire pour une section, laisse le tableau vide []
-- Assure-toi que les indexes correspondent aux positions dans les tableaux
-- Les types d'amélioration :
-  - "orthographe" : Correction de fautes
-  - "reformulation" : Amélioration de la formulation
-  - "mots-cles" : Ajout de mots-clés ATS
-  - "structure" : Amélioration de la structure/organisation
-
-**RÉPONSE JSON UNIQUEMENT (PAS DE TEXTE AVANT OU APRÈS) :**`;
+RÈGLES:
+- type: "orthographe", "reformulation", "mots-cles", "structure"
+- impact: "faible", "moyen", "fort"
+- field expériences: "poste", "entreprise", "description", "lieu"
+- field formations: "diplome", "etablissement", "description", "ville"
+- field compétences: "nom", "categorie"
+- Utilise les mots-clés exacts de l'offre
+- Si pas d'amélioration pour une section: tableau vide []
+- JSON strict uniquement:`;
 }

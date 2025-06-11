@@ -9,6 +9,15 @@
     </ion-toolbar>
   </ion-header>
 
+  <!-- Overlay de spinner global -->
+  <div *ngIf="isGlobalLoading" class="global-loading-overlay">
+    <div class="global-loading-content">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <h3>{{ globalSpinnerMessage }}</h3>
+      <p>Veuillez patienter, ne fermez pas cette page...</p>
+    </div>
+  </div>
+
   <!-- Message si pas de données CV structurées -->
   <ion-card *ngIf="!hasStructuredCvData && !isLoadingCvData" color="warning">
     <ion-card-content>
@@ -16,7 +25,10 @@
         <ion-icon name="warning-outline" size="large"></ion-icon>
         <h3>Aucune donnée CV structurée</h3>
         <p>Pour postuler, vous devez d'abord créer votre CV structuré avec vos expériences, formations et compétences.</p>
-        <ion-button expand="block" (click)="goToMyCv()">
+        <ion-button 
+          expand="block" 
+          (click)="goToMyCv()"
+          [disabled]="isInteractionDisabled">
           <ion-icon name="create-outline" slot="start"></ion-icon>
           Créer mon CV structuré
         </ion-button>
@@ -43,7 +55,7 @@
         placeholder="Entrez ou collez la description complète de l'offre d'emploi..."
         aria-label="Offre d'emploi"
         [(ngModel)]="jobOfferText"
-        [disabled]="isGeneratingAIContent || isSavingCandidature">
+        [disabled]="isInteractionDisabled">
       </ion-textarea>
     </ion-item>
 
@@ -52,10 +64,11 @@
       expand="block" 
       class="ion-margin-top" 
       (click)="generateApplication()" 
-      [disabled]="!jobOfferText || isGeneratingAIContent || isSavingCandidature">
+      [disabled]="!jobOfferText || isInteractionDisabled || atsAnalysisResult">
       <ion-spinner *ngIf="isGeneratingAIContent" name="crescent" slot="start"></ion-spinner>
-      <ion-icon *ngIf="!isGeneratingAIContent" slot="start" name="sparkles-outline"></ion-icon>
-      {{ isGeneratingAIContent ? 'Génération IA en cours...' : 'Analyser avec l\'IA' }}
+      <ion-icon *ngIf="!isGeneratingAIContent && !atsAnalysisResult" slot="start" name="sparkles-outline"></ion-icon>
+      <ion-icon *ngIf="!isGeneratingAIContent && atsAnalysisResult" slot="start" name="checkmark-circle-outline"></ion-icon>
+      {{ isGeneratingAIContent ? 'Génération IA en cours...' : (atsAnalysisResult ? 'Analyse terminée ✓' : 'Analyser avec l\'IA') }}
     </ion-button>
 
     <!-- Erreur IA -->
@@ -83,7 +96,7 @@
       fill="outline" 
       class="ion-margin-top"
       (click)="improveCv()"
-      [disabled]="!atsAnalysisResult || isImprovingCv || isGeneratingAIContent || isSavingCandidature"
+      [disabled]="!atsAnalysisResult || isInteractionDisabled"
       *ngIf="atsAnalysisResult && !structuredCvImprovements">
       <ion-spinner *ngIf="isImprovingCv" name="crescent" slot="start"></ion-spinner>
       <ion-icon *ngIf="!isImprovingCv" slot="start" name="construct-outline"></ion-icon>
@@ -133,7 +146,7 @@
                   <ion-checkbox 
                     [(ngModel)]="competence.accepted"
                     (ionChange)="onImprovementToggle()"
-                    [disabled]="isGeneratingAIContent || isSavingCandidature">
+                    [disabled]="isInteractionDisabled">
                   </ion-checkbox>
                 </div>
                 
@@ -173,7 +186,7 @@
                   <ion-checkbox 
                     [(ngModel)]="improvement.accepted"
                     (ionChange)="onImprovementToggle()"
-                    [disabled]="isGeneratingAIContent || isSavingCandidature">
+                    [disabled]="isInteractionDisabled">
                   </ion-checkbox>
                 </div>
 
@@ -226,7 +239,7 @@
                   <ion-checkbox 
                     [(ngModel)]="improvement.accepted"
                     (ionChange)="onImprovementToggle()"
-                    [disabled]="isGeneratingAIContent || isSavingCandidature">
+                    [disabled]="isInteractionDisabled">
                   </ion-checkbox>
                 </div>
 
@@ -279,7 +292,7 @@
                   <ion-checkbox 
                     [(ngModel)]="improvement.accepted"
                     (ionChange)="onImprovementToggle()"
-                    [disabled]="isGeneratingAIContent || isSavingCandidature">
+                    [disabled]="isInteractionDisabled">
                   </ion-checkbox>
                 </div>
 
@@ -309,20 +322,20 @@
             <ion-button 
               fill="clear" 
               (click)="selectAllImprovements(true)"
-              [disabled]="isGeneratingAIContent || isSavingCandidature">
+              [disabled]="isInteractionDisabled">
               Tout sélectionner
             </ion-button>
             <ion-button 
               fill="clear" 
               (click)="selectAllImprovements(false)"
-              [disabled]="isGeneratingAIContent || isSavingCandidature">
+              [disabled]="isInteractionDisabled">
               Tout désélectionner
             </ion-button>
             <ion-button 
               expand="block" 
               color="primary"
               (click)="applySelectedImprovements()"
-              [disabled]="!hasAcceptedImprovements() || isGeneratingAIContent || isSavingCandidature">
+              [disabled]="!hasAcceptedImprovements() || isInteractionDisabled">
               <ion-icon slot="start" name="checkmark-outline"></ion-icon>
               Appliquer les modifications ({{ getAcceptedCount() }})
             </ion-button>
@@ -344,7 +357,10 @@
         <ion-card-content>
           
           <!-- Contrôles de vue -->
-          <ion-segment [(ngModel)]="comparisonView" class="ion-margin-bottom">
+          <ion-segment 
+            [(ngModel)]="comparisonView" 
+            class="ion-margin-bottom"
+            [disabled]="isInteractionDisabled">
             <ion-segment-button value="original">
               <ion-label>Original</ion-label>
             </ion-segment-button>
@@ -401,7 +417,8 @@
               min="0" 
               max="100" 
               step="1"
-              class="comparison-range">
+              class="comparison-range"
+              [disabled]="isInteractionDisabled">
               <ion-label slot="start">Original</ion-label>
               <ion-label slot="end">Amélioré</ion-label>
             </ion-range>
@@ -426,14 +443,15 @@
           <!-- Actions -->
           <div class="comparison-actions ion-margin-top">
             <ion-button 
-              expand="block" 
-              color="success"
-              (click)="saveImprovements()"
-              [disabled]="isGeneratingAIContent || isSavingCandidature || isSavingImprovements">
-              <ion-spinner *ngIf="isSavingImprovements" name="crescent" slot="start"></ion-spinner>
-              <ion-icon *ngIf="!isSavingImprovements" slot="start" name="save-outline"></ion-icon>
-              {{ isSavingImprovements ? 'Sauvegarde en cours...' : 'Valider et sauvegarder les améliorations' }}
-            </ion-button>
+  expand="block" 
+  color="success"
+  (click)="saveImprovements()"
+  [disabled]="isInteractionDisabled || cvImprovementsValidated">
+  <ion-spinner *ngIf="isSavingImprovements" name="crescent" slot="start"></ion-spinner>
+  <ion-icon *ngIf="!isSavingImprovements && !cvImprovementsValidated" slot="start" name="save-outline"></ion-icon>
+  <ion-icon *ngIf="!isSavingImprovements && cvImprovementsValidated" slot="start" name="checkmark-circle-outline"></ion-icon>
+  {{ isSavingImprovements ? 'Sauvegarde en cours...' : (cvImprovementsValidated ? 'Améliorations validées ✓' : 'Valider et sauvegarder les améliorations') }}
+</ion-button>
           </div>
         </ion-card-content>
       </ion-card>
@@ -466,6 +484,7 @@
                   <div 
                     class="template-card" 
                     [class.selected]="selectedTemplate?.id === template.id"
+                    [class.disabled]="isInteractionDisabled"
                     (click)="onTemplateChange(template)">
                     <img [src]="template.imageUrl" [alt]="template.name" />
                     <div class="template-info">
@@ -492,6 +511,7 @@
                 *ngFor="let theme of availableThemes"
                 class="color-option"
                 [class.selected]="selectedTheme.primaryColor === theme.primaryColor"
+                [class.disabled]="isInteractionDisabled"
                 [style.background-color]="theme.primaryColor"
                 (click)="onThemeChange(theme)">
                 <ion-icon 
@@ -516,15 +536,16 @@
 
           <!-- Bouton générer lettre -->
           <ion-button 
-            expand="block" 
-            color="secondary"
-            class="ion-margin-top"
-            (click)="generateCoverLetter()"
-            [disabled]="!selectedTemplate || isGeneratingCoverLetter">
-            <ion-spinner *ngIf="isGeneratingCoverLetter" name="crescent" slot="start"></ion-spinner>
-            <ion-icon *ngIf="!isGeneratingCoverLetter" slot="start" name="document-text-outline"></ion-icon>
-            {{ isGeneratingCoverLetter ? 'Génération en cours...' : 'Générer la lettre de motivation' }}
-          </ion-button>
+  expand="block" 
+  color="secondary"
+  class="ion-margin-top"
+  (click)="generateCoverLetter()"
+  [disabled]="!selectedTemplate || isInteractionDisabled || !!generatedCoverLetter">
+  <ion-spinner *ngIf="isGeneratingCoverLetter" name="crescent" slot="start"></ion-spinner>
+  <ion-icon *ngIf="!isGeneratingCoverLetter && !generatedCoverLetter" slot="start" name="document-text-outline"></ion-icon>
+  <ion-icon *ngIf="!isGeneratingCoverLetter && generatedCoverLetter" slot="start" name="checkmark-circle-outline"></ion-icon>
+  {{ isGeneratingCoverLetter ? 'Génération en cours...' : (generatedCoverLetter ? 'Lettre générée ✓' : 'Générer la lettre de motivation') }}
+</ion-button>
         </ion-card-content>
       </ion-card>
     </div>
@@ -549,7 +570,7 @@
       color="success" 
       class="ion-margin-top"
       (click)="saveCandidature()"
-      [disabled]="!atsAnalysisResult || !generatedCoverLetter || isSavingCandidature">
+      [disabled]="!atsAnalysisResult || !generatedCoverLetter || isInteractionDisabled">
       <ion-spinner *ngIf="isSavingCandidature" name="crescent" slot="start"></ion-spinner>
       <ion-icon *ngIf="!isSavingCandidature" name="save-outline" slot="start"></ion-icon>
       {{ isSavingCandidature ? 'Sauvegarde en cours...' : 'Sauvegarder la Candidature' }}

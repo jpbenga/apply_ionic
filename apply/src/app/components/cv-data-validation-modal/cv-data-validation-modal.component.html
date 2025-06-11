@@ -1,4 +1,3 @@
-<!-- src/app/components/cv-data-validation-modal/cv-data-validation-modal.component.html -->
 <ion-header>
   <ion-toolbar>
     <ion-title>Validation des données extraites</ion-title>
@@ -12,7 +11,6 @@
 
 <ion-content class="ion-padding">
   
-  <!-- En-tête avec résumé -->
   <ion-card class="summary-card">
     <ion-card-header>
       <ion-card-title>{{ fileName }}</ion-card-title>
@@ -50,7 +48,6 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Section Expériences -->
   <ion-card *ngIf="validatedExperiences.length > 0">
     <ion-card-header>
       <ion-card-title class="section-header" (click)="toggleSection('experiences')">
@@ -64,7 +61,6 @@
     </ion-card-header>
     
     <ion-card-content *ngIf="expandedSections.experiences">
-      <!-- Contrôles globaux -->
       <div class="section-controls">
         <ion-item>
           <ion-checkbox 
@@ -75,7 +71,6 @@
         </ion-item>
       </div>
 
-      <!-- Liste des expériences -->
       <ion-list>
         <ion-item-group *ngFor="let exp of validatedExperiences; let i = index">
           <ion-item>
@@ -96,7 +91,6 @@
               <p *ngIf="exp.data.description" class="description">{{ exp.data.description }}</p>
             </ion-label>
 
-            <!-- Mode édition -->
             <div *ngIf="exp.isEditing" class="edit-form">
               <ion-grid>
                 <ion-row>
@@ -183,7 +177,6 @@
               </ion-grid>
             </div>
 
-            <!-- Boutons d'action -->
             <ion-button 
               slot="end" 
               fill="clear" 
@@ -205,7 +198,6 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Section Formations -->
   <ion-card *ngIf="validatedFormations.length > 0">
     <ion-card-header>
       <ion-card-title class="section-header" (click)="toggleSection('formations')">
@@ -219,7 +211,6 @@
     </ion-card-header>
     
     <ion-card-content *ngIf="expandedSections.formations">
-      <!-- Contrôles globaux -->
       <div class="section-controls">
         <ion-item>
           <ion-checkbox 
@@ -230,7 +221,6 @@
         </ion-item>
       </div>
 
-      <!-- Liste des formations -->
       <ion-list>
         <ion-item-group *ngFor="let form of validatedFormations; let i = index">
           <ion-item>
@@ -251,7 +241,6 @@
               <p *ngIf="form.data.description" class="description">{{ form.data.description }}</p>
             </ion-label>
 
-            <!-- Mode édition -->
             <div *ngIf="form.isEditing" class="edit-form">
               <ion-grid>
                 <ion-row>
@@ -338,7 +327,6 @@
               </ion-grid>
             </div>
 
-            <!-- Boutons d'action -->
             <ion-button 
               slot="end" 
               fill="clear" 
@@ -360,7 +348,6 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Section Compétences -->
   <ion-card *ngIf="validatedCompetences.length > 0">
     <ion-card-header>
       <ion-card-title class="section-header" (click)="toggleSection('competences')">
@@ -374,7 +361,6 @@
     </ion-card-header>
     
     <ion-card-content *ngIf="expandedSections.competences">
-      <!-- Contrôles globaux -->
       <div class="section-controls">
         <ion-item>
           <ion-checkbox 
@@ -385,7 +371,6 @@
         </ion-item>
       </div>
 
-      <!-- Liste des compétences -->
       <ion-list>
         <ion-item *ngFor="let comp of validatedCompetences; let i = index">
           <ion-checkbox 
@@ -401,7 +386,6 @@
             </p>
           </ion-label>
 
-          <!-- Mode édition -->
           <div *ngIf="comp.isEditing" class="edit-form-compact">
             <ion-grid>
               <ion-row>
@@ -433,7 +417,6 @@
             </ion-grid>
           </div>
 
-          <!-- Boutons d'action -->
           <ion-button 
             slot="end" 
             fill="clear" 
@@ -454,7 +437,6 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Section Informations personnelles (optionnelle) -->
   <ion-card *ngIf="hasPersonalInfo">
     <ion-card-header>
       <ion-card-title class="section-header" (click)="toggleSection('personalInfo')">
@@ -533,7 +515,6 @@
     </ion-card-content>
   </ion-card>
 
-  <!-- Message si aucune donnée -->
   <ion-card *ngIf="validatedExperiences.length === 0 && validatedFormations.length === 0 && validatedCompetences.length === 0">
     <ion-card-content class="ion-text-center">
       <ion-text color="medium">
@@ -545,7 +526,6 @@
 
 </ion-content>
 
-<!-- Boutons de validation -->
 <div class="validation-buttons">
   <ion-button 
     expand="block" 

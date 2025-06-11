@@ -42,44 +42,64 @@ export class CandidatureService {
   ) { }
 
   /**
-   * Créer une nouvelle candidature
-   */
-  async createCandidature(candidatureData: Omit<Candidature, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'dateCandidature'>, cvFileToUpload?: File | null): Promise<string> {
-    const user = this.auth.currentUser;
-    if (!user) {
-      throw new Error('Utilisateur non authentifié. Impossible de créer une candidature.');
-    }
+ * Créer une nouvelle candidature
+ */
+async createCandidature(candidatureData: Omit<Candidature, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'dateCandidature'>, cvFileToUpload?: File | null): Promise<string> {
+  const user = this.auth.currentUser;
+  if (!user) {
+    throw new Error('Utilisateur non authentifié. Impossible de créer une candidature.');
+  }
 
-    let cvOriginalUrl: string | undefined = candidatureData.cvOriginalUrl;
-    let cvOriginalNom: string | undefined = candidatureData.cvOriginalNom;
+  let cvOriginalUrl: string | undefined = candidatureData.cvOriginalUrl;
+  let cvOriginalNom: string | undefined = candidatureData.cvOriginalNom;
 
-    if (cvFileToUpload && (!cvOriginalUrl || (cvOriginalNom && cvFileToUpload.name !== cvOriginalNom) || !cvOriginalUrl?.includes('candidatures_cvs')) ) {
-      try {
-        cvOriginalUrl = await this.storageService.uploadFile(cvFileToUpload, `candidatures_cvs/${user.uid}`);
-        cvOriginalNom = cvFileToUpload.name;
-      } catch (error) {
-        console.error('Erreur lors de l\'upload du CV original pour la candidature:', error);
-      }
-    }
-
-    const dataToSave: Candidature = {
-      ...candidatureData,
-      userId: user.uid,
-      cvOriginalUrl: cvOriginalUrl,
-      cvOriginalNom: cvOriginalNom,
-      dateCandidature: Timestamp.now(),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    };
-
+  // Logique d'upload uniquement si un fichier est fourni
+  if (cvFileToUpload && (!cvOriginalUrl || (cvOriginalNom && cvFileToUpload.name !== cvOriginalNom) || !cvOriginalUrl?.includes('candidatures_cvs')) ) {
     try {
-      const docRef = await addDoc(collection(this.firestore, this.basePath), dataToSave);
-      return docRef.id;
+      cvOriginalUrl = await this.storageService.uploadFile(cvFileToUpload, `candidatures_cvs/${user.uid}`);
+      cvOriginalNom = cvFileToUpload.name;
     } catch (error) {
-      console.error('Erreur lors de la création de la candidature dans Firestore:', error);
-      throw error;
+      console.error('Erreur lors de l\'upload du CV original pour la candidature:', error);
     }
   }
+
+  // Construire les données de base
+  const dataToSave: any = {
+    ...candidatureData,
+    userId: user.uid,
+    dateCandidature: Timestamp.now(),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  // Remplacer les valeurs undefined par null ou les supprimer
+  if (cvOriginalUrl !== undefined) {
+    dataToSave.cvOriginalUrl = cvOriginalUrl;
+  } else {
+    delete dataToSave.cvOriginalUrl; // Supprimer le champ s'il est undefined
+  }
+
+  if (cvOriginalNom !== undefined) {
+    dataToSave.cvOriginalNom = cvOriginalNom;
+  } else {
+    delete dataToSave.cvOriginalNom; // Supprimer le champ s'il est undefined
+  }
+
+  // Nettoyer tous les autres champs undefined
+  Object.keys(dataToSave).forEach(key => {
+    if (dataToSave[key] === undefined) {
+      delete dataToSave[key];
+    }
+  });
+
+  try {
+    const docRef = await addDoc(collection(this.firestore, this.basePath), dataToSave);
+    return docRef.id;
+  } catch (error) {
+    console.error('Erreur lors de la création de la candidature dans Firestore:', error);
+    throw error;
+  }
+}
 
   /**
    * Récupérer les candidatures avec options de filtrage
