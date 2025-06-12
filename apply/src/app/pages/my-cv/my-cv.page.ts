@@ -140,6 +140,49 @@ export class MyCvPage implements OnInit, OnDestroy {
     this.showAllCompetences = !this.showAllCompetences;
   }
 
+  // Télécharger le CV
+  async downloadCv() {
+    if (!this.selectedGeneratedCv) {
+      this.presentToast('Aucun CV sélectionné', 'warning');
+      return;
+    }
+  
+    const loading = await this.loadingCtrl.create({
+      message: 'Génération du PDF...',
+      spinner: 'crescent'
+    });
+  
+    try {
+      await loading.present();
+  
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      const cvElement = document.querySelector('app-cv-preview') as HTMLElement;
+      
+      if (!cvElement) {
+        throw new Error('Impossible de trouver le CV à télécharger');
+      }
+  
+      const options = {
+        margin: 0.5,
+        filename: `CV_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+  
+      await html2pdf().set(options).from(cvElement).save();
+      
+      this.presentToast('CV téléchargé avec succès !', 'success');
+      
+    } catch (error: any) {
+      console.error('Erreur téléchargement CV:', error);
+      this.presentToast('Erreur lors du téléchargement', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
   // Charger le CV unique existant
   private loadExistingCv() {
     this.isLoadingCv = true;

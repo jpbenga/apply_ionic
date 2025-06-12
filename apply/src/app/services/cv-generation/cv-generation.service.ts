@@ -292,4 +292,72 @@ export class CvGenerationService {
     console.log('🔓 Reset du verrou de sauvegarde');
     this.isSaving = false;
   }
+  // Méthode à ajouter dans cv-generation.service.ts
+
+  // Génère et télécharge un CV en PDF
+  async downloadCvAsPdf(cvId: string): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user || !cvId) throw new Error('Utilisateur non authentifié ou ID de CV manquant.');
+    
+    try {
+      console.log('📄 Début génération PDF pour CV:', cvId);
+
+      // Récupérer le CV spécifique
+      const cvs = await this.getGeneratedCvs().pipe(first()).toPromise();
+      const cv = cvs?.find(c => c.id === cvId);
+      
+      if (!cv) {
+        throw new Error('CV non trouvé');
+      }
+
+      // Récupérer le profil utilisateur
+      const profile = await this.getUserProfile().pipe(first()).toPromise();
+      
+      if (!profile) {
+        throw new Error('Profil utilisateur non trouvé');
+      }
+
+      // Générer le nom de fichier
+      const fileName = this.generateFileName(profile, cv);
+      
+      // Ici vous pouvez implémenter la génération PDF
+      // Option 1: Utiliser une API backend
+      // const pdfBlob = await this.generatePdfViaApi(cv, profile);
+      
+      // Option 2: Utiliser html2pdf côté client (recommandé pour commencer)
+      console.log('✅ CV prêt pour téléchargement:', fileName);
+      
+      return Promise.resolve();
+      
+    } catch (error) {
+      console.error('❌ Erreur génération PDF:', error);
+      throw error;
+    }
+  }
+
+  // Génère un nom de fichier pour le CV
+  private generateFileName(profile: any, cv: GeneratedCv): string {
+    const date = new Date().toISOString().split('T')[0];
+    const templateName = cv.templateId;
+    
+    let baseName = 'CV';
+    if (profile.firstName && profile.lastName) {
+      baseName = `CV_${profile.firstName}_${profile.lastName}`;
+    } else if (profile.firstName) {
+      baseName = `CV_${profile.firstName}`;
+    }
+    
+    return `${baseName}_${templateName}_${date}.pdf`;
+  }
+
+  // Méthode utilitaire pour récupérer un CV spécifique
+  async getCvById(cvId: string): Promise<GeneratedCv | null> {
+    try {
+      const cvs = await this.getGeneratedCvs().pipe(first()).toPromise();
+      return cvs?.find(cv => cv.id === cvId) || null;
+    } catch (error) {
+      console.error('Erreur récupération CV par ID:', error);
+      return null;
+    }
+  }
 }
