@@ -8,17 +8,17 @@ import {
   IonCheckbox, IonGrid, IonRow, IonCol, IonRange, IonBadge,
   ToastController
 } from '@ionic/angular/standalone';
-import { HeaderService } from '../../../../shared/services/header/header.service'; // MODIFIED
-import { AIService, ATSAnalysisResult } from '../../../../services/ai/ai.service'; // MODIFIED
-import { CandidatureService } from '../../services/candidature/candidature.service'; // MODIFIED
-import { CvGenerationService } from '../../../../services/cv-generation/cv-generation.service'; // MODIFIED
-import { CvTemplateService } from '../../../../services/cv-template/cv-template.service'; // MODIFIED
-import { CvDataService } from '../../../../services/cv-data/cv-data.service'; // MODIFIED
-import { GeneratedCv, CvTemplate, CvTheme, CvData } from '../../../../models/cv-template.model'; // MODIFIED
-import { Candidature, StatutCandidature } from '../../models/candidature.model'; // MODIFIED
+import { HeaderService } from '../../../../shared/services/header/header.service';
+import { AIService, ATSAnalysisResult } from '../../../../services/ai/ai.service';
+import { CandidatureService } from '../../services/candidature/candidature.service';
+import { CvGenerationService } from '../../../../services/cv-generation/cv-generation.service';
+import { CvTemplateService } from '../../../../services/cv-template/cv-template.service';
+import { CvDataService } from '../../../../services/cv-data/cv-data.service';
+import { GeneratedCv, CvTemplate, CvTheme, CvData } from '../../../../models/cv-template.model';
+import { Candidature, StatutCandidature } from '../../models/candidature.model';
 import { Router } from '@angular/router';
-import { UserHeaderComponent } from '../../../../shared/components/user-header/user-header.component'; // MODIFIED
-import { CvPreviewComponent } from '../../../../components/cv-preview/cv-preview.component'; // MODIFIED
+import { UserHeaderComponent } from '../../../../shared/components/user-header/user-header.component';
+import { CvPreviewComponent } from '../../../../components/cv-preview/cv-preview.component';
 import { Subscription, combineLatest } from 'rxjs';
 import { Timestamp } from '@angular/fire/firestore';
 import { 
@@ -26,7 +26,7 @@ import {
   StructuredCvImprovementResult,
   SectionImprovement,
   SuggestedCompetence
-} from '../../../../models/cv-structured-improvement.model'; // MODIFIED
+} from '../../../../models/cv-structured-improvement.model';
 
 @Component({
   selector: 'app-postuler',
@@ -45,7 +45,6 @@ export class PostulerPage implements OnInit, OnDestroy {
   @ViewChild('originalPreview') originalPreview!: CvPreviewComponent;
   @ViewChild('improvedPreview') improvedPreview!: CvPreviewComponent;
 
-  // Propriétés de base
   jobOfferText: string = '';
   atsAnalysisResult: ATSAnalysisResult | null = null;
   generatedCoverLetter: string | null = null;
@@ -55,23 +54,20 @@ export class PostulerPage implements OnInit, OnDestroy {
   isSavingCandidature: boolean = false;
   isSavingImprovements: boolean = false;
 
-  // Workflow states
   cvImprovementsValidated: boolean = false;
 
-  // Gestion CV structuré et templates
   availableTemplates: CvTemplate[] = [];
   selectedTemplate: CvTemplate | null = null;
   selectedTheme: CvTheme = { primaryColor: '#007bff' };
   availableThemes: CvTheme[] = [
-    { primaryColor: '#007bff' }, // Bleu
-    { primaryColor: '#28a745' }, // Vert
-    { primaryColor: '#dc3545' }, // Rouge
-    { primaryColor: '#6f42c1' }, // Violet
-    { primaryColor: '#fd7e14' }, // Orange
-    { primaryColor: '#20c997' }, // Teal
+    { primaryColor: '#007bff' },
+    { primaryColor: '#28a745' },
+    { primaryColor: '#dc3545' },
+    { primaryColor: '#6f42c1' },
+    { primaryColor: '#fd7e14' },
+    { primaryColor: '#20c997' },
   ];
   
-  // Données CV
   hasStructuredCvData: boolean = false;
   currentCvData: CvData | null = null;
   originalCvData: CvData | null = null;
@@ -79,17 +75,14 @@ export class PostulerPage implements OnInit, OnDestroy {
   isLoadingCvData: boolean = false;
   isLoadingTemplates: boolean = false;
 
-  // Améliorations CV
   structuredCvImprovements: StructuredCvImprovementResponse | null = null;
   isImprovingCv: boolean = false;
   improvementsApplied: boolean = false;
   appliedChangesCount = { experiences: 0, formations: 0, competences: 0, total: 0 };
 
-  // Comparaison avant/après
   comparisonView: 'original' | 'improved' | 'split' = 'split';
-  sliderPosition: number = 50; // Position du slider en %
+  sliderPosition: number = 50;
 
-  // Spinner global et messages
   globalSpinnerMessage: string = '';
 
   private subscriptions: Subscription[] = [];
@@ -119,9 +112,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
-  /**
-   * Détermine si l'overlay de spinner global doit être affiché
-   */
   get isGlobalLoading(): boolean {
     return this.isGeneratingAIContent || 
            this.isImprovingCv || 
@@ -131,16 +121,10 @@ export class PostulerPage implements OnInit, OnDestroy {
            this.isLoadingCvData;
   }
 
-  /**
-   * Détermine si les interactions doivent être désactivées
-   */
   get isInteractionDisabled(): boolean {
     return this.isGlobalLoading;
   }
 
-  /**
-   * Met à jour le message du spinner global
-   */
   private updateGlobalSpinnerMessage() {
     if (this.isGeneratingAIContent) {
       this.globalSpinnerMessage = 'Analyse de l\'offre d\'emploi en cours...';
@@ -159,9 +143,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Charge les templates disponibles
-   */
   async loadAvailableTemplates() {
     this.isLoadingTemplates = true;
     this.updateGlobalSpinnerMessage();
@@ -169,10 +150,8 @@ export class PostulerPage implements OnInit, OnDestroy {
     const subscription = this.cvTemplateService.getAvailableTemplates().subscribe({
       next: (templates) => {
         this.availableTemplates = templates;
-        // Sélectionner le premier template par défaut
         if (templates.length > 0 && !this.selectedTemplate) {
           this.selectedTemplate = templates[0];
-          // S'assurer que le thème par défaut est appliqué
           this.updateCvData();
         }
         this.isLoadingTemplates = false;
@@ -185,9 +164,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     this.subscriptions.push(subscription);
   }
 
-  /**
-   * Vérifie si l'utilisateur a des données CV structurées
-   */
   checkStructuredCvData() {
     this.isLoadingCvData = true;
     this.updateGlobalSpinnerMessage();
@@ -203,17 +179,15 @@ export class PostulerPage implements OnInit, OnDestroy {
         
         if (hasData) {
           this.currentCvData = {
-            userId: '', // Sera rempli par le service
+            userId: '',
             experiences,
             formations,
             competences,
             templateId: this.selectedTemplate?.id || 'modern',
             theme: this.selectedTheme
           };
-          // Créer une copie profonde pour l'original
           this.originalCvData = JSON.parse(JSON.stringify(this.currentCvData));
           
-          // S'assurer que les données sont synchronisées avec le template sélectionné
           if (this.selectedTemplate) {
             this.updateCvData();
           }
@@ -231,35 +205,23 @@ export class PostulerPage implements OnInit, OnDestroy {
     this.subscriptions.push(subscription);
   }
 
-  /**
-   * Redirige vers la page Mon CV si pas de données
-   */
   goToMyCv() {
     if (this.isInteractionDisabled) return;
     this.router.navigate(['/tabs/my-cv']);
   }
 
-  /**
-   * Gestion du changement de template
-   */
   onTemplateChange(template: CvTemplate) {
     if (this.isInteractionDisabled) return;
     this.selectedTemplate = template;
     this.updateCvData();
   }
 
-  /**
-   * Gestion du changement de thème
-   */
   onThemeChange(theme: CvTheme) {
     if (this.isInteractionDisabled) return;
     this.selectedTheme = theme;
     this.updateCvData();
   }
 
-  /**
-   * Met à jour les données CV avec le nouveau template/thème
-   */
   updateCvData() {
     if (this.currentCvData && this.selectedTemplate) {
       this.currentCvData.templateId = this.selectedTemplate.id;
@@ -267,9 +229,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Génère SEULEMENT l'analyse ATS (pas la lettre)
-   */
   async generateApplication() {
     if (this.isInteractionDisabled) return;
     
@@ -290,10 +249,7 @@ export class PostulerPage implements OnInit, OnDestroy {
     this.atsAnalysisResult = null;
 
     try {
-      // Convertir les données structurées en texte pour l'IA
       const cvText = this.generateTextFromCvData(this.currentCvData);
-      
-      // Générer SEULEMENT l'analyse ATS
       const atsResult = await this.aiService.getATSAnalysis(this.jobOfferText, cvText);
       this.atsAnalysisResult = atsResult;
       
@@ -311,9 +267,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Lance l'amélioration du CV structuré
-   */
   async improveCv() {
     if (this.isInteractionDisabled) return;
     
@@ -327,7 +280,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     this.structuredCvImprovements = null;
 
     try {
-      // Créer un GeneratedCv temporaire pour l'analyse
       const tempGeneratedCv: GeneratedCv = {
         id: 'temp',
         userId: this.currentCvData.userId,
@@ -342,7 +294,6 @@ export class PostulerPage implements OnInit, OnDestroy {
       
       if (improvements.summary.totalSuggestions === 0) {
         this.presentToast('Excellent ! Aucune amélioration nécessaire pour votre CV.', 'success');
-        // Marquer comme validé même s'il n'y a pas d'améliorations
         this.cvImprovementsValidated = true;
       } else {
         this.presentToast(`${improvements.summary.totalSuggestions} amélioration(s) suggérée(s)`, 'primary');
@@ -359,9 +310,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Applique les améliorations sélectionnées
-   */
   async applySelectedImprovements() {
     if (this.isInteractionDisabled) return;
     if (!this.structuredCvImprovements || !this.currentCvData) return;
@@ -369,7 +317,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     try {
       console.log('🔧 Application des améliorations...');
       
-      // Créer un GeneratedCv temporaire pour l'application
       const tempGeneratedCv: GeneratedCv = {
         id: 'temp',
         userId: this.currentCvData.userId,
@@ -384,7 +331,6 @@ export class PostulerPage implements OnInit, OnDestroy {
         this.structuredCvImprovements
       );
 
-      // Mettre à jour les données améliorées avec une copie profonde
       this.improvedCvData = {
         userId: this.currentCvData.userId,
         templateId: this.currentCvData.templateId,
@@ -394,9 +340,7 @@ export class PostulerPage implements OnInit, OnDestroy {
         competences: JSON.parse(JSON.stringify(result.improvedData.competences))
       };
 
-      // Sauvegarder le nombre de changements
       this.appliedChangesCount = result.changesCount;
-
       this.improvementsApplied = true;
       
       console.log('✅ Améliorations appliquées:', {
@@ -413,9 +357,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Sauvegarde les améliorations et marque comme validé
-   */
   async saveImprovements() {
     if (this.isInteractionDisabled) return;
     if (!this.improvedCvData || !this.selectedTemplate) return;
@@ -424,12 +365,10 @@ export class PostulerPage implements OnInit, OnDestroy {
     this.updateGlobalSpinnerMessage();
 
     try {
-      // Sauvegarder les données améliorées en base
       const savePromises = [];
 
       console.log('💾 Sauvegarde des améliorations en base...');
 
-      // Sauvegarder les expériences modifiées
       for (const experience of this.improvedCvData.experiences) {
         if (experience.id) {
           savePromises.push(this.cvDataService.updateExperience(experience.id, experience));
@@ -438,7 +377,6 @@ export class PostulerPage implements OnInit, OnDestroy {
         }
       }
 
-      // Sauvegarder les formations modifiées
       for (const formation of this.improvedCvData.formations) {
         if (formation.id) {
           savePromises.push(this.cvDataService.updateFormation(formation.id, formation));
@@ -447,7 +385,6 @@ export class PostulerPage implements OnInit, OnDestroy {
         }
       }
 
-      // Sauvegarder les compétences modifiées
       for (const competence of this.improvedCvData.competences) {
         if (competence.id) {
           savePromises.push(this.cvDataService.updateCompetence(competence.id, competence));
@@ -458,7 +395,6 @@ export class PostulerPage implements OnInit, OnDestroy {
 
       await Promise.all(savePromises);
 
-      // Mettre à jour les données actuelles et marquer comme validé
       this.currentCvData = { 
         ...this.improvedCvData,
         templateId: this.selectedTemplate?.id || (this.currentCvData?.templateId || 'modern'),
@@ -476,9 +412,22 @@ export class PostulerPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Génère la lettre de motivation (séparée)
-   */
+  async continueWithoutChanges() {
+    if (this.isInteractionDisabled) return;
+    
+    this.cvImprovementsValidated = true;
+    
+    if (this.originalCvData) {
+      this.currentCvData = { 
+        ...this.originalCvData,
+        templateId: this.selectedTemplate?.id || (this.currentCvData?.templateId || 'modern'),
+        theme: this.selectedTheme
+      };
+    }
+    
+    this.presentToast('CV conservé tel quel. Vous pouvez maintenant personnaliser et générer votre lettre.', 'success');
+  }
+
   async generateCoverLetter() {
     if (this.isInteractionDisabled) return;
     
@@ -492,7 +441,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     this.generatedCoverLetter = null;
 
     try {
-      // Utiliser les données actuelles (améliorées) pour la lettre
       const cvText = this.generateTextFromCvData(this.currentCvData);
       const letterResult = await this.aiService.generateCoverLetter(this.jobOfferText, cvText);
       
@@ -540,7 +488,6 @@ export class PostulerPage implements OnInit, OnDestroy {
       analyseATS: this.atsAnalysisResult.analysisText,
       lettreMotivationGeneree: this.generatedCoverLetter,
       
-      // ✅ NOUVEAU : Sauvegarder le snapshot CV pour reconstruction
       cvDataSnapshot: {
         experiences: this.currentCvData.experiences,
         formations: this.currentCvData.formations,
@@ -551,7 +498,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     };
   
     try {
-  
       await this.candidatureService.createCandidature(candidatureDetails);
       
       this.presentToast('Candidature sauvegardée avec succès !', 'success');
@@ -569,9 +515,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Remet à zéro le formulaire
-   */
   resetForm() {
     this.jobOfferText = '';
     this.atsAnalysisResult = null;
@@ -586,13 +529,9 @@ export class PostulerPage implements OnInit, OnDestroy {
     this.appliedChangesCount = { experiences: 0, formations: 0, competences: 0, total: 0 };
   }
 
-  /**
-   * Convertit les données CV structurées en texte
-   */
   private generateTextFromCvData(cvData: CvData): string {
     let text = '';
 
-    // Expériences
     if (cvData.experiences?.length > 0) {
       text += 'EXPÉRIENCES PROFESSIONNELLES\n';
       cvData.experiences.forEach(exp => {
@@ -602,7 +541,6 @@ export class PostulerPage implements OnInit, OnDestroy {
       });
     }
 
-    // Formations
     if (cvData.formations?.length > 0) {
       text += 'FORMATIONS\n';
       cvData.formations.forEach(form => {
@@ -612,7 +550,6 @@ export class PostulerPage implements OnInit, OnDestroy {
       });
     }
 
-    // Compétences
     if (cvData.competences?.length > 0) {
       text += 'COMPÉTENCES\n';
       text += cvData.competences.map(comp => comp.nom).join(', ') + '\n';
@@ -621,13 +558,9 @@ export class PostulerPage implements OnInit, OnDestroy {
     return text;
   }
 
-  /**
-   * Génère un texte d'affichage formaté pour la comparaison
-   */
   generateDisplayTextFromCvData(cvData: CvData): string {
     let text = '';
 
-    // Expériences
     if (cvData.experiences?.length > 0) {
       text += '💼 EXPÉRIENCES PROFESSIONNELLES\n\n';
       cvData.experiences.forEach((exp, index) => {
@@ -638,7 +571,6 @@ export class PostulerPage implements OnInit, OnDestroy {
       });
     }
 
-    // Formations
     if (cvData.formations?.length > 0) {
       text += '🎓 FORMATIONS\n\n';
       cvData.formations.forEach((form, index) => {
@@ -649,7 +581,6 @@ export class PostulerPage implements OnInit, OnDestroy {
       });
     }
 
-    // Compétences
     if (cvData.competences?.length > 0) {
       text += '🛠️ COMPÉTENCES\n\n';
       const competencesByCategory = cvData.competences.reduce((acc: any, comp) => {
@@ -668,7 +599,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     return text || 'Aucune donnée CV disponible';
   }
 
-  // Méthodes utilitaires pour la comparaison
   getTotalChangesCount(): number {
     return this.appliedChangesCount.total;
   }
@@ -677,7 +607,6 @@ export class PostulerPage implements OnInit, OnDestroy {
     return this.appliedChangesCount[section];
   }
 
-  // Méthodes utilitaires pour les améliorations
   selectAllImprovements(select: boolean) {
     if (this.isInteractionDisabled) return;
     if (!this.structuredCvImprovements) return;
@@ -759,8 +688,6 @@ export class PostulerPage implements OnInit, OnDestroy {
 
   onImprovementToggle() {
     if (this.isInteractionDisabled) return;
-    // Méthode appelée lors du toggle d'une amélioration
-    // Logique supplémentaire si nécessaire
   }
 
   async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light') {
