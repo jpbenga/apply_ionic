@@ -3,7 +3,6 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- États de chargement et d'erreur -->
   <div *ngIf="isLoading" class="state-container loading-state">
     <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
     <p class="state-message">Chargement de la candidature...</p>
@@ -18,10 +17,8 @@
     </ion-button>
   </div>
 
-  <!-- Contenu principal -->
   <div *ngIf="candidature && !isLoading && !errorLoading" class="candidature-detail">
     
-    <!-- En-tête avec actions principales -->
     <div class="detail-header">
       <div class="header-info">
         <h1 class="candidature-title">{{ candidature.intitulePoste }}</h1>
@@ -39,7 +36,6 @@
       </div>
     </div>
 
-    <!-- Informations générales -->
     <ion-card class="info-card">
       <ion-card-header>
         <ion-card-title>
@@ -101,7 +97,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Détail de l'offre -->
     <ion-card class="offre-card" *ngIf="candidature.offreTexteComplet || candidature.descriptionPoste">
       <ion-card-header>
         <ion-card-title>
@@ -116,18 +111,21 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- CV utilisé pour la candidature -->
-    <ion-card class="cv-detail-card" *ngIf="candidature.cvDataSnapshot || candidature.cvTexteExtrait">
+    <ion-card class="cv-detail-card" *ngIf="candidature.cvDataSnapshot || candidature.cvTexteExtrait" id="cv-content">
       <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="document-outline" slot="start"></ion-icon>
-          CV utilisé pour cette candidature
-        </ion-card-title>
+        <div class="card-title-with-button">
+          <div class="title-left">
+            <ion-icon name="document-outline"></ion-icon>
+            <ion-card-title>CV utilisé pour cette candidature</ion-card-title>
+          </div>
+          <ion-button fill="outline" size="small" (click)="downloadCv()" class="download-btn">
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+            PDF
+          </ion-button>
+        </div>
       </ion-card-header>
       <ion-card-content>
-        <!-- Affichage via cvDataSnapshot -->
         <div *ngIf="candidature.cvDataSnapshot" class="cv-structured">
-          <!-- Expériences -->
           <div *ngIf="candidature.cvDataSnapshot.experiences && candidature.cvDataSnapshot.experiences.length > 0" class="cv-section">
             <h3><ion-icon name="briefcase-outline"></ion-icon> Expériences professionnelles</h3>
             <div *ngFor="let exp of candidature.cvDataSnapshot.experiences" class="cv-item">
@@ -138,7 +136,6 @@
             </div>
           </div>
 
-          <!-- Formations -->
           <div *ngIf="candidature.cvDataSnapshot.formations && candidature.cvDataSnapshot.formations.length > 0" class="cv-section">
             <h3><ion-icon name="school-outline"></ion-icon> Formations</h3>
             <div *ngFor="let form of candidature.cvDataSnapshot.formations" class="cv-item">
@@ -150,7 +147,6 @@
             </div>
           </div>
 
-          <!-- Compétences -->
           <div *ngIf="candidature.cvDataSnapshot.competences && candidature.cvDataSnapshot.competences.length > 0" class="cv-section">
             <h3><ion-icon name="build-outline"></ion-icon> Compétences</h3>
             <div class="competences-grid">
@@ -162,20 +158,24 @@
           </div>
         </div>
 
-        <!-- Affichage via cvTexteExtrait si pas de cvDataSnapshot -->
         <div *ngIf="!candidature.cvDataSnapshot && candidature.cvTexteExtrait" class="cv-text">
           <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit;">{{ candidature.cvTexteExtrait }}</pre>
         </div>
       </ion-card-content>
     </ion-card>
 
-    <!-- Lettre de motivation générée -->
-    <ion-card class="lettre-motivation-card" *ngIf="candidature.lettreMotivationGeneree">
+    <ion-card class="lettre-motivation-card" *ngIf="candidature.lettreMotivationGeneree" id="lettre-content">
       <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="mail-outline" slot="start"></ion-icon>
-          Lettre de motivation générée
-        </ion-card-title>
+        <div class="card-title-with-button">
+          <div class="title-left">
+            <ion-icon name="mail-outline"></ion-icon>
+            <ion-card-title>Lettre de motivation générée</ion-card-title>
+          </div>
+          <ion-button fill="outline" size="small" (click)="downloadLettreMotivation()" class="download-btn">
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+            PDF
+          </ion-button>
+        </div>
       </ion-card-header>
       <ion-card-content>
         <div class="lettre-motivation-content">
@@ -184,7 +184,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Gestion du statut -->
     <ion-card class="status-card">
       <ion-card-header>
         <ion-card-title>
@@ -207,7 +206,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Contact recruteur -->
     <ion-card class="contact-card" *ngIf="candidature.contactRecruteur || candidature.contacts">
       <ion-card-header>
         <ion-card-title>
@@ -240,7 +238,6 @@
           </ion-item>
         </div>
         
-        <!-- Compatibilité avec l'ancien format contacts[] -->
         <div *ngIf="!candidature.contactRecruteur && candidature.contacts && candidature.contacts.length > 0">
           <ion-item lines="none" *ngFor="let contact of candidature.contacts">
             <ion-label>
@@ -253,20 +250,20 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Notes personnelles -->
     <ion-card class="notes-card">
       <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="document-text-outline" slot="start"></ion-icon>
-          Notes personnelles
+        <div class="card-title-with-button">
+          <div class="title-left">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <ion-card-title>Notes personnelles</ion-card-title>
+          </div>
           <ion-button 
             fill="clear" 
             size="small" 
-            slot="end"
             (click)="toggleEditing()">
             <ion-icon [name]="isEditing ? 'checkmark-outline' : 'create-outline'"></ion-icon>
           </ion-button>
-        </ion-card-title>
+        </div>
       </ion-card-header>
       <ion-card-content>
         <div *ngIf="!isEditing && candidature.notesPersonnelles" class="notes-display">
@@ -300,20 +297,20 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Suivi de la candidature -->
     <ion-card class="suivi-card">
       <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="list-outline" slot="start"></ion-icon>
-          Suivi de la candidature
+        <div class="card-title-with-button">
+          <div class="title-left">
+            <ion-icon name="list-outline"></ion-icon>
+            <ion-card-title>Suivi de la candidature</ion-card-title>
+          </div>
           <ion-button 
             fill="clear" 
             size="small" 
-            slot="end"
             (click)="openAddSuiviModal()">
             <ion-icon name="add-outline"></ion-icon>
           </ion-button>
-        </ion-card-title>
+        </div>
       </ion-card-header>
       <ion-card-content>
         <div *ngIf="!candidature.suivi || candidature.suivi.length === 0" class="suivi-empty">
@@ -345,7 +342,6 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- Documents -->
     <ion-card class="documents-card" *ngIf="candidature.cvOriginalUrl || candidature.lettreMotivationUrl">
       <ion-card-header>
         <ion-card-title>
@@ -394,7 +390,6 @@
     </ion-card>
   </div>
 
-  <!-- Modal d'ajout de suivi -->
   <ion-modal [isOpen]="isAddingSuivi" (ionModalDidDismiss)="closeAddSuiviModal()">
     <ng-template>
       <ion-header>
@@ -463,7 +458,6 @@
     </ng-template>
   </ion-modal>
 
-  <!-- Boutons d'action flottants -->
   <ion-fab slot="fixed" vertical="bottom" horizontal="end">
     <ion-fab-button color="primary">
       <ion-icon name="ellipsis-vertical"></ion-icon>

@@ -1,4 +1,4 @@
-// Styles pour les nouvelles sections de candidature-detail
+// Styles pour candidature-detail page
 
 // Section CV structuré
 .cv-detail-card {
@@ -236,6 +236,38 @@
   }
 }
 
+// Structure simple pour les titres avec boutons
+.card-title-with-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  
+  .title-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    
+    ion-icon {
+      font-size: 1.2rem;
+      color: var(--ion-color-primary);
+    }
+    
+    ion-card-title {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  }
+  
+  .download-btn {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    margin-left: 1rem;
+  }
+}
+
 // Cards génériques
 .info-card,
 .status-card,
@@ -249,13 +281,14 @@
   margin-bottom: 1rem;
   
   ion-card-title {
-    display: flex;
-    align-items: center;
+    display: flex !important;
+    align-items: center !important;
     gap: 0.5rem;
     font-size: 1.1rem;
     
-    ion-icon {
+    ion-icon:first-child {
       font-size: 1.2rem;
+      color: var(--ion-color-primary);
     }
   }
 }
@@ -356,5 +389,23 @@
     .competences-grid {
       grid-template-columns: 1fr;
     }
+  }
+  
+  .card-title-with-button {
+    .title-left {
+      ion-card-title {
+        font-size: 1rem !important;
+      }
+    }
+    
+    .download-btn {
+      --padding-start: 6px;
+      --padding-end: 6px;
+      min-width: 40px;
+    }
+  }
+  
+  ion-card-title {
+    font-size: 1rem !important;
   }
 }

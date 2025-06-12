@@ -36,19 +36,16 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   public isLoading: boolean = true;
   public errorLoading: string | null = null;
   
-  // États d'édition
   public isEditing: boolean = false;
   public isEditingNotes: boolean = false;
   public editableNotesPersonnelles: string = '';
   
-  // Suivi des candidatures
   public isAddingSuivi: boolean = false;
   public nouveauSuiviType: TypeSuivi = 'contact';
   public nouveauSuiviDescription: string = '';
   public nouveauSuiviNotes: string = '';
   public nouveauSuiviCommentaire: string = '';
 
-  // Options pour les selects
   public statutsCandidature: { value: StatutCandidature, label: string }[] = [
     { value: 'brouillon', label: 'Brouillon' },
     { value: 'envoyee', label: 'Envoyée' },
@@ -120,9 +117,94 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     this.headerService.setShowBackButton(true);
   }
 
-  /**
-   * S'abonner aux changements de candidature
-   */
+  async downloadCv() {
+    if (!this.candidature) {
+      this.presentToast('Aucun CV disponible', 'warning');
+      return;
+    }
+
+    const loading = await this.loadingController.create({
+      message: 'Génération du PDF...',
+      spinner: 'crescent'
+    });
+
+    try {
+      await loading.present();
+
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      const cvElement = document.querySelector('#cv-content') as HTMLElement;
+      
+      if (!cvElement) {
+        throw new Error('Impossible de trouver le CV à télécharger');
+      }
+
+      const filename = `CV_${this.candidature.entreprise}_${this.candidature.intitulePoste}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+      const options = {
+        margin: 0.5,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      await html2pdf().set(options).from(cvElement).save();
+      
+      this.presentToast('CV téléchargé avec succès !', 'success');
+      
+    } catch (error: any) {
+      console.error('Erreur téléchargement CV:', error);
+      this.presentToast('Erreur lors du téléchargement', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
+  async downloadLettreMotivation() {
+    if (!this.candidature) {
+      this.presentToast('Aucune lettre de motivation disponible', 'warning');
+      return;
+    }
+
+    const loading = await this.loadingController.create({
+      message: 'Génération du PDF...',
+      spinner: 'crescent'
+    });
+
+    try {
+      await loading.present();
+
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      const lettreElement = document.querySelector('#lettre-content') as HTMLElement;
+      
+      if (!lettreElement) {
+        throw new Error('Impossible de trouver la lettre de motivation à télécharger');
+      }
+
+      const filename = `Lettre_motivation_${this.candidature.entreprise}_${this.candidature.intitulePoste}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+      const options = {
+        margin: 0.5,
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      await html2pdf().set(options).from(lettreElement).save();
+      
+      this.presentToast('Lettre de motivation téléchargée avec succès !', 'success');
+      
+    } catch (error: any) {
+      console.error('Erreur téléchargement lettre de motivation:', error);
+      this.presentToast('Erreur lors du téléchargement', 'danger');
+    } finally {
+      await loading.dismiss();
+    }
+  }
+
   private subscribeToCandidate(): void {
     const candidatureSub = this.candidature$.subscribe({
       next: (candidature) => {
@@ -145,9 +227,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     this.subscriptions.push(candidatureSub);
   }
 
-  /**
-   * Obtenir la couleur du statut
-   */
   getStatutColor(statut: StatutCandidature): string {
     const colorMap: { [key in StatutCandidature]: string } = {
       'brouillon': 'medium',
@@ -166,17 +245,11 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     return colorMap[statut] || 'medium';
   }
 
-  /**
-   * Obtenir le libellé du statut
-   */
   getStatutLabel(statut: StatutCandidature): string {
     const statutObj = this.statutsCandidature.find(s => s.value === statut);
     return statutObj ? statutObj.label : statut;
   }
 
-  /**
-   * Obtenir l'icône pour un type de suivi
-   */
   getSuiviIcon(type: TypeSuivi): string {
     const iconMap: { [key in TypeSuivi]: string } = {
       'contact': 'person-outline',
@@ -197,9 +270,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     return iconMap[type] || 'information-circle-outline';
   }
 
-  /**
-   * Obtenir la couleur pour un type de suivi
-   */
   getSuiviColor(type: TypeSuivi): string {
     const colorMap: { [key in TypeSuivi]: string } = {
       'contact': 'primary',
@@ -220,9 +290,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     return colorMap[type] || 'medium';
   }
 
-  /**
-   * Basculer le mode édition
-   */
   toggleEditing(): void {
     if (this.isEditing) {
       this.saveChanges();
@@ -234,9 +301,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Annuler l'édition
-   */
   cancelEditing(): void {
     this.isEditing = false;
     if (this.candidature) {
@@ -244,9 +308,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Sauvegarder les modifications
-   */
   async saveChanges(): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
 
@@ -271,9 +332,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Mettre à jour le statut de la candidature
-   */
   async updateStatut(newStatut: StatutCandidature): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
 
@@ -293,9 +351,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Ouvrir le modal d'ajout de suivi
-   */
   openAddSuiviModal(): void {
     this.isAddingSuivi = true;
     this.nouveauSuiviType = 'contact';
@@ -304,9 +359,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     this.nouveauSuiviCommentaire = '';
   }
 
-  /**
-   * Fermer le modal d'ajout de suivi
-   */
   closeAddSuiviModal(): void {
     this.isAddingSuivi = false;
     this.nouveauSuiviType = 'contact';
@@ -315,9 +367,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     this.nouveauSuiviCommentaire = '';
   }
 
-  /**
-   * Ajouter un nouveau suivi
-   */
   async addSuivi(): Promise<void> {
     if (!this.candidatureId || !this.nouveauSuiviDescription.trim()) {
       this.presentToast('Veuillez saisir une description pour le suivi', 'warning');
@@ -348,9 +397,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Envoyer un email de relance
-   */
   async sendRelanceEmail(): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
 
@@ -361,7 +407,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
 
     try {
-      // Ajouter un suivi pour la relance
       const suiviData: Omit<SuiviCandidature, 'id' | 'date'> = {
         type: 'relance',
         description: 'Email de relance envoyé',
@@ -371,7 +416,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
       await this.candidatureService.addSuiviToCandidature(this.candidatureId, suiviData);
 
-      // Ouvrir le client mail
       const subject = `Suivi candidature - ${this.candidature.intitulePoste} chez ${this.candidature.entreprise}`;
       const body = `Bonjour,\n\nJe me permets de vous recontacter concernant ma candidature pour le poste de ${this.candidature.intitulePoste}.\n\nCordialement`;
       const mailtoLink = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -384,9 +428,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Supprimer la candidature
-   */
   async deleteCandidature(): Promise<void> {
     if (!this.candidatureId) return;
 
@@ -411,9 +452,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  /**
-   * Confirmer la suppression de la candidature
-   */
   private async confirmDeleteCandidature(): Promise<void> {
     const loading = await this.loadingController.create({
       message: 'Suppression en cours...'
@@ -432,13 +470,9 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Générer des documents (CV, lettre de motivation)
-   */
   async generateDocuments(): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
 
-    // Vérifier si les documents sont nécessaires
     if (!this.candidature.cvTexteExtrait && !this.candidature.cvOriginalUrl && !this.candidature.lettreMotivationGeneree) {
       this.presentToast('Aucune donnée de CV disponible pour la génération', 'warning');
       return;
@@ -450,7 +484,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     await loading.present();
 
     try {
-      // Simuler la génération de documents (à adapter selon votre logique)
       const updateData: Partial<Candidature> = {
         cvTexteExtrait: this.candidature.cvTexteExtrait,
         lettreMotivationGeneree: this.candidature.lettreMotivationGeneree,
@@ -467,18 +500,13 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Obtenir l'email de contact
-   */
   private getContactEmail(): string {
     if (!this.candidature) return '';
     
-    // Essayer d'abord contactRecruteur.email
     if (this.candidature.contactRecruteur?.email) {
       return this.candidature.contactRecruteur.email;
     }
     
-    // Puis essayer contacts[0].email (compatibilité)
     if (this.candidature.contacts && this.candidature.contacts.length > 0 && this.candidature.contacts[0].email) {
       return this.candidature.contacts[0].email;
     }
@@ -486,14 +514,10 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     return '';
   }
 
-  /**
-   * Formatter la date
-   */
   formatDate(timestamp: any): string {
     if (!timestamp) return '';
     
     try {
-      // Gérer les timestamps Firestore
       const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
       return date.toLocaleDateString('fr-FR', {
         day: '2-digit',
@@ -508,9 +532,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Afficher un toast
-   */
   private async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light'): Promise<void> {
     const toast = await this.toastController.create({
       message: message,
@@ -522,9 +543,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     toast.present();
   }
 
-  /**
-   * Retour au dashboard
-   */
   goBack(): void {
     this.router.navigate(['/tabs/dashboard']);
   }
