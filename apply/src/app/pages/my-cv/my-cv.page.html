@@ -9,15 +9,34 @@
   (uploadComplete)="onCvUploadComplete($event)">
 </app-cv-upload>
 
-  <app-cv-selector 
-    (cvSelected)="onCvSelected($event)"
-    (createNewCv)="generateCv()">
-  </app-cv-selector>
+  <!-- Bouton unique de génération (affiché seulement s'il n'y a pas de CV) -->
+  <div class="generate-cv-section" *ngIf="!selectedGeneratedCv && !isLoadingCv">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Générer votre CV</ion-card-title>
+        <ion-card-subtitle>Créez votre CV professionnel à partir de vos données</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button expand="block" color="primary" (click)="generateCv()" [disabled]="isGeneratingCv">
+          <ion-icon name="document-text-outline" slot="start"></ion-icon>
+          <span *ngIf="!isGeneratingCv">Générer mon CV</span>
+          <span *ngIf="isGeneratingCv">Génération en cours...</span>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
 
+  <!-- Spinner de chargement CV -->
+  <div *ngIf="isLoadingCv" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Chargement de votre CV...</p>
+  </div>
+
+  <!-- Aperçu du CV (affiché seulement s'il y a un CV) -->
   <div *ngIf="selectedGeneratedCv" class="cv-preview-section">
     <ion-card>
       <ion-card-header>
-        <ion-card-title>Aperçu du CV</ion-card-title>
+        <ion-card-title>Aperçu de votre CV</ion-card-title>
         <ion-card-subtitle>{{ getSelectedCvInfo() }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
@@ -29,13 +48,13 @@
         </app-cv-preview>
         
         <div class="cv-actions ion-margin-top">
-          <ion-button fill="outline" (click)="editSelectedCv()">
-            <ion-icon name="create-outline" slot="start"></ion-icon>
-            Modifier
+          <ion-button color="primary" (click)="editSelectedCv()">
+            <ion-icon name="color-palette-outline" slot="start"></ion-icon>
+            Modifier le style
           </ion-button>
-          <ion-button color="primary" (click)="generateNewCvFromSelected()">
-            <ion-icon name="copy-outline" slot="start"></ion-icon>
-            Dupliquer
+          <ion-button fill="outline" color="danger" (click)="deleteCv()">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Supprimer le CV
           </ion-button>
         </div>
       </ion-card-content>
@@ -69,7 +88,7 @@
 
   <ion-list *ngIf="!isLoadingExperiences && (experiences$ | async) as experiencesArray">
     <ng-container *ngIf="experiencesArray.length > 0; else noExperiences">
-      <ion-item-sliding *ngFor="let exp of experiencesArray" #slidingItemExp>
+      <ion-item-sliding *ngFor="let exp of getDisplayedExperiences(experiencesArray); let i = index" #slidingItemExp>
         <ion-item button detail="false" (click)="editExperience(exp, slidingItemExp)">
           <ion-icon name="business-outline" slot="start" color="primary" aria-hidden="true"></ion-icon>
           <ion-label>
@@ -87,6 +106,20 @@
           </ion-item-option>
         </ion-item-options>
       </ion-item-sliding>
+      
+      <ion-item *ngIf="experiencesArray.length > 5 && !showAllExperiences" button (click)="toggleExperiencesDisplay()">
+        <ion-icon name="chevron-down-outline" slot="start" color="medium"></ion-icon>
+        <ion-label color="medium">
+          Voir {{ experiencesArray.length - 5 }} expérience(s) de plus
+        </ion-label>
+      </ion-item>
+      
+      <ion-item *ngIf="experiencesArray.length > 5 && showAllExperiences" button (click)="toggleExperiencesDisplay()">
+        <ion-icon name="chevron-up-outline" slot="start" color="medium"></ion-icon>
+        <ion-label color="medium">
+          Réduire l'affichage
+        </ion-label>
+      </ion-item>
     </ng-container>
     <ng-template #noExperiences>
       <div class="ion-text-center ion-padding list-empty-placeholder">
@@ -122,7 +155,7 @@
 
   <ion-list *ngIf="!isLoadingFormations && (formations$ | async) as formationsArray">
     <ng-container *ngIf="formationsArray.length > 0; else noFormations">
-      <ion-item-sliding *ngFor="let form of formationsArray" #slidingItemForm>
+      <ion-item-sliding *ngFor="let form of getDisplayedFormations(formationsArray); let i = index" #slidingItemForm>
         <ion-item button detail="false" (click)="editFormation(form, slidingItemForm)">
           <ion-icon name="school-outline" slot="start" color="secondary" aria-hidden="true"></ion-icon>
           <ion-label>
@@ -140,6 +173,20 @@
           </ion-item-option>
         </ion-item-options>
       </ion-item-sliding>
+      
+      <ion-item *ngIf="formationsArray.length > 5 && !showAllFormations" button (click)="toggleFormationsDisplay()">
+        <ion-icon name="chevron-down-outline" slot="start" color="medium"></ion-icon>
+        <ion-label color="medium">
+          Voir {{ formationsArray.length - 5 }} formation(s) de plus
+        </ion-label>
+      </ion-item>
+      
+      <ion-item *ngIf="formationsArray.length > 5 && showAllFormations" button (click)="toggleFormationsDisplay()">
+        <ion-icon name="chevron-up-outline" slot="start" color="medium"></ion-icon>
+        <ion-label color="medium">
+          Réduire l'affichage
+        </ion-label>
+      </ion-item>
     </ng-container>
     <ng-template #noFormations>
       <div class="ion-text-center ion-padding list-empty-placeholder">
@@ -171,7 +218,7 @@
   </div>
   <ion-list *ngIf="!isLoadingCompetences && (competences$ | async) as competencesArray">
     <ng-container *ngIf="competencesArray.length > 0; else noCompetences">
-      <ion-item-sliding *ngFor="let comp of competencesArray" #slidingItemComp>
+      <ion-item-sliding *ngFor="let comp of getDisplayedCompetences(competencesArray); let i = index" #slidingItemComp>
         <ion-item button detail="false" (click)="editCompetence(comp, slidingItemComp)">
           <ion-icon name="star-outline" slot="start" color="tertiary" aria-hidden="true"></ion-icon>
           <ion-label>
@@ -184,6 +231,20 @@
           <ion-item-option color="danger" (click)="deleteCompetence(comp.id, slidingItemComp)"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-item-option>
         </ion-item-options>
       </ion-item-sliding>
+      
+      <ion-item *ngIf="competencesArray.length > 5 && !showAllCompetences" button (click)="toggleCompetencesDisplay()">
+        <ion-icon name="chevron-down-outline" slot="start" color="medium"></ion-icon>
+        <ion-label color="medium">
+          Voir {{ competencesArray.length - 5 }} compétence(s) de plus
+        </ion-label>
+      </ion-item>
+      
+      <ion-item *ngIf="competencesArray.length > 5 && showAllCompetences" button (click)="toggleCompetencesDisplay()">
+        <ion-icon name="chevron-up-outline" slot="start" color="medium"></ion-icon>
+        <ion-label color="medium">
+          Réduire l'affichage
+        </ion-label>
+      </ion-item>
     </ng-container>
     <ng-template #noCompetences>
       <div class="ion-text-center ion-padding list-empty-placeholder"><ion-icon name="list-outline" size="large" color="medium"></ion-icon><p color="medium">Aucune compétence enregistrée.</p></div>
@@ -205,12 +266,6 @@
         <ion-icon name="business-outline"></ion-icon>
       </ion-fab-button>
     </ion-fab-list>
-  </ion-fab>
-
-  <ion-fab slot="fixed" vertical="bottom" horizontal="start">
-    <ion-fab-button (click)="generateCv()" color="success" data-desc="Générer CV">
-      <ion-icon name="document-text-outline"></ion-icon>
-    </ion-fab-button>
   </ion-fab>
 
 </ion-content>
