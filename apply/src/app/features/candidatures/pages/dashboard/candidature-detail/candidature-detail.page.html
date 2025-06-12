@@ -32,10 +32,6 @@
       </div>
       
       <div class="header-actions">
-        <ion-button fill="outline" size="small" (click)="editCandidature()">
-          <ion-icon name="create-outline" slot="start"></ion-icon>
-          Modifier
-        </ion-button>
         <ion-button fill="outline" size="small" color="danger" (click)="deleteCandidature()">
           <ion-icon name="trash-outline" slot="start"></ion-icon>
           Supprimer
@@ -102,6 +98,89 @@
             </ion-col>
           </ion-row>
         </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Détail de l'offre -->
+    <ion-card class="offre-card" *ngIf="candidature.offreTexteComplet || candidature.descriptionPoste">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="document-text-outline" slot="start"></ion-icon>
+          Détail de l'offre
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="offre-content">
+          <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit;">{{ candidature.offreTexteComplet || candidature.descriptionPoste }}</pre>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- CV utilisé pour la candidature -->
+    <ion-card class="cv-detail-card" *ngIf="candidature.cvDataSnapshot || candidature.cvTexteExtrait">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="document-outline" slot="start"></ion-icon>
+          CV utilisé pour cette candidature
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <!-- Affichage via cvDataSnapshot -->
+        <div *ngIf="candidature.cvDataSnapshot" class="cv-structured">
+          <!-- Expériences -->
+          <div *ngIf="candidature.cvDataSnapshot.experiences && candidature.cvDataSnapshot.experiences.length > 0" class="cv-section">
+            <h3><ion-icon name="briefcase-outline"></ion-icon> Expériences professionnelles</h3>
+            <div *ngFor="let exp of candidature.cvDataSnapshot.experiences" class="cv-item">
+              <h4>{{ exp.poste }} - {{ exp.entreprise }}</h4>
+              <p class="cv-periode">{{ formatDate(exp.dateDebut) }} - {{ exp.dateFin ? formatDate(exp.dateFin) : 'En cours' }}</p>
+              <p *ngIf="exp.lieu" class="cv-lieu">{{ exp.lieu }}</p>
+              <p *ngIf="exp.description" class="cv-description">{{ exp.description }}</p>
+            </div>
+          </div>
+
+          <!-- Formations -->
+          <div *ngIf="candidature.cvDataSnapshot.formations && candidature.cvDataSnapshot.formations.length > 0" class="cv-section">
+            <h3><ion-icon name="school-outline"></ion-icon> Formations</h3>
+            <div *ngFor="let form of candidature.cvDataSnapshot.formations" class="cv-item">
+              <h4>{{ form.diplome }}</h4>
+              <p class="cv-etablissement">{{ form.etablissement }}</p>
+              <p class="cv-periode">{{ formatDate(form.dateDebut) }} - {{ form.dateFin ? formatDate(form.dateFin) : (form.enCours ? 'En cours' : '') }}</p>
+              <p *ngIf="form.ville" class="cv-lieu">{{ form.ville }}</p>
+              <p *ngIf="form.description" class="cv-description">{{ form.description }}</p>
+            </div>
+          </div>
+
+          <!-- Compétences -->
+          <div *ngIf="candidature.cvDataSnapshot.competences && candidature.cvDataSnapshot.competences.length > 0" class="cv-section">
+            <h3><ion-icon name="build-outline"></ion-icon> Compétences</h3>
+            <div class="competences-grid">
+              <div *ngFor="let comp of candidature.cvDataSnapshot.competences" class="competence-item">
+                <span class="competence-nom">{{ comp.nom }}</span>
+                <span *ngIf="comp.categorie" class="competence-categorie">{{ comp.categorie }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Affichage via cvTexteExtrait si pas de cvDataSnapshot -->
+        <div *ngIf="!candidature.cvDataSnapshot && candidature.cvTexteExtrait" class="cv-text">
+          <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit;">{{ candidature.cvTexteExtrait }}</pre>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Lettre de motivation générée -->
+    <ion-card class="lettre-motivation-card" *ngIf="candidature.lettreMotivationGeneree">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          Lettre de motivation générée
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="lettre-motivation-content">
+          <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit;">{{ candidature.lettreMotivationGeneree }}</pre>
+        </div>
       </ion-card-content>
     </ion-card>
 
@@ -315,117 +394,6 @@
     </ion-card>
   </div>
 
-  <!-- CV de la candidature -->
-<ion-card class="cv-card" *ngIf="candidature">
-  <ion-card-header>
-    <ion-card-title>
-      <ion-icon name="document-attach-outline" slot="start"></ion-icon>
-      CV de la candidature
-      <ion-chip [color]="canReconstructCv() ? 'success' : 'warning'" slot="end">
-        <ion-label>{{ canReconstructCv() ? 'Reconstructible' : 'Données manquantes' }}</ion-label>
-      </ion-chip>
-    </ion-card-title>
-    <ion-card-subtitle *ngIf="canReconstructCv()">
-      {{ getTemplateInfo().templateName }} • {{ getCvStats().total }} élément(s) sauvegardé(s)
-    </ion-card-subtitle>
-  </ion-card-header>
-  
-  <ion-card-content>
-    <!-- Informations sur les données CV -->
-    <div class="cv-info" *ngIf="canReconstructCv()">
-      <ion-grid>
-        <ion-row>
-          <ion-col size="4">
-            <ion-item lines="none">
-              <ion-icon name="briefcase-outline" slot="start" color="primary"></ion-icon>
-              <ion-label>
-                <h3>{{ getCvStats().experiences }}</h3>
-                <p>Expérience(s)</p>
-              </ion-label>
-            </ion-item>
-          </ion-col>
-          <ion-col size="4">
-            <ion-item lines="none">
-              <ion-icon name="school-outline" slot="start" color="secondary"></ion-icon>
-              <ion-label>
-                <h3>{{ getCvStats().formations }}</h3>
-                <p>Formation(s)</p>
-              </ion-label>
-            </ion-item>
-          </ion-col>
-          <ion-col size="4">
-            <ion-item lines="none">
-              <ion-icon name="build-outline" slot="start" color="tertiary"></ion-icon>
-              <ion-label>
-                <h3>{{ getCvStats().competences }}</h3>
-                <p>Compétence(s)</p>
-              </ion-label>
-            </ion-item>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </div>
-
-    <!-- Message si données manquantes -->
-    <div class="cv-unavailable" *ngIf="!canReconstructCv()">
-      <ion-item lines="none">
-        <ion-icon name="alert-circle-outline" slot="start" color="warning"></ion-icon>
-        <ion-label>
-          <h3>CV non reconstructible</h3>
-          <p>Cette candidature a été créée avant la mise en place du système de sauvegarde des données CV.</p>
-        </ion-label>
-      </ion-item>
-    </div>
-
-    <!-- Actions -->
-    <div class="cv-actions">
-      <ion-button 
-        *ngIf="canReconstructCv() && !showCvPreview"
-        fill="outline" 
-        (click)="reconstructCandidatureCv()"
-        [disabled]="isReconstructingCv">
-        <ion-spinner *ngIf="isReconstructingCv" name="crescent" slot="start"></ion-spinner>
-        <ion-icon *ngIf="!isReconstructingCv" name="eye-outline" slot="start"></ion-icon>
-        {{ isReconstructingCv ? 'Reconstruction...' : 'Prévisualiser le CV' }}
-      </ion-button>
-
-      <ion-button 
-        *ngIf="showCvPreview && reconstructedCv?.hasValidData"
-        fill="solid" 
-        color="primary"
-        (click)="downloadReconstructedCv()">
-        <ion-icon name="download-outline" slot="start"></ion-icon>
-        Télécharger le CV
-      </ion-button>
-
-      <ion-button 
-        *ngIf="showCvPreview"
-        fill="clear" 
-        (click)="closeCvPreview()">
-        <ion-icon name="close-outline" slot="start"></ion-icon>
-        Fermer l'aperçu
-      </ion-button>
-    </div>
-
-    <!-- Prévisualisation du CV -->
-    <div class="cv-preview" *ngIf="showCvPreview && reconstructedCv?.hasValidData">
-      <ion-item lines="full">
-        <ion-label>
-          <h3>Aperçu du CV reconstruit</h3>
-          <p>Template: {{ getTemplateInfo().templateName }}</p>
-        </ion-label>
-        <ion-chip [style.background-color]="getTemplateInfo().themeName" slot="end">
-          <ion-label style="color: white;">{{ getTemplateInfo().themeName }}</ion-label>
-        </ion-chip>
-      </ion-item>
-      
-      <div class="cv-preview-content">
-        <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit; background: #f5f5f5; padding: 1rem; border-radius: 8px; margin: 1rem 0;">{{ cvPreviewText }}</pre>
-      </div>
-    </div>
-  </ion-card-content>
-</ion-card>
-
   <!-- Modal d'ajout de suivi -->
   <ion-modal [isOpen]="isAddingSuivi" (ionModalDidDismiss)="closeAddSuiviModal()">
     <ng-template>
@@ -506,9 +474,6 @@
       </ion-fab-button>
       <ion-fab-button (click)="openAddSuiviModal()" color="tertiary">
         <ion-icon name="add-outline"></ion-icon>
-      </ion-fab-button>
-      <ion-fab-button (click)="editCandidature()" color="warning">
-        <ion-icon name="create-outline"></ion-icon>
       </ion-fab-button>
     </ion-fab-list>
   </ion-fab>
