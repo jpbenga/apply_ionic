@@ -23,7 +23,7 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
   @Input() template: CvTemplate | null = null;
   @Input() theme: string | null = null;
   @Input() previewMode: 'mini' | 'normal' | 'full' = 'normal';
-  @ViewChild('templateContainer', { read: ViewContainerRef }) templateContainer!: ViewContainerRef;
+  @ViewChild('templateContainer', { read: ViewContainerRef, static: false }) templateContainer!: ViewContainerRef;
 
   // États du composant
   cvData: CvData | null = null;
@@ -76,15 +76,39 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
       theme: themeChanged?.currentValue,
       mode: modeChanged?.currentValue
     });
+
+    // CORRECTION : Éviter le rendu si le template devient undefined
+    if (templateChanged && templateChanged.currentValue === null) {
+      console.log('CvPreview: Template est devenu null, abandon du rendu');
+      return;
+    }
+
+    // CORRECTION : Rendu immédiat si template défini pour la première fois et données disponibles
+    const isFirstTemplateLoad = templateChanged && 
+                               templateChanged.previousValue === null && 
+                               templateChanged.currentValue !== null;
+    
+    if (isFirstTemplateLoad && this.cvData && !this.isLoading) {
+      console.log('CvPreview: Premier chargement template - rendu immédiat');
+      this.renderTemplate();
+      return;
+    }
+
+    // CORRECTION : Rendu immédiat si seulement le thème change et template existe
+    if (!templateChanged && themeChanged && this.template && this.cvData && !this.isLoading) {
+      console.log('CvPreview: Changement de thème seulement - rendu immédiat');
+      this.renderTemplate();
+      return;
+    }
   
-    // Débounce tous les changements de la même manière
+    // Débounce pour les autres changements
     if (this.renderTimeout) {
       clearTimeout(this.renderTimeout);
     }
     
     this.renderTimeout = setTimeout(() => {
       this.renderTemplate();
-    }, 200); // Augmenté de 150ms à 200ms pour plus de stabilité
+    }, 200);
   }
 
   ngOnDestroy() {
@@ -127,7 +151,12 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
         this.isLoading = false;
         this.error = null;
         this.cdr.markForCheck();
-        this.renderTemplate();
+        
+        // CORRECTION : Rendre le template automatiquement dès que les données sont chargées
+        if (this.template && this.cvData) {
+          console.log('CvPreview: Données chargées, déclenchement du rendu');
+          this.renderTemplate();
+        }
       },
       error: (error) => {
         console.error('Erreur lors du chargement des données CV:', error);
@@ -156,20 +185,27 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
       return;
     }
   
-    // Vérifications préliminaires
-    if (!this.templateContainer) {
-      return;
-    }
-  
     if (!this.template) {
-      this.showEmptyState('Aucun template sélectionné');
+      console.log('CvPreview: Aucun template sélectionné');
       return;
     }
   
+    // CORRECTION : Attendre que les données CV soient chargées
     if (!this.cvData) {
-      if (!this.isLoading) {
-        this.showEmptyState('Aucune donnée CV disponible');
+      if (this.isLoading) {
+        console.log('CvPreview: Données en cours de chargement, attente...');
+        return;
+      } else {
+        console.log('CvPreview: Aucune donnée CV, tentative de rechargement...');
+        this.loadCvData();
+        return;
       }
+    }
+
+    // CORRECTION : Vérification simple du templateContainer
+    if (!this.templateContainer) {
+      console.log('CvPreview: templateContainer non disponible, nouvelle tentative...');
+      setTimeout(() => this.renderTemplate(), 100);
       return;
     }
   
@@ -224,11 +260,15 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
     
     console.log('CvPreview: Configuration du composant template');
     
+    // CORRECTION : S'assurer que le thème est toujours défini
+    const themeToApply = this.buildThemeObject();
+    console.log('CvPreview: Thème à appliquer:', themeToApply);
+    
     // Configure toutes les données en une seule fois
     instance.cvData = this.cvData;
     instance.userProfile = this.userProfile;
     instance.previewMode = true;
-    instance.theme = this.buildThemeObject();
+    instance.theme = themeToApply;
   
     // Un seul appel à detectChanges pour toute la configuration
     this.currentComponentRef.changeDetectorRef.detectChanges();
@@ -237,9 +277,12 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
   }
 
   private buildThemeObject(): CvTheme {
+    // CORRECTION : Utiliser le thème par défaut si aucun thème n'est fourni
+    const primaryColor = this.theme || this.defaultTheme.primaryColor;
+    
     const theme = {
-      primaryColor: this.theme || '#007bff',
-      secondaryColor: this.lightenColor(this.theme || '#007bff', 20),
+      primaryColor: primaryColor,
+      secondaryColor: this.lightenColor(primaryColor, 20),
       textColor: '#333333',
       backgroundColor: '#ffffff'
     };

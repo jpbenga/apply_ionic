@@ -172,6 +172,8 @@ export class PostulerPage implements OnInit, OnDestroy {
         // Sélectionner le premier template par défaut
         if (templates.length > 0 && !this.selectedTemplate) {
           this.selectedTemplate = templates[0];
+          // S'assurer que le thème par défaut est appliqué
+          this.updateCvData();
         }
         this.isLoadingTemplates = false;
       },
@@ -210,6 +212,11 @@ export class PostulerPage implements OnInit, OnDestroy {
           };
           // Créer une copie profonde pour l'original
           this.originalCvData = JSON.parse(JSON.stringify(this.currentCvData));
+          
+          // S'assurer que les données sont synchronisées avec le template sélectionné
+          if (this.selectedTemplate) {
+            this.updateCvData();
+          }
         }
         
         this.isLoadingCvData = false;
@@ -452,7 +459,11 @@ export class PostulerPage implements OnInit, OnDestroy {
       await Promise.all(savePromises);
 
       // Mettre à jour les données actuelles et marquer comme validé
-      this.currentCvData = { ...this.improvedCvData };
+      this.currentCvData = { 
+        ...this.improvedCvData,
+        templateId: this.selectedTemplate?.id || (this.currentCvData?.templateId || 'modern'),
+        theme: this.selectedTheme
+      };
       this.cvImprovementsValidated = true;
 
       this.presentToast('Améliorations sauvegardées avec succès !', 'success');

@@ -100,14 +100,15 @@
       </div>
     </div>
 
-    <!-- Zone de rendu du template -->
+    <!-- CORRECTION : Zone de rendu du template TOUJOURS présente -->
     <div 
-      *ngIf="!isLoading && !isRendering && !error && hasTemplate && hasCvData"
       class="template-viewport"
       [class.viewport-mini]="previewMode === 'mini'"
       [class.viewport-normal]="previewMode === 'normal'"
       [class.viewport-full]="previewMode === 'full'"
+      [style.display]="(!isLoading && !isRendering && !error && hasTemplate && hasCvData) ? 'block' : 'none'"
     >
+      <!-- CORRECTION : templateContainer toujours présent dans le DOM -->
       <div class="template-container" #templateContainer></div>
       
       <!-- Overlay d'interaction pour le mode mini -->

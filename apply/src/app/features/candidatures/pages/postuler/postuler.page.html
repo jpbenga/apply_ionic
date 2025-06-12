@@ -457,7 +457,7 @@
       </ion-card>
     </div>
 
-    <!-- Section sélection template et thème (APRÈS validation des améliorations) -->
+    <!-- Section sélection template et thème (APRÈS validation des améliorations OU dès le départ) -->
     <div *ngIf="cvImprovementsValidated" class="ion-margin-top">
       <ion-card>
         <ion-card-header>
@@ -527,9 +527,11 @@
           <div class="cv-preview-section ion-margin-top" *ngIf="selectedTemplate">
             <h4>Aperçu final</h4>
             <div class="cv-preview-container">
+              <!-- CORRECTION : Passer le template ET le thème au composant cv-preview -->
               <app-cv-preview 
                 [template]="selectedTemplate"
-                [theme]="selectedTheme.primaryColor">
+                [theme]="selectedTheme.primaryColor"
+                previewMode="normal">
               </app-cv-preview>
             </div>
           </div>

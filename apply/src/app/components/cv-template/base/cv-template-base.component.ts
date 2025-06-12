@@ -1,5 +1,5 @@
 // src/app/components/cv-templates/base/cv-template-base.component.ts
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ElementRef, OnInit } from '@angular/core';
 import { CvData, CvTheme } from 'src/app/models/cv-template.model';
 import { UserProfile } from '../../../features/profile/models/user-profile.model'; // MODIFIED
 
@@ -8,7 +8,7 @@ import { UserProfile } from '../../../features/profile/models/user-profile.model
   template: '', // Sera surchargé par les templates enfants
   standalone: true
 })
-export abstract class CvTemplateBaseComponent implements OnChanges {
+export abstract class CvTemplateBaseComponent implements OnInit, OnChanges {
   @Input() cvData: CvData | null = null;
   @Input() userProfile: UserProfile | null = null;
   @Input() theme: CvTheme = { primaryColor: '#007bff' };
@@ -17,14 +17,17 @@ export abstract class CvTemplateBaseComponent implements OnChanges {
   // Variables CSS pour les couleurs dynamiques
   cssVariables: { [key: string]: string } = {};
 
+  constructor(private elementRef: ElementRef) {}
+
+  ngOnInit() {
+    // Appliquer le thème initial
+    this.updateCssVariables();
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes['theme']) {
       console.log('Theme changé dans le composant base:', this.theme);
       this.updateCssVariables();
-      // Force la mise à jour visuelle après le cycle de détection
-      setTimeout(() => {
-        this.updateCssVariables();
-      }, 0);
     }
   }
 
@@ -37,6 +40,19 @@ export abstract class CvTemplateBaseComponent implements OnChanges {
       '--cv-background-color': this.theme.backgroundColor || '#ffffff'
     };
     console.log('Variables CSS mises à jour:', this.cssVariables);
+    
+    // Appliquer les variables CSS à l'élément DOM
+    this.applyCssVariables();
+  }
+
+  private applyCssVariables() {
+    const element = this.elementRef.nativeElement;
+    if (element) {
+      Object.keys(this.cssVariables).forEach(key => {
+        element.style.setProperty(key, this.cssVariables[key]);
+      });
+      console.log('Variables CSS appliquées à l\'élément DOM');
+    }
   }
 
   // Utilitaire pour éclaircir une couleur
