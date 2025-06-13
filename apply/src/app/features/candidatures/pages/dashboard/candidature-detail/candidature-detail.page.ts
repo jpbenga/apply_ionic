@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import {
   IonHeader, IonContent, IonSpinner, IonIcon, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle,
@@ -12,10 +12,11 @@ import {
 import { HeaderService } from '../../../../../shared/services/header/header.service';
 import { CandidatureService } from '../../../../../shared/services/candidature/candidature.service';
 import { Candidature, SuiviCandidature, TypeSuivi, StatutCandidature } from 'src/app/features/candidatures/models/candidature.model';
-import { CvTheme } from 'src/app/models/cv-template.model';
 import { UserHeaderComponent } from '../../../../../shared/components/user-header/user-header.component';
 import { ToastController, AlertController, LoadingController } from '@ionic/angular/standalone';
 import { PdfGeneratorService } from 'src/app/services/pdf-generator/pdf-generator.service';
+import { ProfileService } from '../../../../profile/services/profile.service';
+import { UserProfile } from '../../../../profile/models/user-profile.model';
 
 @Component({
   selector: 'app-candidature-detail',
@@ -23,17 +24,13 @@ import { PdfGeneratorService } from 'src/app/services/pdf-generator/pdf-generato
   styleUrls: ['./candidature-detail.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    RouterModule,
-    FormsModule,
-    IonHeader, IonContent, IonSpinner, IonIcon, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle,
-    IonItem, IonLabel, IonSelect, IonSelectOption, IonTextarea, IonInput, IonChip,
-    IonList, IonModal, IonButtons, IonTitle, IonToolbar, IonFab, IonFabButton, IonFabList, IonGrid, IonRow, IonCol,
-    UserHeaderComponent
+    CommonModule, RouterModule, FormsModule, IonHeader, IonContent, IonSpinner, IonIcon, IonButton, IonCard, 
+    IonCardContent, IonCardHeader, IonCardTitle, IonItem, IonLabel, IonSelect, IonSelectOption, IonTextarea, 
+    IonInput, IonChip, IonList, IonModal, IonButtons, IonTitle, IonToolbar, IonFab, IonFabButton, IonFabList, 
+    IonGrid, IonRow, IonCol, UserHeaderComponent
   ]
 })
 export class CandidatureDetailPage implements OnInit, OnDestroy {
-  public candidature$: Observable<Candidature | undefined>;
   public candidature: Candidature | undefined;
   public isLoading: boolean = true;
   public errorLoading: string | null = null;
@@ -44,6 +41,8 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   public nouveauSuiviDescription: string = '';
   public nouveauSuiviNotes: string = '';
   public nouveauSuiviCommentaire: string = '';
+  private candidatureId: string = '';
+  private subscriptions = new Subscription();
 
   public statutsCandidature: { value: StatutCandidature, label: string }[] = [
     { value: 'brouillon', label: 'Brouillon' }, { value: 'envoyee', label: 'Envoyée' },
@@ -64,39 +63,53 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     { value: 'relance', label: 'Relance' }, { value: 'autre', label: 'Autre' }
   ];
 
-  private candidatureId: string = '';
-  private subscriptions: Subscription[] = [];
-
   constructor(
     private headerService: HeaderService,
     private candidatureService: CandidatureService,
+    private profileService: ProfileService,
     private router: Router,
     private route: ActivatedRoute,
     private toastController: ToastController,
     private alertController: AlertController,
     private loadingController: LoadingController,
     private pdfGeneratorService: PdfGeneratorService
-  ) {
-    this.candidature$ = this.route.paramMap.pipe(
-      map(params => params.get('id') || ''),
-      switchMap(id => {
-        this.candidatureId = id;
+  ) {}
+
+  ngOnInit() {
+    const candidature$ = this.route.paramMap.pipe(
+      map(params => {
+        const id = params.get('id');
         if (!id) {
-          this.errorLoading = 'ID de candidature non fourni';
-          this.isLoading = false;
-          return [];
+          throw new Error('ID de candidature non fourni');
         }
-        return this.candidatureService.getCandidatureById(id);
+        this.candidatureId = id;
+        return id;
+      }),
+      switchMap(id => this.candidatureService.getCandidatureById(id))
+    );
+
+    this.subscriptions.add(
+      candidature$.subscribe({
+        next: (candidature) => {
+          if (candidature) {
+            this.candidature = candidature;
+            this.editableNotesPersonnelles = candidature.notesPersonnelles || '';
+          } else {
+            this.errorLoading = 'Candidature non trouvée';
+          }
+          this.isLoading = false;
+        },
+        error: (err) => {
+          this.errorLoading = 'Erreur lors du chargement de la candidature.';
+          this.isLoading = false;
+          console.error(err);
+        }
       })
     );
   }
 
-  ngOnInit() {
-    this.subscribeToCandidate();
-  }
-
   ngOnDestroy() {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.unsubscribe();
   }
 
   ionViewWillEnter() {
@@ -106,7 +119,7 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
   async downloadCv() {
     if (!this.candidature?.cvDataSnapshot) {
-      this.presentToast('Les données structurées du CV sont introuvables.', 'warning');
+      this.presentToast('Les données du CV sont introuvables.', 'warning');
       return;
     }
 
@@ -119,22 +132,24 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     let pdfElement: HTMLElement | null = null;
 
     try {
-      pdfElement = this.createCvElementFromData();
+      const userProfile = await firstValueFrom(this.profileService.getUserProfile());
+      if (!userProfile) {
+        throw new Error('Impossible de récupérer le profil utilisateur.');
+      }
+
+      pdfElement = this.createCvElementFromData(this.candidature.cvDataSnapshot, userProfile);
       document.body.appendChild(pdfElement);
       
       await new Promise(resolve => setTimeout(resolve, 50));
 
       const filename = this.pdfGeneratorService.generateFileName(
-        `CV_${this.candidature.entreprise}`,
-        'candidature'
+        `CV_${this.candidature.entreprise}`, 'candidature'
       );
 
-      await this.pdfGeneratorService.generateOptimizedPdf(pdfElement, {
-        filename,
-        singlePage: true
-      });
+      await this.pdfGeneratorService.generateOptimizedPdf(pdfElement, { filename, singlePage: true });
 
       this.presentToast('CV téléchargé avec succès !', 'success');
+
     } catch (error: any) {
       console.error('Erreur lors du téléchargement du CV:', error);
       this.presentToast(`Erreur de génération PDF: ${error.message || 'Une erreur inconnue est survenue'}`, 'danger');
@@ -146,78 +161,75 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
   }
 
-  private createCvElementFromData(): HTMLElement {
-    if (!this.candidature || !this.candidature.cvDataSnapshot) {
-      throw new Error('Données de CV snapshot manquantes.');
-    }
+  private createCvElementFromData(snapshot: any, profile: UserProfile): HTMLElement {
     const cvElement = document.createElement('div');
     cvElement.id = 'cv-render-temp';
-    cvElement.innerHTML = this.generateStyledCvHtml(this.candidature.cvDataSnapshot as any);
+    cvElement.innerHTML = this.generateStyledCvHtml(snapshot, profile);
     return cvElement;
   }
   
-  private generateStyledCvHtml(data: any): string {
-    const theme = data.theme || { primaryColor: '#007bff' };
+  private generateStyledCvHtml(snapshot: any, profile: UserProfile): string {
+    const theme = snapshot.theme || { primaryColor: '#007bff' };
     const primaryColor = theme.primaryColor;
 
-    const experiences = data.experiences || [];
-    const formations = data.formations || [];
-    const competences = data.competences || [];
+    const experiences = snapshot.experiences || [];
+    const formations = snapshot.formations || [];
+    const competences = snapshot.competences || [];
 
     const headerHtml = `
-      <div style="background-color: ${primaryColor}; color: white; padding: 20px; font-family: Arial, sans-serif;">
-        <h1 style="font-size: 24px; margin: 0 0 5px 0; text-transform: uppercase;">${data.nom || 'JP'} ${data.prenom || 'BENGS'}</h1>
-        <p style="font-size: 14px; margin: 0 0 15px 0;">${data.resumePersonnel || 'blabla'}</p>
-        <div style="font-size: 12px; line-height: 1.5;">
-            ${data.email ? `<div><strong>Email:</strong> ${data.email}</div>` : ''}
-            ${data.telephone ? `<div><strong>Téléphone:</strong> ${data.telephone}</div>` : ''}
-            ${data.adresse ? `<div><strong>Adresse:</strong> ${data.adresse}</div>` : ''}
+      <div style="background-color: ${primaryColor}; color: white; padding: 20px; font-family: Arial, sans-serif; line-height: 1.4;">
+        <h1 style="font-size: 24px; margin: 0 0 5px 0; text-transform: uppercase;">${profile.prenom || ''} ${profile.nom || ''}</h1>
+        <p style="font-size: 14px; margin: 0 0 12px 0; font-style: italic;">${profile.resumePersonnel || ''}</p>
+        <div style="font-size: 11px;">
+            ${profile.email ? `<div><strong>Email:</strong> ${profile.email}</div>` : ''}
+            ${profile.telephone ? `<div><strong>Téléphone:</strong> ${profile.telephone}</div>` : ''}
+            ${profile.adresse ? `<div><strong>Adresse:</strong> ${profile.adresse}</div>` : ''}
         </div>
       </div>
     `;
 
-    const experiencesHtml = experiences.length > 0 ? `
-      <div style="margin-top: 20px;">
-        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 5px; margin-bottom: 15px; font-size: 16px; text-transform: uppercase;">Expérience Professionnelle</h2>
+    const experiencesHtml = (experiences || []).length === 0 ? '' : `
+      <div style="margin-top: 15px;">
+        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 4px; margin-bottom: 12px; font-size: 16px; text-transform: uppercase;">Expérience Professionnelle</h2>
         ${experiences.map((exp: any) => `
-          <div style="margin-bottom: 15px; page-break-inside: avoid;">
-            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 2px 0;">${exp.poste}</h3>
-            <div style="color: #555; margin-bottom: 5px; font-size: 13px;">${exp.entreprise}</div>
-            <p style="font-size: 12px; margin: 0; text-align: justify;">${exp.description || ''}</p>
+          <div style="margin-bottom: 12px; page-break-inside: avoid;">
+            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 2px 0;">${exp.poste || ''}</h3>
+            <div style="color: #555; margin-bottom: 4px; font-size: 12px; font-style: italic;">${exp.entreprise || ''}</div>
+            <p style="font-size: 12px; margin: 0; text-align: justify; color: #333; line-height: 1.3;">${exp.description || ''}</p>
           </div>
         `).join('')}
       </div>
-    ` : '';
+    `;
     
-    const formationsHtml = formations.length > 0 ? `
-      <div style="margin-top: 20px;">
-        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 5px; margin-bottom: 15px; font-size: 16px; text-transform: uppercase;">Formations</h2>
+    const formationsHtml = (formations || []).length === 0 ? '' : `
+      <div style="margin-top: 15px;">
+        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 4px; margin-bottom: 12px; font-size: 16px; text-transform: uppercase;">Formations</h2>
         ${formations.map((form: any) => `
-          <div style="margin-bottom: 15px; page-break-inside: avoid;">
-            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 2px 0;">${form.diplome}</h3>
-            <p style="font-size: 12px; margin: 0;">${form.etablissement}</p>
+          <div style="margin-bottom: 10px; page-break-inside: avoid;">
+            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 2px 0;">${form.diplome || ''}</h3>
+            <p style="font-size: 12px; margin: 0; color: #555;">${form.etablissement || ''}</p>
           </div>
         `).join('')}
       </div>
-    ` : '';
+    `;
 
-    const competencesHtml = competences.length > 0 ? `
-      <div style="margin-top: 20px;">
-        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 5px; margin-bottom: 10px; font-size: 16px; text-transform: uppercase;">Compétences</h2>
+    const competencesHtml = (competences || []).length === 0 ? '' : `
+      <div style="margin-top: 15px;">
+        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 4px; margin-bottom: 10px; font-size: 16px; text-transform: uppercase;">Compétences</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
           ${competences.map((comp: any) => `
-            <span style="background-color: #e9ecef; color: #333; padding: 5px 12px; border-radius: 15px; font-size: 12px;">
-              ${comp.nom}
+            <span style="background-color: #f1f1f1; color: #333; padding: 4px 10px; border-radius: 14px; font-size: 12px;">
+              ${comp.nom || ''}
             </span>
           `).join('')}
         </div>
       </div>
-    ` : '';
+    `;
 
     return `
       <div style="padding: 20px; font-family: Arial, sans-serif;">
         ${headerHtml}
-        <div style="padding: 10px;">
+        <div style="padding: 10px 5px 0 5px;">
           ${experiencesHtml}
           ${formationsHtml}
           ${competencesHtml}
@@ -225,18 +237,16 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       </div>
     `;
   }
-
+  
   async downloadLettreMotivation() {
     if (!this.candidature) {
       this.presentToast('Aucune lettre de motivation disponible', 'warning');
       return;
     }
-
     const loading = await this.loadingController.create({
       message: 'Génération du PDF en cours...',
       spinner: 'crescent'
     });
-
     try {
       await loading.present();
       const lettreElement = document.querySelector('#lettre-content') as HTMLElement;
@@ -263,28 +273,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     } finally {
       await loading.dismiss();
     }
-  }
-
-  private subscribeToCandidate(): void {
-    const candidatureSub = this.candidature$.subscribe({
-      next: (candidature) => {
-        this.isLoading = false;
-        if (candidature) {
-          this.candidature = candidature;
-          this.editableNotesPersonnelles = candidature.notesPersonnelles || '';
-          this.errorLoading = null;
-        } else {
-          this.errorLoading = 'Candidature non trouvée';
-        }
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorLoading = 'Erreur lors du chargement de la candidature';
-        console.error('Erreur candidature:', error);
-      }
-    });
-
-    this.subscriptions.push(candidatureSub);
   }
 
   getStatutColor(statut: StatutCandidature): string {
@@ -344,10 +332,8 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
   async saveChanges(): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
-
     const loading = await this.loadingController.create({ message: 'Sauvegarde en cours...' });
     await loading.present();
-
     try {
       const updateData: Partial<Candidature> = {
         notesPersonnelles: this.editableNotesPersonnelles || ''
@@ -365,10 +351,8 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
   async updateStatut(newStatut: StatutCandidature): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
-
     const loading = await this.loadingController.create({ message: 'Mise à jour du statut...' });
     await loading.present();
-
     try {
       await this.candidatureService.updateCandidature(this.candidatureId, { statut: newStatut });
       this.presentToast('Statut mis à jour avec succès', 'success');
@@ -390,10 +374,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
   closeAddSuiviModal(): void {
     this.isAddingSuivi = false;
-    this.nouveauSuiviType = 'contact';
-    this.nouveauSuiviDescription = '';
-    this.nouveauSuiviNotes = '';
-    this.nouveauSuiviCommentaire = '';
   }
 
   async addSuivi(): Promise<void> {
@@ -401,10 +381,8 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       this.presentToast('Veuillez saisir une description pour le suivi', 'warning');
       return;
     }
-
     const loading = await this.loadingController.create({ message: 'Ajout du suivi...' });
     await loading.present();
-
     try {
       const suiviData: Omit<SuiviCandidature, 'id' | 'date'> = {
         type: this.nouveauSuiviType,
@@ -425,13 +403,11 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
   async sendRelanceEmail(): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
-
     const contactEmail = this.getContactEmail();
     if (!contactEmail) {
       this.presentToast('Aucun email de contact disponible', 'warning');
       return;
     }
-
     try {
       const suiviData: Omit<SuiviCandidature, 'id' | 'date'> = {
         type: 'relance',
@@ -440,11 +416,9 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
         commentaire: 'Tentative d\'ouverture du client mail'
       };
       await this.candidatureService.addSuiviToCandidature(this.candidatureId, suiviData);
-
       const subject = `Suivi candidature - ${this.candidature.intitulePoste} chez ${this.candidature.entreprise}`;
       const body = `Bonjour,\n\nJe me permets de vous recontacter concernant ma candidature pour le poste de ${this.candidature.intitulePoste}.\n\nCordialement`;
       const mailtoLink = `mailto:${contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      
       window.open(mailtoLink, '_blank');
       this.presentToast('Email de relance préparé', 'success');
     } catch (error) {
@@ -455,17 +429,12 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
   async deleteCandidature(): Promise<void> {
     if (!this.candidatureId) return;
-
     const alert = await this.alertController.create({
       header: 'Confirmer la suppression',
       message: 'Êtes-vous sûr de vouloir supprimer cette candidature ? Cette action est irréversible.',
       buttons: [
         { text: 'Annuler', role: 'cancel' },
-        {
-          text: 'Supprimer',
-          role: 'destructive',
-          handler: async () => { await this.confirmDeleteCandidature(); }
-        }
+        { text: 'Supprimer', role: 'destructive', handler: () => this.confirmDeleteCandidature() }
       ]
     });
     await alert.present();
@@ -474,30 +443,26 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   private async confirmDeleteCandidature(): Promise<void> {
     const loading = await this.loadingController.create({ message: 'Suppression en cours...' });
     await loading.present();
-
     try {
       await this.candidatureService.deleteCandidature(this.candidatureId);
-      await loading.dismiss();
       this.presentToast('Candidature supprimée avec succès', 'success');
       this.router.navigate(['/tabs/dashboard']);
     } catch (error) {
-      await loading.dismiss();
       console.error('Erreur lors de la suppression:', error);
       this.presentToast('Erreur lors de la suppression de la candidature', 'danger');
+    } finally {
+      await loading.dismiss();
     }
   }
 
   async generateDocuments(): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
-
     if (!this.candidature.cvTexteExtrait && !this.candidature.cvOriginalUrl && !this.candidature.lettreMotivationGeneree) {
-      this.presentToast('Aucune donnée de CV disponible pour la génération', 'warning');
+      this.presentToast('Aucune donnée disponible pour la génération', 'warning');
       return;
     }
-
     const loading = await this.loadingController.create({ message: 'Génération des documents...' });
     await loading.present();
-
     try {
       const updateData: Partial<Candidature> = {
         cvTexteExtrait: this.candidature.cvTexteExtrait,
@@ -525,33 +490,25 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     return '';
   }
   
-  formatDate(timestamp: any, includeTime: boolean = true): string {
+  formatDate(timestamp: any): string {
     if (!timestamp) return '';
     try {
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        const options: Intl.DateTimeFormatOptions = {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-        };
-        if (includeTime) {
-            options.hour = '2-digit';
-            options.minute = '2-digit';
-        }
-        return date.toLocaleDateString('fr-FR', options);
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const options: Intl.DateTimeFormatOptions = {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      };
+      return date.toLocaleDateString('fr-FR', options);
     } catch (error) {
-        console.error('Erreur formatage date:', error);
-        return '';
+      console.error('Erreur formatage date:', error);
+      return '';
     }
   }
-  
-  private async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light'): Promise<void> {
+  private async presentToast(message: string, color: 'success' | 'danger' | 'warning'): Promise<void> {
     const toast = await this.toastController.create({
       message: message,
       duration: 3000,
       position: 'top',
       color: color,
-      buttons: [{ text: 'OK', role: 'cancel'}]
     });
     toast.present();
   }

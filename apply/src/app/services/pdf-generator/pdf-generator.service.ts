@@ -131,7 +131,9 @@ export class PdfGeneratorService {
 
     this.compressSpacing(element, compressionFactor);
     this.compressFontSizes(element, compressionFactor);
-    this.optimizeLongContent(element);
+    
+    // Mettez cette ligne en commentaire pour désactiver la coupe du texte
+    // this.optimizeLongContent(element); 
   }
 
   private compressSpacing(element: HTMLElement, factor: number): void {
