@@ -1,195 +1,565 @@
 /* src/app/components/cv-templates/template-modern/cv-template-modern.component.scss */
+
 .cv-modern {
-    max-width: 210mm;
-    min-height: 297mm;
-    margin: 0 auto;
-    background: var(--cv-background-color, #ffffff);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    color: var(--cv-text-color, #333);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  
-    .cv-header {
-      background: linear-gradient(135deg, var(--cv-primary-color, #007bff), var(--cv-secondary-color, #0056b3));
-      color: white;
-      padding: 40px 30px;
-      position: relative;
-  
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: -20px;
-        left: 0;
-        right: 0;
-        height: 20px;
-        background: linear-gradient(45deg, transparent 49%, var(--cv-primary-color, #007bff) 50%);
+  max-width: 794px;
+  min-height: 1123px;
+  background: white;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #333;
+  padding: 25px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  position: relative;
+
+  // Variables CSS pour les couleurs dynamiques
+  --cv-primary-color: #007bff;
+  --cv-secondary-color: #6c757d;
+  --cv-text-color: #333333;
+  --cv-background-color: #ffffff;
+
+  // Styles d'impression optimisés
+  @media print {
+    width: 794px !important;
+    height: 1123px !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+    page-break-inside: avoid !important;
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  .cv-header {
+    background: linear-gradient(135deg, var(--cv-primary-color) 0%, rgba(0, 123, 255, 0.8) 100%);
+    color: white;
+    padding: 25px;
+    margin: -25px -25px 25px -25px;
+    border-radius: 0 0 15px 15px;
+    position: relative;
+    
+    @media print {
+      margin: -20px -20px 20px -20px !important;
+      padding: 20px !important;
+      border-radius: 0 0 10px 10px !important;
+      -webkit-print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+
+    .personal-info {
+      .full-name {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        
+        @media print {
+          font-size: 20px !important;
+          margin: 0 0 6px 0 !important;
+          text-shadow: none !important;
+        }
       }
-  
-      .personal-info {
-        .full-name {
-          font-size: 2.5rem;
-          font-weight: 700;
-          margin: 0 0 10px 0;
-          letter-spacing: -1px;
+
+      .title {
+        font-size: 14px;
+        margin: 0 0 15px 0;
+        opacity: 0.95;
+        font-weight: 300;
+        font-style: italic;
+        
+        @media print {
+          font-size: 12px !important;
+          margin: 0 0 12px 0 !important;
         }
-  
-        .title {
-          font-size: 1.2rem;
-          margin: 0 0 20px 0;
-          opacity: 0.9;
-          font-weight: 300;
+      }
+
+      .contact-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        
+        @media print {
+          gap: 15px !important;
         }
-  
-        .contact-info {
+
+        .contact-item {
           display: flex;
-          flex-wrap: wrap;
-          gap: 20px;
-  
-          .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-  
-            .icon {
-              opacity: 0.8;
+          align-items: center;
+          font-size: 11px;
+          
+          @media print {
+            font-size: 9px !important;
+          }
+
+          .icon {
+            margin-right: 8px;
+            font-size: 12px;
+            
+            @media print {
+              margin-right: 6px !important;
+              font-size: 10px !important;
             }
           }
         }
       }
     }
-  
-    .cv-body {
-      padding: 40px 30px 30px;
-  
-      .cv-section {
-        margin-bottom: 35px;
-  
-        .section-title {
-          font-size: 1.4rem;
-          font-weight: 600;
-          color: var(--cv-primary-color, #007bff);
-          margin: 0 0 20px 0;
-          padding-bottom: 8px;
-          border-bottom: 2px solid var(--cv-primary-color, #007bff);
-          position: relative;
-  
-          &::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 50px;
-            height: 2px;
-            background: var(--cv-secondary-color, #0056b3);
+  }
+
+  .cv-body {
+    .cv-section {
+      margin-bottom: 20px;
+      page-break-inside: avoid;
+      
+      @media print {
+        margin-bottom: 15px !important;
+        page-break-inside: avoid !important;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--cv-primary-color);
+        margin: 0 0 15px 0;
+        padding-bottom: 5px;
+        border-bottom: 2px solid var(--cv-primary-color);
+        position: relative;
+        
+        @media print {
+          font-size: 14px !important;
+          margin: 0 0 10px 0 !important;
+          padding-bottom: 4px !important;
+          border-bottom-width: 1px !important;
+        }
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 30px;
+          height: 2px;
+          background: var(--cv-primary-color);
+          
+          @media print {
+            bottom: -1px !important;
+            width: 25px !important;
+            height: 1px !important;
           }
         }
-  
-        .experience-item,
-        .formation-item {
-          margin-bottom: 25px;
-          padding-left: 20px;
-          border-left: 3px solid var(--cv-secondary-color, #0056b3);
-          position: relative;
-  
-          &::before {
-            content: '';
-            position: absolute;
-            left: -6px;
-            top: 5px;
-            width: 9px;
-            height: 9px;
-            background: var(--cv-primary-color, #007bff);
-            border-radius: 50%;
+      }
+
+      // Expériences professionnelles
+      .experience-item {
+        margin-bottom: 15px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid var(--cv-primary-color);
+        page-break-inside: avoid;
+        
+        @media print {
+          margin-bottom: 10px !important;
+          padding: 8px !important;
+          border-radius: 4px !important;
+          border-left-width: 3px !important;
+          page-break-inside: avoid !important;
+          background: #f8f9fa !important;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .experience-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 6px;
+          
+          @media print {
+            margin-bottom: 4px !important;
           }
-  
-          .experience-header,
-          .formation-header {
-            margin-bottom: 5px;
-  
-            .position,
-            .diploma {
-              font-size: 1.1rem;
-              font-weight: 600;
-              margin: 0;
-              color: var(--cv-text-color, #333);
-            }
-  
-            .company,
-            .school {
-              font-weight: 500;
-              color: var(--cv-primary-color, #007bff);
-              display: block;
-              margin-top: 2px;
-            }
-          }
-  
-          .experience-meta,
-          .formation-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            color: #666;
-  
-            .dates {
-              font-weight: 500;
-              background: var(--cv-secondary-color, #0056b3);
-              color: white;
-              padding: 2px 8px;
-              border-radius: 12px;
-              font-size: 0.8rem;
-            }
-          }
-  
-          .description {
+
+          .position {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
             margin: 0;
-            color: #555;
-            font-size: 0.95rem;
+            
+            @media print {
+              font-size: 11px !important;
+            }
+          }
+
+          .company {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--cv-primary-color);
+            
+            @media print {
+              font-size: 10px !important;
+            }
           }
         }
-  
-        .skills-container {
-          .skill-category {
-            margin-bottom: 20px;
-  
-            .category-title {
-              font-size: 1rem;
-              font-weight: 600;
-              margin: 0 0 10px 0;
-              color: var(--cv-primary-color, #007bff);
+
+        .experience-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+          font-size: 10px;
+          color: #666;
+          
+          @media print {
+            margin-bottom: 6px !important;
+            font-size: 9px !important;
+          }
+
+          .location {
+            font-style: italic;
+          }
+
+          .dates {
+            font-weight: 500;
+            white-space: nowrap;
+          }
+        }
+
+        .description {
+          font-size: 10px;
+          line-height: 1.4;
+          color: #555;
+          margin: 0;
+          text-align: justify;
+          
+          @media print {
+            font-size: 9px !important;
+            line-height: 1.3 !important;
+          }
+        }
+      }
+
+      // Formations
+      .formation-item {
+        margin-bottom: 12px;
+        padding: 10px;
+        background: linear-gradient(45deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 6px;
+        border-left: 3px solid var(--cv-secondary-color);
+        page-break-inside: avoid;
+        
+        @media print {
+          margin-bottom: 8px !important;
+          padding: 8px !important;
+          border-radius: 4px !important;
+          border-left-width: 2px !important;
+          page-break-inside: avoid !important;
+          background: #f8f9fa !important;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .formation-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 5px;
+          
+          @media print {
+            margin-bottom: 3px !important;
+          }
+
+          .diploma {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+            
+            @media print {
+              font-size: 11px !important;
             }
-  
-            .skills-list {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 8px;
-  
-              .skill-tag {
-                background: var(--cv-secondary-color, #0056b3);
-                color: white;
-                padding: 4px 12px;
-                border-radius: 16px;
-                font-size: 0.85rem;
-                font-weight: 500;
-                transition: all 0.3s ease;
-  
-                &:hover {
-                  background: var(--cv-primary-color, #007bff);
-                  transform: translateY(-1px);
-                }
+          }
+
+          .school {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--cv-secondary-color);
+            
+            @media print {
+              font-size: 9px !important;
+            }
+          }
+        }
+
+        .formation-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 6px;
+          font-size: 9px;
+          color: #666;
+          
+          @media print {
+            margin-bottom: 4px !important;
+            font-size: 8px !important;
+          }
+
+          .location {
+            font-style: italic;
+          }
+
+          .dates {
+            font-weight: 500;
+            white-space: nowrap;
+          }
+        }
+
+        .description {
+          font-size: 9px;
+          line-height: 1.3;
+          color: #555;
+          margin: 0;
+          
+          @media print {
+            font-size: 8px !important;
+            line-height: 1.2 !important;
+          }
+        }
+      }
+
+      // Compétences
+      .skills-container {
+        .skill-category {
+          margin-bottom: 15px;
+          
+          @media print {
+            margin-bottom: 10px !important;
+          }
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+
+          .category-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--cv-primary-color);
+            margin: 0 0 8px 0;
+            
+            @media print {
+              font-size: 11px !important;
+              margin: 0 0 6px 0 !important;
+            }
+          }
+
+          .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            
+            @media print {
+              gap: 4px !important;
+            }
+
+            .skill-tag {
+              background: var(--cv-primary-color);
+              color: white;
+              padding: 4px 8px;
+              border-radius: 12px;
+              font-size: 9px;
+              font-weight: 500;
+              white-space: nowrap;
+              
+              @media print {
+                padding: 3px 6px !important;
+                border-radius: 8px !important;
+                font-size: 8px !important;
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
               }
             }
           }
         }
       }
     }
-  
-    // Mode preview - plus petit
-    &.preview-mode {
-      transform: scale(0.6);
-      transform-origin: top left;
-      margin-bottom: -40%;
+  }
+
+  // Optimisations spécifiques pour la génération PDF
+  &.pdf-optimized {
+    width: 794px !important;
+    height: 1123px !important;
+    padding: 20px !important;
+    margin: 0 !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+
+    .cv-header {
+      margin: -20px -20px 20px -20px !important;
+      padding: 20px !important;
+      border-radius: 0 0 10px 10px !important;
+      
+      .personal-info {
+        .full-name {
+          font-size: 20px !important;
+          margin: 0 0 6px 0 !important;
+        }
+
+        .title {
+          font-size: 12px !important;
+          margin: 0 0 12px 0 !important;
+        }
+
+        .contact-info {
+          gap: 15px !important;
+
+          .contact-item {
+            font-size: 9px !important;
+
+            .icon {
+              font-size: 10px !important;
+            }
+          }
+        }
+      }
+    }
+
+    .cv-body {
+      .cv-section {
+        margin-bottom: 12px !important;
+
+        .section-title {
+          font-size: 14px !important;
+          margin: 0 0 8px 0 !important;
+        }
+
+        .experience-item {
+          margin-bottom: 8px !important;
+          padding: 6px !important;
+
+          .experience-header {
+            .position {
+              font-size: 11px !important;
+            }
+
+            .company {
+              font-size: 10px !important;
+            }
+          }
+
+          .experience-meta {
+            font-size: 9px !important;
+          }
+
+          .description {
+            font-size: 9px !important;
+            line-height: 1.2 !important;
+          }
+        }
+
+        .formation-item {
+          margin-bottom: 6px !important;
+          padding: 6px !important;
+
+          .formation-header {
+            .diploma {
+              font-size: 11px !important;
+            }
+
+            .school {
+              font-size: 9px !important;
+            }
+          }
+
+          .formation-meta {
+            font-size: 8px !important;
+          }
+
+          .description {
+            font-size: 8px !important;
+          }
+        }
+
+        .skills-container {
+          .skill-category {
+            margin-bottom: 8px !important;
+
+            .category-title {
+              font-size: 11px !important;
+              margin: 0 0 4px 0 !important;
+            }
+
+            .skills-list {
+              gap: 3px !important;
+
+              .skill-tag {
+                padding: 2px 5px !important;
+                font-size: 8px !important;
+                border-radius: 6px !important;
+              }
+            }
+          }
+        }
+      }
     }
   }
+}
+
+// Styles pour prévisualisation mobile
+@media (max-width: 768px) {
+  .cv-modern {
+    max-width: 100%;
+    padding: 15px;
+    font-size: 12px;
+
+    .cv-header {
+      margin: -15px -15px 20px -15px;
+      padding: 20px;
+      border-radius: 0 0 10px 10px;
+
+      .personal-info {
+        .full-name {
+          font-size: 22px;
+        }
+
+        .contact-info {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+    }
+
+    .cv-body {
+      .cv-section {
+        .experience-item,
+        .formation-item {
+          padding: 15px;
+        }
+
+        .skills-container {
+          .skill-category {
+            .skills-list {
+              .skill-tag {
+                padding: 6px 10px;
+                font-size: 10px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

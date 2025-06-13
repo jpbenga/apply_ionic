@@ -9,11 +9,13 @@ import {
   IonItem, IonLabel, IonSelect, IonSelectOption, IonTextarea, IonInput, IonChip,
   IonList, IonModal, IonButtons, IonTitle, IonToolbar, IonFab, IonFabButton, IonFabList, IonGrid, IonRow, IonCol
 } from '@ionic/angular/standalone';
-import { HeaderService } from 'src/app/shared/services/header/header.service';
-import { CandidatureService } from 'src/app/shared/services/candidature/candidature.service';
-import { Candidature, SuiviCandidature, TypeSuivi, StatutCandidature } from '../../../models/candidature.model';
-import { UserHeaderComponent } from 'src/app/shared/components/user-header/user-header.component';
+import { HeaderService } from '../../../../../shared/services/header/header.service';
+import { CandidatureService } from '../../../../../shared/services/candidature/candidature.service';
+import { Candidature, SuiviCandidature, TypeSuivi, StatutCandidature } from 'src/app/features/candidatures/models/candidature.model';
+import { CvTheme } from 'src/app/models/cv-template.model';
+import { UserHeaderComponent } from '../../../../../shared/components/user-header/user-header.component';
 import { ToastController, AlertController, LoadingController } from '@ionic/angular/standalone';
+import { PdfGeneratorService } from 'src/app/services/pdf-generator/pdf-generator.service';
 
 @Component({
   selector: 'app-candidature-detail',
@@ -35,11 +37,8 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   public candidature: Candidature | undefined;
   public isLoading: boolean = true;
   public errorLoading: string | null = null;
-  
   public isEditing: boolean = false;
-  public isEditingNotes: boolean = false;
   public editableNotesPersonnelles: string = '';
-  
   public isAddingSuivi: boolean = false;
   public nouveauSuiviType: TypeSuivi = 'contact';
   public nouveauSuiviDescription: string = '';
@@ -47,35 +46,22 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   public nouveauSuiviCommentaire: string = '';
 
   public statutsCandidature: { value: StatutCandidature, label: string }[] = [
-    { value: 'brouillon', label: 'Brouillon' },
-    { value: 'envoyee', label: 'Envoyée' },
-    { value: 'en_cours_rh', label: 'En cours RH' },
-    { value: 'entretien_planifie', label: 'Entretien planifié' },
-    { value: 'test_technique', label: 'Test technique' },
-    { value: 'entretien_final', label: 'Entretien final' },
-    { value: 'offre_recue', label: 'Offre reçue' },
-    { value: 'acceptee', label: 'Acceptée' },
-    { value: 'refusee_candidat', label: 'Refusée (par moi)' },
-    { value: 'refusee_entreprise', label: 'Refusée (par entreprise)' },
-    { value: 'archivee', label: 'Archivée' },
-    { value: 'standby', label: 'Standby' }
+    { value: 'brouillon', label: 'Brouillon' }, { value: 'envoyee', label: 'Envoyée' },
+    { value: 'en_cours_rh', label: 'En cours RH' }, { value: 'entretien_planifie', label: 'Entretien planifié' },
+    { value: 'test_technique', label: 'Test technique' }, { value: 'entretien_final', label: 'Entretien final' },
+    { value: 'offre_recue', label: 'Offre reçue' }, { value: 'acceptee', label: 'Acceptée' },
+    { value: 'refusee_candidat', label: 'Refusée (par moi)' }, { value: 'refusee_entreprise', label: 'Refusée (par entreprise)' },
+    { value: 'archivee', label: 'Archivée' }, { value: 'standby', label: 'Standby' }
   ];
 
   public typesDeSuivi: { value: TypeSuivi, label: string }[] = [
-    { value: 'contact', label: 'Contact' },
-    { value: 'email_envoye', label: 'Email envoyé' },
-    { value: 'email_recu', label: 'Email reçu' },
-    { value: 'appel_effectue', label: 'Appel effectué' },
-    { value: 'appel_recu', label: 'Appel reçu' },
-    { value: 'entretien_planifie', label: 'Entretien planifié' },
-    { value: 'entretien_effectue', label: 'Entretien effectué' },
-    { value: 'entretien', label: 'Entretien' },
-    { value: 'test_technique_recu', label: 'Test technique reçu' },
-    { value: 'test_technique_complete', label: 'Test technique complété' },
-    { value: 'test', label: 'Test' },
-    { value: 'feedback', label: 'Feedback' },
-    { value: 'relance', label: 'Relance' },
-    { value: 'autre', label: 'Autre' }
+    { value: 'contact', label: 'Contact' }, { value: 'email_envoye', label: 'Email envoyé' },
+    { value: 'email_recu', label: 'Email reçu' }, { value: 'appel_effectue', label: 'Appel effectué' },
+    { value: 'appel_recu', label: 'Appel reçu' }, { value: 'entretien_planifie', label: 'Entretien planifié' },
+    { value: 'entretien_effectue', label: 'Entretien effectué' }, { value: 'entretien', label: 'Entretien' },
+    { value: 'test_technique_recu', label: 'Test technique reçu' }, { value: 'test_technique_complete', label: 'Test technique complété' },
+    { value: 'test', label: 'Test' }, { value: 'feedback', label: 'Feedback' },
+    { value: 'relance', label: 'Relance' }, { value: 'autre', label: 'Autre' }
   ];
 
   private candidatureId: string = '';
@@ -88,7 +74,8 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private toastController: ToastController,
     private alertController: AlertController,
-    private loadingController: LoadingController
+    private loadingController: LoadingController,
+    private pdfGeneratorService: PdfGeneratorService
   ) {
     this.candidature$ = this.route.paramMap.pipe(
       map(params => params.get('id') || ''),
@@ -118,47 +105,125 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   }
 
   async downloadCv() {
-    if (!this.candidature) {
-      this.presentToast('Aucun CV disponible', 'warning');
+    if (!this.candidature?.cvDataSnapshot) {
+      this.presentToast('Les données structurées du CV sont introuvables.', 'warning');
       return;
     }
 
     const loading = await this.loadingController.create({
-      message: 'Génération du PDF...',
+      message: 'Génération du PDF en cours...',
       spinner: 'crescent'
     });
+    await loading.present();
+
+    let pdfElement: HTMLElement | null = null;
 
     try {
-      await loading.present();
-
-      const html2pdf = (await import('html2pdf.js')).default;
+      pdfElement = this.createCvElementFromData();
+      document.body.appendChild(pdfElement);
       
-      const cvElement = document.querySelector('#cv-content') as HTMLElement;
-      
-      if (!cvElement) {
-        throw new Error('Impossible de trouver le CV à télécharger');
-      }
+      await new Promise(resolve => setTimeout(resolve, 50));
 
-      const filename = `CV_${this.candidature.entreprise}_${this.candidature.intitulePoste}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const filename = this.pdfGeneratorService.generateFileName(
+        `CV_${this.candidature.entreprise}`,
+        'candidature'
+      );
 
-      const options = {
-        margin: 0.5,
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-      };
+      await this.pdfGeneratorService.generateOptimizedPdf(pdfElement, {
+        filename,
+        singlePage: true
+      });
 
-      await html2pdf().set(options).from(cvElement).save();
-      
       this.presentToast('CV téléchargé avec succès !', 'success');
-      
     } catch (error: any) {
-      console.error('Erreur téléchargement CV:', error);
-      this.presentToast('Erreur lors du téléchargement', 'danger');
+      console.error('Erreur lors du téléchargement du CV:', error);
+      this.presentToast(`Erreur de génération PDF: ${error.message || 'Une erreur inconnue est survenue'}`, 'danger');
     } finally {
+      if (pdfElement) {
+        document.body.removeChild(pdfElement);
+      }
       await loading.dismiss();
     }
+  }
+
+  private createCvElementFromData(): HTMLElement {
+    if (!this.candidature || !this.candidature.cvDataSnapshot) {
+      throw new Error('Données de CV snapshot manquantes.');
+    }
+    const cvElement = document.createElement('div');
+    cvElement.id = 'cv-render-temp';
+    cvElement.innerHTML = this.generateStyledCvHtml(this.candidature.cvDataSnapshot as any);
+    return cvElement;
+  }
+  
+  private generateStyledCvHtml(data: any): string {
+    const theme = data.theme || { primaryColor: '#007bff' };
+    const primaryColor = theme.primaryColor;
+
+    const experiences = data.experiences || [];
+    const formations = data.formations || [];
+    const competences = data.competences || [];
+
+    const headerHtml = `
+      <div style="background-color: ${primaryColor}; color: white; padding: 20px; font-family: Arial, sans-serif;">
+        <h1 style="font-size: 24px; margin: 0 0 5px 0; text-transform: uppercase;">${data.nom || 'JP'} ${data.prenom || 'BENGS'}</h1>
+        <p style="font-size: 14px; margin: 0 0 15px 0;">${data.resumePersonnel || 'blabla'}</p>
+        <div style="font-size: 12px; line-height: 1.5;">
+            ${data.email ? `<div><strong>Email:</strong> ${data.email}</div>` : ''}
+            ${data.telephone ? `<div><strong>Téléphone:</strong> ${data.telephone}</div>` : ''}
+            ${data.adresse ? `<div><strong>Adresse:</strong> ${data.adresse}</div>` : ''}
+        </div>
+      </div>
+    `;
+
+    const experiencesHtml = experiences.length > 0 ? `
+      <div style="margin-top: 20px;">
+        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 5px; margin-bottom: 15px; font-size: 16px; text-transform: uppercase;">Expérience Professionnelle</h2>
+        ${experiences.map((exp: any) => `
+          <div style="margin-bottom: 15px; page-break-inside: avoid;">
+            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 2px 0;">${exp.poste}</h3>
+            <div style="color: #555; margin-bottom: 5px; font-size: 13px;">${exp.entreprise}</div>
+            <p style="font-size: 12px; margin: 0; text-align: justify;">${exp.description || ''}</p>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+    
+    const formationsHtml = formations.length > 0 ? `
+      <div style="margin-top: 20px;">
+        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 5px; margin-bottom: 15px; font-size: 16px; text-transform: uppercase;">Formations</h2>
+        ${formations.map((form: any) => `
+          <div style="margin-bottom: 15px; page-break-inside: avoid;">
+            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 2px 0;">${form.diplome}</h3>
+            <p style="font-size: 12px; margin: 0;">${form.etablissement}</p>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
+    const competencesHtml = competences.length > 0 ? `
+      <div style="margin-top: 20px;">
+        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 5px; margin-bottom: 10px; font-size: 16px; text-transform: uppercase;">Compétences</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          ${competences.map((comp: any) => `
+            <span style="background-color: #e9ecef; color: #333; padding: 5px 12px; border-radius: 15px; font-size: 12px;">
+              ${comp.nom}
+            </span>
+          `).join('')}
+        </div>
+      </div>
+    ` : '';
+
+    return `
+      <div style="padding: 20px; font-family: Arial, sans-serif;">
+        ${headerHtml}
+        <div style="padding: 10px;">
+          ${experiencesHtml}
+          ${formationsHtml}
+          ${competencesHtml}
+        </div>
+      </div>
+    `;
   }
 
   async downloadLettreMotivation() {
@@ -168,38 +233,33 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     }
 
     const loading = await this.loadingController.create({
-      message: 'Génération du PDF...',
+      message: 'Génération du PDF en cours...',
       spinner: 'crescent'
     });
 
     try {
       await loading.present();
-
-      const html2pdf = (await import('html2pdf.js')).default;
-      
       const lettreElement = document.querySelector('#lettre-content') as HTMLElement;
-      
       if (!lettreElement) {
         throw new Error('Impossible de trouver la lettre de motivation à télécharger');
       }
-
-      const filename = `Lettre_motivation_${this.candidature.entreprise}_${this.candidature.intitulePoste}_${new Date().toISOString().split('T')[0]}.pdf`;
-
+      const validation = this.pdfGeneratorService.validateElement(lettreElement);
+      if (!validation.valid) {
+        throw new Error(`Élément invalide: ${validation.errors.join(', ')}`);
+      }
+      const filename = this.pdfGeneratorService.generateFileName(
+        `Lettre_motivation_${this.candidature.entreprise}_${this.candidature.intitulePoste}`,
+        'candidature'
+      );
       const options = {
-        margin: 0.5,
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        filename, quality: 0.95, scale: 2, singlePage: true,
+        fontOptimization: true, backgroundColor: '#ffffff', padding: 30
       };
-
-      await html2pdf().set(options).from(lettreElement).save();
-      
+      await this.pdfGeneratorService.generateOptimizedPdf(lettreElement, options);
       this.presentToast('Lettre de motivation téléchargée avec succès !', 'success');
-      
     } catch (error: any) {
       console.error('Erreur téléchargement lettre de motivation:', error);
-      this.presentToast('Erreur lors du téléchargement', 'danger');
+      this.presentToast(`Erreur lors du téléchargement: ${error.message}`, 'danger');
     } finally {
       await loading.dismiss();
     }
@@ -229,18 +289,10 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
   getStatutColor(statut: StatutCandidature): string {
     const colorMap: { [key in StatutCandidature]: string } = {
-      'brouillon': 'medium',
-      'envoyee': 'primary',
-      'en_cours_rh': 'secondary',
-      'entretien_planifie': 'tertiary',
-      'test_technique': 'warning',
-      'entretien_final': 'warning',
-      'offre_recue': 'success',
-      'acceptee': 'success',
-      'refusee_candidat': 'danger',
-      'refusee_entreprise': 'danger',
-      'archivee': 'dark',
-      'standby': 'medium'
+      'brouillon': 'medium', 'envoyee': 'primary', 'en_cours_rh': 'secondary',
+      'entretien_planifie': 'tertiary', 'test_technique': 'warning', 'entretien_final': 'warning',
+      'offre_recue': 'success', 'acceptee': 'success', 'refusee_candidat': 'danger',
+      'refusee_entreprise': 'danger', 'archivee': 'dark', 'standby': 'medium'
     };
     return colorMap[statut] || 'medium';
   }
@@ -252,40 +304,22 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
   getSuiviIcon(type: TypeSuivi): string {
     const iconMap: { [key in TypeSuivi]: string } = {
-      'contact': 'person-outline',
-      'email_envoye': 'mail-outline',
-      'email_recu': 'mail-open-outline',
-      'appel_effectue': 'call-outline',
-      'appel_recu': 'call-outline',
-      'entretien_planifie': 'calendar-outline',
-      'entretien_effectue': 'checkmark-circle-outline',
-      'entretien': 'people-outline',
-      'test_technique_recu': 'document-text-outline',
-      'test_technique_complete': 'document-attach-outline',
-      'test': 'school-outline',
-      'feedback': 'chatbubble-outline',
-      'relance': 'refresh-outline',
-      'autre': 'ellipsis-horizontal-outline'
+      'contact': 'person-outline', 'email_envoye': 'mail-outline', 'email_recu': 'mail-open-outline',
+      'appel_effectue': 'call-outline', 'appel_recu': 'call-outline', 'entretien_planifie': 'calendar-outline',
+      'entretien_effectue': 'checkmark-circle-outline', 'entretien': 'people-outline', 'test_technique_recu': 'document-text-outline',
+      'test_technique_complete': 'document-attach-outline', 'test': 'school-outline', 'feedback': 'chatbubble-outline',
+      'relance': 'refresh-outline', 'autre': 'ellipsis-horizontal-outline'
     };
     return iconMap[type] || 'information-circle-outline';
   }
 
   getSuiviColor(type: TypeSuivi): string {
     const colorMap: { [key in TypeSuivi]: string } = {
-      'contact': 'primary',
-      'email_envoye': 'secondary',
-      'email_recu': 'secondary',
-      'appel_effectue': 'tertiary',
-      'appel_recu': 'tertiary',
-      'entretien_planifie': 'warning',
-      'entretien_effectue': 'success',
-      'entretien': 'warning',
-      'test_technique_recu': 'medium',
-      'test_technique_complete': 'success',
-      'test': 'medium',
-      'feedback': 'primary',
-      'relance': 'warning',
-      'autre': 'dark'
+      'contact': 'primary', 'email_envoye': 'secondary', 'email_recu': 'secondary',
+      'appel_effectue': 'tertiary', 'appel_recu': 'tertiary', 'entretien_planifie': 'warning',
+      'entretien_effectue': 'success', 'entretien': 'warning', 'test_technique_recu': 'medium',
+      'test_technique_complete': 'success', 'test': 'medium', 'feedback': 'primary',
+      'relance': 'warning', 'autre': 'dark'
     };
     return colorMap[type] || 'medium';
   }
@@ -311,16 +345,13 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   async saveChanges(): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
 
-    const loading = await this.loadingController.create({
-      message: 'Sauvegarde en cours...'
-    });
+    const loading = await this.loadingController.create({ message: 'Sauvegarde en cours...' });
     await loading.present();
 
     try {
       const updateData: Partial<Candidature> = {
         notesPersonnelles: this.editableNotesPersonnelles || ''
       };
-
       await this.candidatureService.updateCandidature(this.candidatureId, updateData);
       this.isEditing = false;
       this.presentToast('Modifications sauvegardées avec succès', 'success');
@@ -335,9 +366,7 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
   async updateStatut(newStatut: StatutCandidature): Promise<void> {
     if (!this.candidature || !this.candidatureId) return;
 
-    const loading = await this.loadingController.create({
-      message: 'Mise à jour du statut...'
-    });
+    const loading = await this.loadingController.create({ message: 'Mise à jour du statut...' });
     await loading.present();
 
     try {
@@ -373,9 +402,7 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       return;
     }
 
-    const loading = await this.loadingController.create({
-      message: 'Ajout du suivi...'
-    });
+    const loading = await this.loadingController.create({ message: 'Ajout du suivi...' });
     await loading.present();
 
     try {
@@ -385,7 +412,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
         commentaire: this.nouveauSuiviCommentaire.trim() || undefined,
         notes: this.nouveauSuiviNotes.trim() || undefined
       };
-
       await this.candidatureService.addSuiviToCandidature(this.candidatureId, suiviData);
       this.closeAddSuiviModal();
       this.presentToast('Suivi ajouté avec succès', 'success');
@@ -413,7 +439,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
         notes: `Email de relance envoyé à ${contactEmail}`,
         commentaire: 'Tentative d\'ouverture du client mail'
       };
-
       await this.candidatureService.addSuiviToCandidature(this.candidatureId, suiviData);
 
       const subject = `Suivi candidature - ${this.candidature.intitulePoste} chez ${this.candidature.entreprise}`;
@@ -435,27 +460,19 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       header: 'Confirmer la suppression',
       message: 'Êtes-vous sûr de vouloir supprimer cette candidature ? Cette action est irréversible.',
       buttons: [
-        {
-          text: 'Annuler',
-          role: 'cancel'
-        },
+        { text: 'Annuler', role: 'cancel' },
         {
           text: 'Supprimer',
           role: 'destructive',
-          handler: async () => {
-            await this.confirmDeleteCandidature();
-          }
+          handler: async () => { await this.confirmDeleteCandidature(); }
         }
       ]
     });
-
     await alert.present();
   }
 
   private async confirmDeleteCandidature(): Promise<void> {
-    const loading = await this.loadingController.create({
-      message: 'Suppression en cours...'
-    });
+    const loading = await this.loadingController.create({ message: 'Suppression en cours...' });
     await loading.present();
 
     try {
@@ -478,9 +495,7 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       return;
     }
 
-    const loading = await this.loadingController.create({
-      message: 'Génération des documents...'
-    });
+    const loading = await this.loadingController.create({ message: 'Génération des documents...' });
     await loading.present();
 
     try {
@@ -489,7 +504,6 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
         lettreMotivationGeneree: this.candidature.lettreMotivationGeneree,
         analyseATS: 'Analyse ATS générée automatiquement'
       };
-
       await this.candidatureService.updateCandidature(this.candidatureId, updateData);
       this.presentToast('Documents générés avec succès', 'success');
     } catch (error) {
@@ -502,36 +516,35 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
   private getContactEmail(): string {
     if (!this.candidature) return '';
-    
     if (this.candidature.contactRecruteur?.email) {
       return this.candidature.contactRecruteur.email;
     }
-    
     if (this.candidature.contacts && this.candidature.contacts.length > 0 && this.candidature.contacts[0].email) {
       return this.candidature.contacts[0].email;
     }
-    
     return '';
   }
-
-  formatDate(timestamp: any): string {
+  
+  formatDate(timestamp: any, includeTime: boolean = true): string {
     if (!timestamp) return '';
-    
     try {
-      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-      return date.toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        const options: Intl.DateTimeFormatOptions = {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        };
+        if (includeTime) {
+            options.hour = '2-digit';
+            options.minute = '2-digit';
+        }
+        return date.toLocaleDateString('fr-FR', options);
     } catch (error) {
-      console.error('Erreur lors du formatage de la date:', error);
-      return '';
+        console.error('Erreur formatage date:', error);
+        return '';
     }
   }
-
+  
   private async presentToast(message: string, color: 'success' | 'danger' | 'warning' | 'primary' | 'medium' | 'light'): Promise<void> {
     const toast = await this.toastController.create({
       message: message,
