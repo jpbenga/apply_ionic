@@ -122,6 +122,10 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       this.presentToast('Les données du CV sont introuvables.', 'warning');
       return;
     }
+    
+    // DEBUG: Afficher le snapshot des données CV qui sera utilisé
+    console.log('📄 [DEBUG] cvDataSnapshot utilisé pour la génération:', JSON.stringify(this.candidature.cvDataSnapshot, null, 2));
+
 
     const loading = await this.loadingController.create({
       message: 'Génération du PDF en cours...',
@@ -136,8 +140,14 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
       if (!userProfile) {
         throw new Error('Impossible de récupérer le profil utilisateur.');
       }
+      // DEBUG: Afficher le profil utilisateur
+      console.log('👤 [DEBUG] Profil utilisateur:', JSON.stringify(userProfile, null, 2));
 
       pdfElement = this.createCvElementFromData(this.candidature.cvDataSnapshot, userProfile);
+      
+      // DEBUG: Afficher le HTML final généré
+      console.log('📄 [DEBUG] HTML généré:', pdfElement.innerHTML);
+      
       document.body.appendChild(pdfElement);
       
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -176,6 +186,16 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     const formations = snapshot.formations || [];
     const competences = snapshot.competences || [];
 
+    const renderDescription = (description: string | string[] | undefined) => {
+        if (!description) return '';
+        if (Array.isArray(description)) {
+            console.log('📄 [DEBUG] Rendu de la description comme une LISTE pour le PDF.');
+            return `<ul style="margin: 4px 0 0 20px; padding-left: 0; list-style-type: disc;">${description.map(item => `<li style="margin-bottom: 3px; font-size: 12px;">${item}</li>`).join('')}</ul>`;
+        }
+        console.log('📄 [DEBUG] Rendu de la description comme un simple PARAGRAPHE pour le PDF.');
+        return `<p style="font-size: 12px; margin: 0; text-align: justify; color: #333; line-height: 1.3;">${description}</p>`;
+    };
+
     const headerHtml = `
       <div style="background-color: ${primaryColor}; color: white; padding: 20px; font-family: Arial, sans-serif; line-height: 1.4;">
         <h1 style="font-size: 24px; margin: 0 0 5px 0; text-transform: uppercase;">${profile.prenom || ''} ${profile.nom || ''}</h1>
@@ -190,12 +210,12 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
     const experiencesHtml = (experiences || []).length === 0 ? '' : `
       <div style="margin-top: 15px;">
-        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 4px; margin-bottom: 12px; font-size: 16px; text-transform: uppercase;">Expérience Professionnelle</h2>
+        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 4px; margin-bottom: 12px; font-size: 18px; text-transform: uppercase;">Expérience Professionnelle</h2>
         ${experiences.map((exp: any) => `
           <div style="margin-bottom: 12px; page-break-inside: avoid;">
-            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 2px 0;">${exp.poste || ''}</h3>
-            <div style="color: #555; margin-bottom: 4px; font-size: 12px; font-style: italic;">${exp.entreprise || ''}</div>
-            <p style="font-size: 12px; margin: 0; text-align: justify; color: #333; line-height: 1.3;">${exp.description || ''}</p>
+            <h3 style="font-size: 15px; font-weight: bold; margin: 0 0 2px 0;">${exp.poste || ''}</h3>
+            <div style="color: #555; margin-bottom: 4px; font-size: 13px; font-style: italic;">${exp.entreprise || ''}</div>
+            ${renderDescription(exp.description)}
           </div>
         `).join('')}
       </div>
@@ -203,11 +223,12 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
     
     const formationsHtml = (formations || []).length === 0 ? '' : `
       <div style="margin-top: 15px;">
-        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 4px; margin-bottom: 12px; font-size: 16px; text-transform: uppercase;">Formations</h2>
+        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 4px; margin-bottom: 12px; font-size: 18px; text-transform: uppercase;">Formations</h2>
         ${formations.map((form: any) => `
           <div style="margin-bottom: 10px; page-break-inside: avoid;">
-            <h3 style="font-size: 14px; font-weight: bold; margin: 0 0 2px 0;">${form.diplome || ''}</h3>
-            <p style="font-size: 12px; margin: 0; color: #555;">${form.etablissement || ''}</p>
+            <h3 style="font-size: 15px; font-weight: bold; margin: 0 0 2px 0;">${form.diplome || ''}</h3>
+            <p style="font-size: 13px; margin: 0; color: #555;">${form.etablissement || ''}</p>
+            ${renderDescription(form.description)}
           </div>
         `).join('')}
       </div>
@@ -215,7 +236,7 @@ export class CandidatureDetailPage implements OnInit, OnDestroy {
 
     const competencesHtml = (competences || []).length === 0 ? '' : `
       <div style="margin-top: 15px;">
-        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 4px; margin-bottom: 10px; font-size: 16px; text-transform: uppercase;">Compétences</h2>
+        <h2 style="color: ${primaryColor}; border-bottom: 2px solid ${primaryColor}; padding-bottom: 4px; margin-bottom: 10px; font-size: 18px; text-transform: uppercase;">Compétences</h2>
         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
           ${competences.map((comp: any) => `
             <span style="background-color: #f1f1f1; color: #333; padding: 4px 10px; border-radius: 14px; font-size: 12px;">

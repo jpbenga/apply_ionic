@@ -1,4 +1,4 @@
-import { Timestamp } from '@angular/fire/firestore'; // Importer Timestamp
+import { Timestamp } from '@angular/fire/firestore';
 
 export interface Experience {
   id?: string;
@@ -6,8 +6,9 @@ export interface Experience {
   poste: string;
   entreprise: string;
   lieu?: string;
-  dateDebut: Timestamp | Date | string; // Accepte Date/string en entrée, devient Timestamp en BDD
-  dateFin?: Timestamp | Date | string | null; // Accepte Date/string/null en entrée, devient Timestamp/null en BDD
-  description?: string;
+  dateDebut: Timestamp | Date | string;
+  dateFin?: Timestamp | Date | string | null;
+  // MODIFIÉ : Accepte maintenant une liste de missions
+  description?: string[] | string;
   enCours?: boolean;
 }

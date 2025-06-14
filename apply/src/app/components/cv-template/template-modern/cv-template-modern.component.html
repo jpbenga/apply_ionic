@@ -1,4 +1,3 @@
-<!-- src/app/components/cv-templates/template-modern/cv-template-modern.component.html -->
 <div class="cv-modern" [ngStyle]="cssVariables">
   <div class="cv-header">
     <div class="personal-info">
@@ -22,52 +21,76 @@
   </div>
 
   <div class="cv-body">
-    <div class="cv-section" *ngIf="cvData && cvData.experiences && cvData.experiences.length > 0">
-      <h2 class="section-title">Expériences Professionnelles</h2>
-      <div class="experience-item" *ngFor="let exp of cvData.experiences">
-        <div class="experience-header">
-          <h3 class="position">{{ exp.poste }}</h3>
-          <span class="company">{{ exp.entreprise }}</span>
-        </div>
-        <div class="experience-meta">
-          <span class="location" *ngIf="exp.lieu">{{ exp.lieu }}</span>
-          <span class="dates">
-            {{ formatDate(exp.dateDebut) }} - 
-            {{ exp.enCours ? 'Présent' : formatDate(exp.dateFin) }}
-          </span>
-        </div>
-        <p class="description" *ngIf="exp.description">{{ exp.description }}</p>
-      </div>
-    </div>
-
-    <div class="cv-section" *ngIf="cvData && cvData.formations && cvData.formations.length > 0">
-      <h2 class="section-title">Formation</h2>
-      <div class="formation-item" *ngFor="let form of cvData.formations">
-        <div class="formation-header">
-          <h3 class="diploma">{{ form.diplome }}</h3>
-          <span class="school">{{ form.etablissement }}</span>
-        </div>
-        <div class="formation-meta">
-          <span class="location" *ngIf="form.ville">{{ form.ville }}</span>
-          <span class="dates">
-            {{ formatDate(form.dateDebut) }} - 
-            {{ form.enCours ? 'Présent' : formatDate(form.dateFin) }}
-          </span>
-        </div>
-        <p class="description" *ngIf="form.description">{{ form.description }}</p>
-      </div>
-    </div>
-
-    <div class="cv-section" *ngIf="cvData && cvData.competences && cvData.competences.length > 0">
-      <h2 class="section-title">Compétences</h2>
-      <div class="skills-container">
-        <div class="skill-category" *ngFor="let category of getSkillsByCategory()">
-          <h4 class="category-title">{{ category.name }}</h4>
-          <div class="skills-list">
-            <span class="skill-tag" *ngFor="let skill of category.skills">{{ skill.nom }}</span>
+    <ng-container *ngIf="cvData?.experiences as experiences">
+      <div class="cv-section" *ngIf="experiences.length > 0">
+        <h2 class="section-title">Expériences Professionnelles</h2>
+        <div class="experience-item" *ngFor="let exp of experiences">
+          <div class="experience-header">
+            <h3 class="position">{{ exp.poste }}</h3>
+            <span class="company">{{ exp.entreprise }}</span>
           </div>
+          <div class="experience-meta">
+            <span class="location" *ngIf="exp.lieu">{{ exp.lieu }}</span>
+            <span class="dates">
+              {{ formatDate(exp.dateDebut) }} -
+              {{ exp.enCours ? 'Présent' : formatDate(exp.dateFin) }}
+            </span>
+          </div>
+          
+          <ng-container *ngIf="exp.description">
+            <ul *ngIf="isArray(exp.description)" class="description">
+              <li *ngFor="let mission of exp.description">{{ mission }}</li>
+            </ul>
+            <p *ngIf="!isArray(exp.description)" class="description">
+              {{ exp.description }}
+            </p>
+          </ng-container>
+
         </div>
       </div>
-    </div>
+    </ng-container>
+
+    <ng-container *ngIf="cvData?.formations as formations">
+      <div class="cv-section" *ngIf="formations.length > 0">
+        <h2 class="section-title">Formation</h2>
+        <div class="formation-item" *ngFor="let form of formations">
+          <div class="formation-header">
+            <h3 class="diploma">{{ form.diplome }}</h3>
+            <span class="school">{{ form.etablissement }}</span>
+          </div>
+          <div class="formation-meta">
+            <span class="location" *ngIf="form.ville">{{ form.ville }}</span>
+            <span class="dates">
+              {{ formatDate(form.dateDebut) }} -
+              {{ form.enCours ? 'Présent' : formatDate(form.dateFin) }}
+            </span>
+          </div>
+          
+          <ng-container *ngIf="form.description">
+              <ul *ngIf="isArray(form.description)" class="description">
+                  <li *ngFor="let detail of form.description">{{ detail }}</li>
+              </ul>
+              <p *ngIf="!isArray(form.description)" class="description">
+                  {{ form.description }}
+              </p>
+          </ng-container>
+
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="cvData?.competences as competences">
+        <div class="cv-section" *ngIf="competences.length > 0">
+            <h2 class="section-title">Compétences</h2>
+            <div class="skills-container">
+                <div class="skill-category" *ngFor="let category of getSkillsByCategory()">
+                <h4 class="category-title">{{ category.name }}</h4>
+                <div class="skills-list">
+                    <span class="skill-tag" *ngFor="let skill of category.skills">{{ skill.nom }}</span>
+                </div>
+                </div>
+            </div>
+        </div>
+    </ng-container>
   </div>
 </div>

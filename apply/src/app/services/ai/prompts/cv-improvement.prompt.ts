@@ -1,5 +1,5 @@
-export const getCvImprovementPrompt = (jobOfferText: string, cvText: string): string => {
-    return `
+export default function getCvImprovementPrompt(jobOfferText: string, cvText: string): string {
+  return `
 CONTEXTE : Tu es un expert en recrutement et rédaction de CV. Analyse le CV ci-dessous par rapport à l'offre d'emploi et propose des améliorations précises et concrètes.
 
 OFFRE D'EMPLOI :
@@ -20,24 +20,24 @@ INSTRUCTIONS :
 **IMPORTANT** : Réponds UNIQUEMENT avec un JSON valide dans ce format exact :
 
 {
-  "improvements": [
-    {
-      "id": "unique_id_1",
-      "type": "orthographe|reformulation|mots-cles|structure",
-      "section": "Nom de la section concernée",
-      "titre": "Titre court de l'amélioration",
-      "textOriginal": "Texte original exact du CV",
-      "textAmeliore": "Version améliorée proposée",
-      "explication": "Pourquoi cette amélioration (1-2 phrases)",
-      "impact": "faible|moyen|fort"
-    }
-  ],
-  "summary": {
-    "totalSuggestions": 0,
-    "criticalIssues": 0,
-    "enhancementSuggestions": 0,
-    "atsKeywords": ["mot-clé1", "mot-clé2"]
+"improvements": [
+  {
+    "id": "unique_id_1",
+    "type": "orthographe|reformulation|mots-cles|structure",
+    "section": "Nom de la section concernée",
+    "titre": "Titre court de l'amélioration",
+    "textOriginal": "Texte original exact du CV",
+    "textAmeliore": "Version améliorée proposée",
+    "explication": "Pourquoi cette amélioration (1-2 phrases)",
+    "impact": "faible|moyen|fort"
   }
+],
+"summary": {
+  "totalSuggestions": 0,
+  "criticalIssues": 0,
+  "enhancementSuggestions": 0,
+  "atsKeywords": ["mot-clé1", "mot-clé2"]
+}
 }
 
 **CRITÈRES D'AMÉLIORATION** :
