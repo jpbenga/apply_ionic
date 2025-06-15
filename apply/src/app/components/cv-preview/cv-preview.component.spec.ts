@@ -9,8 +9,7 @@ describe('CvPreviewComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ CvPreviewComponent ],
-      imports: [IonicModule.forRoot()]
+      imports: [IonicModule.forRoot(), CvPreviewComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CvPreviewComponent);

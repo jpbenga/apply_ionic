@@ -340,7 +340,7 @@ export class PdfGeneratorService {
     const warnings: string[] = [];
     const area = element.offsetWidth * element.offsetHeight;
    
-    let estimatedSizeMB = (area / 1000000) * 0.5;
+    const estimatedSizeMB = (area / 1000000) * 0.5;
     let recommendedQuality = 0.95;
    
     if (estimatedSizeMB > 5) {

@@ -9,8 +9,7 @@ describe('CvTemplateSelectorComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ CvTemplateSelectorComponent ],
-      imports: [IonicModule.forRoot()]
+      imports: [IonicModule.forRoot(), CvTemplateSelectorComponent]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CvTemplateSelectorComponent);

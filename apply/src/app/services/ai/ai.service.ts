@@ -13,10 +13,7 @@ import {
   SuggestedCompetence
 } from 'src/app/models/cv-structured-improvement.model';
 import { GeneratedCv } from 'src/app/models/cv-template.model';
-import { Experience } from 'src/app/models/experience.model';
-import { Formation } from 'src/app/models/formation.model';
 import { Competence } from 'src/app/models/competence.model';
-import { UserProfile } from 'src/app/features/profile/models/user-profile.model';
 
 export interface OpenAIResponse {
   success: boolean;
@@ -280,7 +277,7 @@ export class AIService {
       addedCompetences: [] as SuggestedCompetence[]
     };
 
-    let changesCount = { experiences: 0, formations: 0, competences: 0, total: 0 };
+    const changesCount = { experiences: 0, formations: 0, competences: 0, total: 0 };
 
     improvements.improvements.experiences.forEach(sectionImprovement => {
       const accepted = sectionImprovement.improvements.filter(imp => imp.accepted);

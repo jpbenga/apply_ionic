@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
-import { map } from 'rxjs/operators';
-import { authState } from '@angular/fire/auth'; // Auth and inject are already imported by the new guards
+// Auth and inject are already imported by the new guards
 // import { Auth } from '@angular/fire/auth'; // No longer needed directly here
 // import { inject } from '@angular/core'; // No longer needed directly here
 import { redirectUnauthorizedToLoginGuard } from './features/auth/guards/redirect-unauthorized-to-login.guard';

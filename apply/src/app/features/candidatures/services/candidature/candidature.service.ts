@@ -18,7 +18,7 @@ import {
   QueryConstraint
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { Candidature, SuiviCandidature, StatutCandidature, TypeSuivi } from 'src/app/features/candidatures/models/candidature.model';
+import { Candidature, SuiviCandidature, StatutCandidature } from 'src/app/features/candidatures/models/candidature.model';
 import { StorageService } from 'src/app/shared/services/storage/storage.service';
 import { Observable, of } from 'rxjs';
 import { map, catchError, first } from 'rxjs/operators';

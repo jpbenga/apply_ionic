@@ -1,0 +1,53 @@
+
+> firestarter@0.0.1 build
+> ng build
+
+❯ Building...
+✔ Building...
+Initial chunk files   | Names                   |  Raw size | Estimated transfer size
+chunk-LRPFGSNQ.js     | -                       |   1.19 MB |               198.50 kB
+chunk-JYIFMVER.js     | -                       | 368.58 kB |                97.44 kB
+chunk-SRKSDDLX.js     | -                       |  38.37 kB |                12.67 kB
+polyfills-4BK4MXU4.js | polyfills               |  34.73 kB |                11.41 kB
+chunk-M7ZJ5U4O.js     | -                       |  32.48 kB |                 9.63 kB
+styles-TGFG4HD2.css   | styles                  |  29.33 kB |                 4.46 kB
+main-DXEUYWBA.js      | main                    |  27.63 kB |                 6.21 kB
+chunk-TTSZL7LA.js     | -                       |  10.37 kB |                 2.67 kB
+chunk-5MP2OYY2.js     | -                       |   9.30 kB |                 3.24 kB
+chunk-Z4LC2IFJ.js     | -                       |   9.26 kB |                 3.47 kB
+chunk-JWIEPCRG.js     | -                       |   5.83 kB |                 2.15 kB
+chunk-QAEVNTE6.js     | -                       |   3.14 kB |                 1.23 kB
+chunk-WAPKWRY7.js     | -                       |   1.63 kB |               714 bytes
+chunk-C5RQ2IC2.js     | -                       |   1.32 kB |               583 bytes
+chunk-D4VGNZLR.js     | -                       |   1.02 kB |                 1.02 kB
+chunk-7S7BORWJ.js     | -                       | 989 bytes |               989 bytes
+chunk-OLRQNAAJ.js     | -                       | 946 bytes |               946 bytes
+chunk-7KGURMOZ.js     | -                       | 908 bytes |               908 bytes
+chunk-N3I635BE.js     | -                       | 888 bytes |               888 bytes
+chunk-JHLW7V75.js     | -                       | 557 bytes |               557 bytes
+chunk-4U6PRYVA.js     | -                       | 126 bytes |               126 bytes
+chunk-SV7S5NYR.js     | -                       |  99 bytes |                99 bytes
+
+                      | Initial total           |   1.77 MB |               359.92 kB
+
+Lazy chunk files      | Names                   |  Raw size | Estimated transfer size
+chunk-Z4YOODVS.js     | -                       | 352.60 kB |                97.27 kB
+chunk-FM2ZPWWS.js     | -                       | 203.13 kB |                38.49 kB
+chunk-GQ7UZPMF.js     | index-es                | 159.12 kB |                47.00 kB
+chunk-4MMID5WA.js     | my-cv-page              | 119.17 kB |                19.88 kB
+chunk-LK3DAOW7.js     | -                       | 102.19 kB |                15.95 kB
+chunk-YHIWNTNS.js     | postuler-page           |  96.25 kB |                17.68 kB
+chunk-SEYH7MI5.js     | html2pdf                |  74.57 kB |                17.66 kB
+chunk-XPOUMMMW.js     | candidature-detail-page |  51.24 kB |                10.03 kB
+chunk-YIK3UJLO.js     | dashboard-page          |  49.69 kB |                 9.45 kB
+chunk-EOAL7XV7.js     | purify-es               |  21.73 kB |                 7.77 kB
+chunk-TVS3QEJU.js     | profile-page            |  15.79 kB |                 4.31 kB
+chunk-TLMXZFXY.js     | -                       |   7.59 kB |                 2.55 kB
+chunk-X5TM3WCK.js     | signup-page             |   7.11 kB |                 2.39 kB
+chunk-IEFHWBOD.js     | -                       |   5.99 kB |                 2.11 kB
+chunk-JP22TVBV.js     | input-shims             |   4.92 kB |                 1.90 kB
+...and 18 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [19.828 seconds]
+
+Output location: /app/apply/www

@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, OnDestroy, OnInit } from '@angular/core';
+import { Component, ViewChild, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -15,17 +15,14 @@ import { CvGenerationService } from '../../../../services/cv-generation/cv-gener
 import { CvTemplateService } from '../../../../services/cv-template/cv-template.service';
 import { CvDataService } from '../../../../services/cv-data/cv-data.service';
 import { GeneratedCv, CvTemplate, CvTheme, CvData } from '../../../../models/cv-template.model';
-import { Candidature, StatutCandidature } from '../../models/candidature.model';
+import { StatutCandidature } from '../../models/candidature.model';
 import { Router } from '@angular/router';
 import { UserHeaderComponent } from '../../../../shared/components/user-header/user-header.component';
 import { CvPreviewComponent } from '../../../../components/cv-preview/cv-preview.component';
 import { Subscription, combineLatest, firstValueFrom } from 'rxjs';
-import { Timestamp } from '@angular/fire/firestore';
 import { 
  StructuredCvImprovementResponse, 
- StructuredCvImprovementResult,
- SectionImprovement,
- SuggestedCompetence
+ StructuredCvImprovementResult
 } from '../../../../models/cv-structured-improvement.model';
 import { ProfileService } from '../../../../features/profile/services/profile.service';
 import { UserProfile } from 'src/app/features/profile/models/user-profile.model';

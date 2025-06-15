@@ -1,5 +1,3 @@
-import { UserProfile } from 'src/app/features/profile/models/user-profile.model';
-
 export const getCoverLetterPrompt = (
     jobOfferText: string,
     cvText: string,

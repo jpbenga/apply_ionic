@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { 
   Firestore, collection, addDoc, updateDoc, deleteDoc, 
-  query, orderBy, doc, docData, collectionData 
+  query, orderBy, doc, collectionData
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
 import { Observable, of, combineLatest } from 'rxjs';
@@ -51,7 +51,7 @@ export class CvGenerationService {
       this.cvDataService.getFormations(),
       this.cvDataService.getCompetences()
     ]).pipe(
-      map(([profile, experiences, formations, competences]) => {
+      map(([_profile, experiences, formations, competences]) => {
         const cvData: CvData = {
           userId: user.uid,
           experiences: experiences || [],

@@ -65,7 +65,7 @@ export class FileExtractionService {
     try {
       // 2. Appel de la fonction Firebase appropriée
       let extractFn: any; // Type HttpsCallable<unknown, unknown>
-      let payload: { fileName: string; fileUrl?: string; docxUrl?: string; pdfUrl?: string; } =
+      const payload: { fileName: string; fileUrl?: string; docxUrl?: string; pdfUrl?: string; } =
         { fileName: file.name, fileUrl: fileUrl }; // fileUrl est commun, spécifique ci-dessous
 
       if (isDocx) {

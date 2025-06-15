@@ -8,15 +8,13 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   User,
-  authState,
   updateProfile,
   sendPasswordResetEmail,
   onAuthStateChanged
 } from '@angular/fire/auth';
-import { Observable, BehaviorSubject, from, of } from 'rxjs';
-import { switchMap, tap, catchError, map } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
-import { Firestore, doc, setDoc, getDoc, updateDoc, DocumentReference, DocumentData } from '@angular/fire/firestore';
+import { Firestore, doc, setDoc, getDoc, updateDoc, DocumentData } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
