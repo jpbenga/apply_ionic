@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CvTemplateBaseComponent } from '../base/cv-template-base.component';
 import { Experience } from 'src/app/models/experience.model';

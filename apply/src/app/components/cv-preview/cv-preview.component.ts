@@ -309,7 +309,7 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  private showEmptyState(message: string) {
+  private showEmptyState() {
     this.cleanupCurrentComponent();
     this.error = null;
     this.isRendering = false;

@@ -114,7 +114,7 @@ export class TextViewerModalComponent implements OnInit {
     try {
       await Clipboard.write({ string: textToCopy });
       this.presentToast('Texte copié !', 'success');
-    } catch (e) {
+    } catch {
       this.presentToast('Erreur de copie.', 'danger');
     }
   }

@@ -1,0 +1,276 @@
+
+> firestarter@0.0.1 lint
+> ng lint --fix
+
+
+Linting "app"...
+
+/app/apply/src/app/app.routes.ts
+  2:10  warning  'map' is defined but never used        @typescript-eslint/no-unused-vars
+  3:10  warning  'authState' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/apply/src/app/components/cv-data-validation-modal/cv-data-validation-modal.component.ts
+  16:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:9   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  53:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/components/cv-preview/cv-preview.component.ts
+   30:16  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   40:26  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  168:27  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  168:34  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  306:36  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  312:26  warning  'message' is defined but never used       @typescript-eslint/no-unused-vars
+
+/app/apply/src/app/components/cv-selector/cv-selector.component.ts
+  125:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/apply/src/app/components/cv-template/base/cv-template-base.component.ts
+    2:74  warning  'ViewChild' is defined but never used     @typescript-eslint/no-unused-vars
+  211:30  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  243:65  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  253:30  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/components/cv-template/template-classic/cv-template-classic.component.ts
+    2:21  warning  'Input' is defined but never used                @typescript-eslint/no-unused-vars
+  136:15  warning  'categoryEl' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  183:42  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  183:54  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  206:51  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  239:49  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  272:46  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/components/cv-template/template-modern/cv-template-modern.component.ts
+   1:21  warning  'Input' is defined but never used          @typescript-eslint/no-unused-vars
+   1:36  warning  'OnChanges' is defined but never used      @typescript-eslint/no-unused-vars
+   1:47  warning  'SimpleChanges' is defined but never used  @typescript-eslint/no-unused-vars
+  21:24  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  21:39  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/components/cv-template/template-registry.ts
+  29:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/components/cv-upload/cv-upload.component.ts
+  43:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  84:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/components/experience-modal/experience-modal.component.ts
+  66:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/components/file-uploader/file-uploader.component.ts
+  13:3  error  Lifecycle methods should not be empty  @angular-eslint/no-empty-lifecycle-method
+
+/app/apply/src/app/components/filter-panel/filter-panel.component.ts
+  109:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/components/formation-modal/formation-modal.component.ts
+  70:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/components/letter-template/letter-template.component.ts
+  13:3  error  Lifecycle methods should not be empty  @angular-eslint/no-empty-lifecycle-method
+
+/app/apply/src/app/components/text-viewer-modal/text-viewer-modal.component.ts
+   91:25  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  117:14  warning  'e' is defined but never used             @typescript-eslint/no-unused-vars
+
+/app/apply/src/app/features/auth/pages/login/login.page.ts
+  61:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  72:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/features/auth/pages/signup/signup.page.ts
+  89:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/features/auth/services/auth/auth.service.ts
+  11:3   warning  'authState' is defined but never used          @typescript-eslint/no-unused-vars
+  16:10  warning  'Observable' is defined but never used         @typescript-eslint/no-unused-vars
+  16:39  warning  'from' is defined but never used               @typescript-eslint/no-unused-vars
+  16:45  warning  'of' is defined but never used                 @typescript-eslint/no-unused-vars
+  17:10  warning  'switchMap' is defined but never used          @typescript-eslint/no-unused-vars
+  17:21  warning  'tap' is defined but never used                @typescript-eslint/no-unused-vars
+  17:26  warning  'catchError' is defined but never used         @typescript-eslint/no-unused-vars
+  17:38  warning  'map' is defined but never used                @typescript-eslint/no-unused-vars
+  19:53  warning  'DocumentReference' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/apply/src/app/features/candidatures/components/filter-bar/filter-bar.component.ts
+  13:3  error  Lifecycle methods should not be empty  @angular-eslint/no-empty-lifecycle-method
+
+/app/apply/src/app/features/candidatures/components/status-badge/status-badge.component.ts
+  13:3  error  Lifecycle methods should not be empty  @angular-eslint/no-empty-lifecycle-method
+
+/app/apply/src/app/features/candidatures/models/candidature.model.ts
+  106:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  107:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/features/candidatures/pages/dashboard/candidature-detail/candidature-detail.page.ts
+    5:10  warning  'Observable' is defined but never used    @typescript-eslint/no-unused-vars
+  155:21  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  166:45  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  173:42  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  204:33  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  217:33  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  231:36  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  306:21  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  532:25  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/features/candidatures/pages/dashboard/dashboard.page.ts
+  114:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  178:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/features/candidatures/pages/postuler/postuler.page.ts
+    1:32  warning  'ElementRef' is defined but never used           @typescript-eslint/no-unused-vars
+   18:10  warning  'Candidature' is defined but never used          @typescript-eslint/no-unused-vars
+   23:10  warning  'Timestamp' is defined but never used            @typescript-eslint/no-unused-vars
+   27:2   warning  'SectionImprovement' is defined but never used   @typescript-eslint/no-unused-vars
+   28:2   warning  'SuggestedCompetence' is defined but never used  @typescript-eslint/no-unused-vars
+  646:68  error    Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/features/candidatures/services/candidature/candidature.service.ts
+  21:60  warning  'TypeSuivi' is defined but never used     @typescript-eslint/no-unused-vars
+  67:21  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/features/profile/models/user-profile.model.ts
+  17:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/features/profile/pages/profile.page.html
+   6:28  error  Async pipe results should not be negated. Use `(observable | async) === false`, `(observable | async) === null`, or `(observable | async) === undefined` to check its value instead  @angular-eslint/template/no-negated-async
+  63:48  error  Async pipe results should not be negated. Use `(observable | async) === false`, `(observable | async) === null`, or `(observable | async) === undefined` to check its value instead  @angular-eslint/template/no-negated-async
+
+/app/apply/src/app/features/profile/pages/profile.page.ts
+  121:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  195:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/guards/auth-guard.guard.ts
+  3:47  warning  'route' is defined but never used  @typescript-eslint/no-unused-vars
+  3:54  warning  'state' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/apply/src/app/models/cv-structured-improvement.model.ts
+   14:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   15:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   27:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   28:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   40:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   41:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  116:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  120:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/models/cv-template.model.ts
+  12:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/pages/my-cv/my-cv.page.ts
+  178:21  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  311:21  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  320:53  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  351:47  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  364:27  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  377:27  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  390:27  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  418:21  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  458:13  warning  'data' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  465:25  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  471:27  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  498:26  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  525:27  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  570:12  warning  'e' is defined but never used              @typescript-eslint/no-unused-vars
+  583:12  warning  'e' is defined but never used              @typescript-eslint/no-unused-vars
+  592:12  warning  'e' is defined but never used              @typescript-eslint/no-unused-vars
+  665:41  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  667:40  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  669:41  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/services/ai/ai.service.ts
+   16:10  warning  'Experience' is defined but never used    @typescript-eslint/no-unused-vars
+   17:10  warning  'Formation' is defined but never used     @typescript-eslint/no-unused-vars
+   19:10  warning  'UserProfile' is defined but never used   @typescript-eslint/no-unused-vars
+  145:84  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  293:30  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  310:29  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  327:30  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  374:60  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  388:72  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  412:53  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  428:41  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  433:34  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  453:47  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  454:82  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  455:81  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  456:83  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  461:45  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  462:39  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  463:47  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  464:51  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  468:53  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  469:39  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  470:47  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  471:51  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  475:42  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  476:39  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  477:47  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  478:51  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/services/ai/prompts/cover-letter.prompt.ts
+  1:10  warning  'UserProfile' is defined but never used  @typescript-eslint/no-unused-vars
+
+/app/apply/src/app/services/cv-data/cv-data.service.ts
+   65:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   87:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   99:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  149:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  161:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  191:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  203:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  204:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/services/cv-generation/cv-generation.service.ts
+    5:24  warning  'docData' is defined but never used       @typescript-eslint/no-unused-vars
+   38:32  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   54:13  warning  'profile' is defined but never used       @typescript-eslint/no-unused-vars
+  321:62  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  344:61  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  430:32  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  435:34  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  446:50  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  446:87  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  456:30  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  464:37  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/services/cv-parsing/cv-parsing.service.ts
+   34:37  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  110:38  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  121:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  122:20  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  136:24  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:21  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  151:24  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  152:21  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  172:31  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  190:14  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+
+/app/apply/src/app/services/cv-template/cv-template.service.ts
+  22:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/services/cv/cv.service.ts
+  83:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/shared/components/user-header/user-header.component.ts
+   29:9   error    Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+   91:11  warning  'newTitle' is assigned a value but never used           @typescript-eslint/no-unused-vars
+   96:11  warning  'newShowBackButton' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  133:18  warning  'e' is defined but never used                           @typescript-eslint/no-unused-vars
+
+/app/apply/src/app/shared/services/file-extraction/file-extraction.service.ts
+   60:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   67:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   88:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/app/shared/services/storage/storage.service.ts
+  58:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/app/apply/src/zone-flags.ts
+  6:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 182 problems (138 errors, 44 warnings)

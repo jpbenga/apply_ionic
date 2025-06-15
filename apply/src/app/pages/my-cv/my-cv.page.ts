@@ -567,7 +567,7 @@ export class MyCvPage implements OnInit, OnDestroy {
       this.presentToast('Expérience supprimée.', 'success');
       this.loadExperiences();
     }
-    catch (e) { this.presentToast("Erreur suppression expérience.", "danger"); }
+    catch { this.presentToast("Erreur suppression expérience.", "danger"); }
   }
 
   async addFormation() { await this.openFormationModal(); }
@@ -580,7 +580,7 @@ export class MyCvPage implements OnInit, OnDestroy {
       this.presentToast('Formation supprimée.', 'success');
       this.loadFormations();
     }
-    catch (e) { this.presentToast("Erreur suppression formation.", "danger"); }
+    catch { this.presentToast("Erreur suppression formation.", "danger"); }
   }
 
   async addCompetence() { await this.openCompetenceModal(); }
@@ -589,7 +589,7 @@ export class MyCvPage implements OnInit, OnDestroy {
     if (item) await item.close();
     if (!id) return;
     try { await this.cvDataService.deleteCompetence(id); this.presentToast('Compétence supprimée.', 'success'); this.loadCompetences(); }
-    catch (e) { this.presentToast("Erreur suppression compétence.", "danger"); }
+    catch { this.presentToast("Erreur suppression compétence.", "danger"); }
   }
 
   async openExperienceModal(experience?: Experience) {

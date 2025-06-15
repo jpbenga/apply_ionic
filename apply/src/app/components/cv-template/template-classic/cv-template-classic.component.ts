@@ -1,5 +1,5 @@
 // src/app/components/cv-templates/template-classic/cv-template-classic.component.ts
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CvTemplateBaseComponent } from '../base/cv-template-base.component';
 

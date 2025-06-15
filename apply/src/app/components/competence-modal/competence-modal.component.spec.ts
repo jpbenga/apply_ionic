@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
+import { ModalController } from '@ionic/angular/standalone';
 import { CompetenceModalComponent } from './competence-modal.component';
 
 describe('CompetenceModalComponent', () => {
@@ -9,6 +9,9 @@ describe('CompetenceModalComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [CompetenceModalComponent],
+      providers: [
+        { provide: ModalController, useValue: {} } // Mock ModalController
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(CompetenceModalComponent);

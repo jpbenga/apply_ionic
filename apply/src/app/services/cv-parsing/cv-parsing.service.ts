@@ -187,7 +187,7 @@ RÈGLES IMPORTANTES:
       if (!isNaN(date.getTime())) {
         return date.toISOString().split('T')[0]; // Format YYYY-MM-DD
       }
-    } catch (error) {
+    } catch {
       console.warn('Format de date non reconnu:', dateStr);
     }
 
