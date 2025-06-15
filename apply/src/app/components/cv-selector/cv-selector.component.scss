@@ -1,202 +1,254 @@
-/* src/app/components/cv-selector/cv-selector.component.scss */
 .cv-selector-container {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    margin-bottom: 20px;
+  background: var(--app-white);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-sm);
+  border: 1px solid rgba(75, 92, 240, 0.08);
+  overflow: hidden;
   
-    .selector-header {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      padding: 16px 20px;
-      border-bottom: 1px solid #dee2e6;
+  .selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--app-spacing-lg);
+    border-bottom: 1px solid var(--app-gray);
+    background: var(--app-gray-light);
+    
+    .selector-title {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: var(--app-spacing-sm);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--app-dark);
+      margin: 0;
+      
+      ion-icon {
+        font-size: 20px;
+        color: var(--app-primary);
+      }
+    }
+    
+    .create-new-btn {
+      --border-color: var(--app-primary);
+      --color: var(--app-primary);
+      --background: transparent;
+      --border-radius: var(--app-radius-md);
+      height: 36px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        --background: var(--app-primary);
+        --color: var(--app-white);
+        transform: translateY(-1px);
+      }
+      
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
   
-      .selector-title {
-        margin: 0;
-        font-size: 1.1rem;
+  .loading-state,
+  .error-state,
+  .empty-state {
+    padding: var(--app-spacing-xl);
+    text-align: center;
+    
+    .loading-content,
+    .error-content,
+    .empty-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--app-spacing-md);
+      
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--app-primary-lighter);
+        border-top: 3px solid var(--app-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      .error-icon,
+      .empty-icon {
+        font-size: 40px;
+        color: var(--app-gray-medium);
+        opacity: 0.7;
+      }
+      
+      h4 {
+        font-size: 18px;
         font-weight: 600;
-        color: #495057;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-  
-        ion-icon {
-          color: #007bff;
-        }
+        color: var(--app-dark);
+        margin: 0;
       }
-  
-      .create-new-btn {
-        --border-radius: 8px;
-        --padding-start: 12px;
-        --padding-end: 12px;
+      
+      p {
+        font-size: 14px;
+        color: var(--app-gray-medium);
+        line-height: 1.5;
+        margin: 0;
+        max-width: 300px;
       }
-    }
-  
-    // États de chargement et d'erreur
-    .loading-state,
-    .error-state {
-      padding: 40px 20px;
-      text-align: center;
-  
-      .loading-content,
-      .error-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 16px;
-  
-        .spinner {
-          width: 32px;
-          height: 32px;
-          border: 3px solid #e9ecef;
-          border-top: 3px solid #007bff;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-  
-        .error-icon {
-          font-size: 2rem;
-          color: #dc3545;
-        }
-  
-        p {
-          margin: 0;
-          color: #6c757d;
-          font-size: 0.9rem;
+      
+      ion-button {
+        --border-color: var(--app-primary);
+        --color: var(--app-primary);
+        --background: transparent;
+        --border-radius: var(--app-radius-md);
+        margin-top: var(--app-spacing-sm);
+        
+        &:hover {
+          --background: var(--app-primary);
+          --color: var(--app-white);
         }
       }
     }
+  }
   
-    // État vide
-    .empty-state {
-      padding: 40px 20px;
-      text-align: center;
-  
-      .empty-content {
-        .empty-icon {
-          font-size: 3rem;
-          color: #adb5bd;
-          margin-bottom: 16px;
-        }
-  
-        h4 {
-          margin: 0 0 8px 0;
-          color: #495057;
-          font-size: 1.1rem;
-        }
-  
-        p {
-          margin: 0 0 24px 0;
-          color: #6c757d;
-          font-size: 0.9rem;
-          line-height: 1.4;
-        }
-  
-        .primary-btn {
-          --background: #007bff;
-          --border-radius: 8px;
-        }
-      }
+  .error-state .error-content {
+    .error-icon {
+      color: var(--app-danger);
     }
+    
+    p {
+      color: var(--app-danger);
+      font-weight: 500;
+    }
+  }
   
-    // Liste des CV
-    .cvs-content {
-      .cvs-list {
-        ion-radio-group {
-          width: 100%;
-        }
-  
+  .cvs-content {
+    .cvs-list {
+      padding: 0;
+      
+      ion-radio-group {
         .cv-item {
-          border-bottom: 1px solid #f8f9fa;
+          margin-bottom: var(--app-spacing-sm);
+          border-radius: var(--app-radius-md);
+          overflow: hidden;
           transition: all 0.3s ease;
-  
-          &:last-child {
-            border-bottom: none;
-          }
-  
-          &.selected {
-            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-            border-left: 4px solid #007bff;
-          }
-  
+          border: 2px solid transparent;
+          
           &:hover {
-            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: var(--app-shadow-md);
+            border-color: rgba(75, 92, 240, 0.1);
           }
-  
-          .cv-item-content {
-            --padding-start: 16px;
-            --padding-end: 16px;
-            --inner-padding-end: 0px;
-            --min-height: 80px;
-  
-            .cv-radio {
-              margin-right: 16px;
-              --color-checked: #007bff;
+          
+          &.selected {
+            border-color: var(--app-primary);
+            background: rgba(75, 92, 240, 0.03);
+            
+            .cv-item-content {
+              --background: rgba(75, 92, 240, 0.05);
             }
-  
+          }
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          .cv-item-content {
+            --background: var(--app-white);
+            --border-color: transparent;
+            --inner-border-width: 0;
+            --padding-start: var(--app-spacing-lg);
+            --padding-end: var(--app-spacing-lg);
+            --padding-top: var(--app-spacing-md);
+            --padding-bottom: var(--app-spacing-md);
+            margin: 0;
+            box-shadow: var(--app-shadow-sm);
+            border: 1px solid rgba(75, 92, 240, 0.08);
+            
+            .cv-radio {
+              --color: var(--app-primary);
+              --color-checked: var(--app-primary);
+              --border-width: 2px;
+              --border-color: var(--app-gray-medium);
+              --border-color-checked: var(--app-primary);
+              margin-right: var(--app-spacing-md);
+              
+              &::part(container) {
+                border-radius: 50%;
+              }
+            }
+            
             .cv-info {
+              flex: 1;
               display: flex;
               justify-content: space-between;
               align-items: center;
-              width: 100%;
-  
+              
               .cv-main-info {
-                flex: 1;
-  
                 .cv-title {
-                  margin: 0 0 4px 0;
-                  font-size: 1rem;
+                  font-size: 16px;
                   font-weight: 600;
-                  color: #212529;
+                  color: var(--app-dark);
+                  margin: 0 0 var(--app-spacing-xs) 0;
+                  line-height: 1.3;
                 }
-  
+                
                 .cv-date {
+                  font-size: 12px;
+                  color: var(--app-gray-medium);
                   margin: 0;
-                  font-size: 0.85rem;
-                  color: #6c757d;
+                  font-weight: 500;
                 }
               }
-  
+              
               .cv-details {
                 display: flex;
                 align-items: center;
-                gap: 12px;
-  
+                gap: var(--app-spacing-sm);
+                
                 .cv-template-badge {
-                  background: #e9ecef;
-                  color: #495057;
-                  padding: 4px 8px;
-                  border-radius: 12px;
-                  font-size: 0.75rem;
-                  font-weight: 500;
+                  background: var(--app-primary);
+                  color: var(--app-white);
+                  font-size: 10px;
+                  font-weight: 600;
+                  padding: 4px var(--app-spacing-xs);
+                  border-radius: var(--app-radius-sm);
                   text-transform: uppercase;
                   letter-spacing: 0.5px;
+                  white-space: nowrap;
                 }
-  
+                
                 .cv-color-indicator {
                   width: 20px;
                   height: 20px;
                   border-radius: 50%;
-                  border: 2px solid white;
-                  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+                  border: 2px solid var(--app-white);
+                  box-shadow: 0 0 0 1px var(--app-gray), var(--app-shadow-sm);
+                  flex-shrink: 0;
                 }
               }
             }
-  
+            
             .cv-actions {
               display: flex;
-              gap: 4px;
-  
+              align-items: center;
+              margin-left: var(--app-spacing-sm);
+              
               .delete-btn {
-                --color: #dc3545;
-                --padding-start: 8px;
-                --padding-end: 8px;
-  
+                --color: var(--app-gray-medium);
+                --background: transparent;
+                --border-radius: var(--app-radius-md);
+                width: 36px;
+                height: 36px;
+                transition: all 0.3s ease;
+                
                 &:hover {
-                  --background: rgba(220, 53, 69, 0.1);
+                  --color: var(--app-danger);
+                  --background: rgba(255, 59, 48, 0.1);
+                  transform: scale(1.1);
+                }
+                
+                ion-icon {
+                  font-size: 18px;
                 }
               }
             }
@@ -205,49 +257,327 @@
       }
     }
   }
+}
+
+// Animation de spin
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Animation d'entrée pour les CV items
+.cv-item {
+  animation: slideInUp 0.3s ease-out;
+  animation-fill-mode: both;
   
-  // Animation du spinner
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.1}s;
+    }
   }
-  
-  // Responsive
-  @media (max-width: 768px) {
-    .cv-selector-container {
-      .selector-header {
-        padding: 12px 16px;
-  
-        .selector-title {
-          font-size: 1rem;
-        }
-  
-        .create-new-btn {
-          --padding-start: 8px;
-          --padding-end: 8px;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .cv-selector-container {
+    .selector-header {
+      padding: var(--app-spacing-md);
+      flex-direction: column;
+      gap: var(--app-spacing-md);
+      align-items: stretch;
+      
+      .selector-title {
+        font-size: 16px;
+        justify-content: center;
+        
+        ion-icon {
+          font-size: 18px;
         }
       }
-  
-      .cvs-content .cvs-list .cv-item .cv-item-content {
-        --padding-start: 12px;
-        --padding-end: 12px;
-        --min-height: 70px;
-  
+      
+      .create-new-btn {
+        width: 100%;
+        height: 40px;
+        font-size: 13px;
+        
+        ion-icon {
+          font-size: 14px;
+        }
+      }
+    }
+    
+    .loading-state,
+    .error-state,
+    .empty-state {
+      padding: var(--app-spacing-lg);
+      
+      .loading-content,
+      .error-content,
+      .empty-content {
+        .spinner {
+          width: 28px;
+          height: 28px;
+        }
+        
+        .error-icon,
+        .empty-icon {
+          font-size: 32px;
+        }
+        
+        h4 {
+          font-size: 16px;
+        }
+        
+        p {
+          font-size: 13px;
+        }
+      }
+    }
+    
+    .cvs-content .cvs-list ion-radio-group .cv-item {
+      margin-bottom: var(--app-spacing-xs);
+      
+      .cv-item-content {
+        --padding-start: var(--app-spacing-md);
+        --padding-end: var(--app-spacing-md);
+        --padding-top: var(--app-spacing-sm);
+        --padding-bottom: var(--app-spacing-sm);
+        
         .cv-info {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: var(--app-spacing-sm);
+          
+          .cv-main-info .cv-title {
+            font-size: 14px;
+          }
+          
           .cv-details {
-            gap: 8px;
-  
+            align-self: flex-end;
+            
             .cv-template-badge {
-              padding: 2px 6px;
-              font-size: 0.7rem;
+              font-size: 9px;
+              padding: 3px 6px;
             }
-  
+            
             .cv-color-indicator {
               width: 16px;
               height: 16px;
             }
           }
         }
+        
+        .cv-actions .delete-btn {
+          width: 32px;
+          height: 32px;
+          
+          ion-icon {
+            font-size: 16px;
+          }
+        }
       }
     }
   }
+}
+
+@media (max-width: 480px) {
+  .cv-selector-container {
+    .selector-header {
+      padding: var(--app-spacing-sm);
+      
+      .selector-title {
+        font-size: 14px;
+        
+        ion-icon {
+          font-size: 16px;
+        }
+      }
+      
+      .create-new-btn {
+        height: 36px;
+        font-size: 12px;
+      }
+    }
+    
+    .cvs-content .cvs-list ion-radio-group .cv-item .cv-item-content {
+      --padding-start: var(--app-spacing-sm);
+      --padding-end: var(--app-spacing-sm);
+      
+      .cv-radio {
+        margin-right: var(--app-spacing-sm);
+      }
+      
+      .cv-info {
+        .cv-main-info .cv-title {
+          font-size: 13px;
+        }
+        
+        .cv-details {
+          gap: var(--app-spacing-xs);
+          
+          .cv-template-badge {
+            font-size: 8px;
+            padding: 2px 4px;
+          }
+          
+          .cv-color-indicator {
+            width: 14px;
+            height: 14px;
+          }
+        }
+      }
+      
+      .cv-actions .delete-btn {
+        width: 28px;
+        height: 28px;
+        
+        ion-icon {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}
+
+// Mode sombre
+@media (prefers-color-scheme: dark) {
+  .cv-selector-container {
+    background: var(--app-dark);
+    border-color: #333;
+    
+    .selector-header {
+      background: #2d3748;
+      border-bottom-color: #4a5568;
+      
+      .selector-title {
+        color: var(--app-white);
+        
+        ion-icon {
+          color: var(--app-primary-light);
+        }
+      }
+      
+      .create-new-btn {
+        --border-color: var(--app-primary-light);
+        --color: var(--app-primary-light);
+        
+        &:hover {
+          --background: var(--app-primary-light);
+          --color: var(--app-dark);
+        }
+      }
+    }
+    
+    .loading-state,
+    .error-state,
+    .empty-state {
+      .loading-content,
+      .error-content,
+      .empty-content {
+        .spinner {
+          border-color: rgba(170, 180, 247, 0.3);
+          border-top-color: var(--app-primary-light);
+        }
+        
+        .error-icon,
+        .empty-icon {
+          color: #aaa;
+        }
+        
+        h4 {
+          color: var(--app-white);
+        }
+        
+        p {
+          color: #aaa;
+        }
+        
+        ion-button {
+          --border-color: var(--app-primary-light);
+          --color: var(--app-primary-light);
+          
+          &:hover {
+            --background: var(--app-primary-light);
+            --color: var(--app-dark);
+          }
+        }
+      }
+    }
+    
+    .error-state .error-content {
+      .error-icon {
+        color: var(--app-danger);
+      }
+      
+      p {
+        color: var(--app-danger);
+      }
+    }
+    
+    .cvs-content .cvs-list ion-radio-group .cv-item {
+      &:hover {
+        border-color: rgba(170, 180, 247, 0.3);
+      }
+      
+      &.selected {
+        border-color: var(--app-primary-light);
+        background: rgba(170, 180, 247, 0.05);
+        
+        .cv-item-content {
+          --background: rgba(170, 180, 247, 0.08);
+        }
+      }
+      
+      .cv-item-content {
+        --background: var(--app-dark);
+        border-color: #333;
+        
+        .cv-radio {
+          --color: var(--app-primary-light);
+          --color-checked: var(--app-primary-light);
+          --border-color: #aaa;
+          --border-color-checked: var(--app-primary-light);
+        }
+        
+        .cv-info {
+          .cv-main-info {
+            .cv-title {
+              color: var(--app-white);
+            }
+            
+            .cv-date {
+              color: #aaa;
+            }
+          }
+          
+          .cv-details {
+            .cv-template-badge {
+              background: var(--app-primary-light);
+              color: var(--app-dark);
+            }
+          }
+        }
+        
+        .cv-actions .delete-btn {
+          --color: #aaa;
+          
+          &:hover {
+            --color: var(--app-danger);
+            --background: rgba(255, 59, 48, 0.2);
+          }
+        }
+      }
+    }
+  }
+}

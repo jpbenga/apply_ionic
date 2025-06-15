@@ -1,71 +1,397 @@
-/* src/app/components/cv-theme-picker/cv-theme-picker.component.scss */
 .theme-picker-container {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+  gap: var(--app-spacing-md);
+  padding: var(--app-spacing-lg);
+  background: var(--app-white);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-sm);
+  border: 1px solid rgba(75, 92, 240, 0.08);
+  
   .color-option {
-    width: 44px;
-    height: 44px;
+    position: relative;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     cursor: pointer;
     border: 3px solid transparent;
+    box-shadow: var(--app-shadow-sm);
     transition: all 0.3s ease;
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
+    overflow: hidden;
+    
     &:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    &.selected {
-      border-color: #333;
       transform: scale(1.1);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--app-shadow-md);
+      border-color: rgba(255, 255, 255, 0.8);
     }
-
+    
+    &:focus-within {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(75, 92, 240, 0.3), var(--app-shadow-md);
+    }
+    
+    &.selected {
+      border-color: var(--app-white);
+      transform: scale(1.05);
+      box-shadow: var(--app-shadow-lg);
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        border: 2px solid var(--app-primary);
+        border-radius: 50%;
+        animation: pulseRing 0.6s ease-out;
+      }
+    }
+    
     .invisible-radio {
-      display: none;
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
     }
-
+    
     .selection-indicator {
-      color: white;
-      font-weight: bold;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--app-white);
       font-size: 16px;
-      text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-      animation: checkmark 0.3s ease-in-out;
+      font-weight: 700;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      animation: scaleIn 0.3s ease-out;
+      z-index: 2;
+      
+      // Assurer une bonne visibilité sur toutes les couleurs
+      filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+    }
+    
+    // Styles spécifiques pour certaines couleurs courantes
+    &[style*="#ffffff"],
+    &[style*="white"],
+    &[style*="rgb(255, 255, 255)"] {
+      border-color: var(--app-gray);
+      
+      &:hover {
+        border-color: var(--app-primary);
+      }
+      
+      &.selected {
+        border-color: var(--app-primary);
+        
+        .selection-indicator {
+          color: var(--app-primary);
+          text-shadow: none;
+          filter: none;
+        }
+      }
+    }
+    
+    &[style*="#000000"],
+    &[style*="black"],
+    &[style*="rgb(0, 0, 0)"] {
+      &:hover {
+        border-color: var(--app-gray-light);
+      }
+    }
+    
+    // Amélioration pour les couleurs très claires
+    &[style*="#f"],
+    &[style*="rgb(25"][style*="25"][style*="25"] {
+      border-color: var(--app-gray);
+      
+      .selection-indicator {
+        color: var(--app-dark);
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        filter: none;
+      }
     }
   }
 }
 
-@keyframes checkmark {
+// Animations
+@keyframes scaleIn {
   0% {
     opacity: 0;
-    transform: scale(0.5);
+    transform: translate(-50%, -50%) scale(0.5);
   }
   100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes pulseRing {
+  0% {
+    opacity: 1;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+// Animation d'entrée pour les couleurs
+.color-option {
+  animation: slideInScale 0.4s ease-out;
+  animation-fill-mode: both;
+  
+  @for $i from 1 through 20 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
     opacity: 1;
     transform: scale(1);
   }
 }
 
-// Responsive
+// Variants de disposition
+.theme-picker-container.compact {
+  padding: var(--app-spacing-md);
+  gap: var(--app-spacing-sm);
+  
+  .color-option {
+    width: 40px;
+    height: 40px;
+    
+    .selection-indicator {
+      font-size: 14px;
+    }
+  }
+}
+
+.theme-picker-container.large {
+  gap: var(--app-spacing-lg);
+  
+  .color-option {
+    width: 56px;
+    height: 56px;
+    
+    .selection-indicator {
+      font-size: 18px;
+    }
+  }
+}
+
+// Layout en ligne pour espace restreint
+.theme-picker-container.inline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--app-spacing-sm);
+  padding: var(--app-spacing-md);
+  
+  .color-option {
+    width: 36px;
+    height: 36px;
+    
+    .selection-indicator {
+      font-size: 12px;
+    }
+  }
+}
+
+// Responsive design
 @media (max-width: 768px) {
   .theme-picker-container {
-    gap: 8px;
-
+    padding: var(--app-spacing-md);
+    gap: var(--app-spacing-sm);
+    grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+    
     .color-option {
-      width: 36px;
-      height: 36px;
-
+      width: 44px;
+      height: 44px;
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+      
+      &.selected {
+        transform: scale(1.02);
+      }
+      
       .selection-indicator {
         font-size: 14px;
       }
     }
   }
+}
+
+@media (max-width: 480px) {
+  .theme-picker-container {
+    padding: var(--app-spacing-sm);
+    gap: var(--app-spacing-xs);
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+    
+    .color-option {
+      width: 40px;
+      height: 40px;
+      border-width: 2px;
+      
+      &.selected::after {
+        border-width: 1px;
+        top: -3px;
+        left: -3px;
+        right: -3px;
+        bottom: -3px;
+      }
+      
+      .selection-indicator {
+        font-size: 12px;
+      }
+    }
+  }
+}
+
+// Accessibilité améliorée
+@media (prefers-reduced-motion: reduce) {
+  .color-option {
+    transition: none;
+    animation: none;
+    
+    &:hover {
+      transform: none;
+    }
+    
+    &.selected {
+      transform: none;
+      
+      &::after {
+        animation: none;
+      }
+    }
+    
+    .selection-indicator {
+      animation: none;
+    }
+  }
+}
+
+// Mode sombre
+@media (prefers-color-scheme: dark) {
+  .theme-picker-container {
+    background: var(--app-dark);
+    border-color: #333;
+    
+    .color-option {
+      &:hover {
+        border-color: rgba(255, 255, 255, 0.6);
+      }
+      
+      &.selected {
+        border-color: var(--app-white);
+        
+        &::after {
+          border-color: var(--app-primary-light);
+        }
+      }
+      
+      // Ajustements pour les couleurs claires en mode sombre
+      &[style*="#ffffff"],
+      &[style*="white"],
+      &[style*="rgb(255, 255, 255)"] {
+        border-color: #4a5568;
+        
+        &:hover {
+          border-color: var(--app-primary-light);
+        }
+        
+        &.selected {
+          border-color: var(--app-primary-light);
+          
+          .selection-indicator {
+            color: var(--app-primary-light);
+          }
+        }
+      }
+      
+      // Ajustements pour les couleurs très claires
+      &[style*="#f"] {
+        .selection-indicator {
+          color: var(--app-dark);
+          text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+        }
+      }
+    }
+  }
+}
+
+// États désactivés (si nécessaire)
+.theme-picker-container.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+  
+  .color-option {
+    cursor: not-allowed;
+    
+    &:hover {
+      transform: none;
+      box-shadow: var(--app-shadow-sm);
+    }
+  }
+}
+
+// Tooltip personnalisé (optionnel)
+.color-option {
+  &[title]:hover::before {
+    content: attr(title);
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--app-dark);
+    color: var(--app-white);
+    padding: var(--app-spacing-xs) var(--app-spacing-sm);
+    border-radius: var(--app-radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    animation: tooltipFadeIn 0.2s ease-out 0.5s forwards;
+  }
+  
+  &[title]:hover::after {
+    content: '';
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--app-dark);
+    z-index: 1000;
+    opacity: 0;
+    animation: tooltipFadeIn 0.2s ease-out 0.5s forwards;
+  }
+}
+
+@keyframes tooltipFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+// Focus visible pour l'accessibilité
+.color-option:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
 }

@@ -2,136 +2,255 @@
   <app-user-header></app-user-header>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div *ngIf="isLoading && !(userProfile$ | async)" class="ion-text-center ion-padding">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Chargement du profil...</p>
-  </div>
-
-  <div *ngIf="errorMessage && !isLoading" class="ion-text-center ion-padding">
-    <p style="color: var(--ion-color-danger);">{{ errorMessage }}</p>
-    <ion-button fill="outline" (click)="loadProfile()">Réessayer</ion-button>
-  </div>
-
-  <ng-container *ngIf="(userProfile$ | async) as profile; else noProfileDataOrLoading">
-    <ion-list lines="inset">
-      <ion-item class="ion-text-center ion-margin-bottom">
-        <ion-avatar slot="start" style="width: 80px; height: 80px; margin: auto;">
-          <img *ngIf="profile.photoURL" [src]="profile.photoURL" alt="Avatar" />
-          <ion-icon *ngIf="!profile.photoURL" name="person-circle-outline" style="font-size: 80px;"></ion-icon>
-        </ion-avatar>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked">Prénom</ion-label>
-        <div class="readonly-value">{{ profile.prenom || '-' }}</div>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked">Nom</ion-label>
-        <div class="readonly-value">{{ profile.nom || '-' }}</div>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked">Email</ion-label>
-        <div class="readonly-value">{{ profile.email }}</div>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked">Téléphone</ion-label>
-        <div class="readonly-value">{{ profile.telephone || '-' }}</div>
-      </ion-item>
-      
-      <ion-item>
-        <ion-label position="stacked">Titre de Poste Actuel/Recherché</ion-label>
-        <div class="readonly-value">{{ profile.titrePoste || '-' }}</div>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked">Adresse</ion-label>
-        <div class="readonly-value-textarea">{{ profile.adresse || '-' }}</div>
-      </ion-item>
-
-      <ion-item>
-        <ion-label position="stacked">Résumé Personnel / Objectif</ion-label>
-        <div class="readonly-value-textarea">{{ profile.resumePersonnel || '-' }}</div>
-      </ion-item>
-    </ion-list>
-  </ng-container>
-
-  <ng-template #noProfileDataOrLoading>
-    <div *ngIf="!isLoading && !errorMessage && !(userProfile$ | async)" class="ion-text-center ion-padding">
-      <ng-container *ngIf="(currentUserAuth$ | async) as authUser; else notLoggedIn">
-        <p>Profil non trouvé pour {{ authUser?.email }}.</p>
-        <ion-button (click)="openEditProfileModal(null)">Compléter mon profil</ion-button>
-      </ng-container>
-      <ng-template #notLoggedIn><p>Veuillez vous connecter pour voir ou créer votre profil.</p></ng-template>
+<ion-content class="modern-content">
+  <div class="content-wrapper">
+    <div class="loading-state" *ngIf="isLoading && !(userProfile$ | async)">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h3>Chargement du profil...</h3>
+        <p>Veuillez patienter pendant que nous récupérons vos informations</p>
+      </div>
     </div>
-  </ng-template>
 
-  <ion-fab slot="fixed" vertical="bottom" horizontal="end" *ngIf="(userProfile$ | async) || (currentUserAuth$ | async)">
-    <ion-fab-button (click)="openEditProfileModal(userProfileSubject.value)">
-      <ion-icon name="create-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+    <div class="error-state" *ngIf="errorMessage && !isLoading">
+      <div class="error-content">
+        <div class="error-icon">❌</div>
+        <h3>Erreur de chargement</h3>
+        <p class="error-message">{{ errorMessage }}</p>
+        <button class="modern-btn outline-btn" (click)="loadProfile()">
+          <span class="btn-icon">🔄</span>
+          <span class="btn-text">Réessayer</span>
+        </button>
+      </div>
+    </div>
 
-  <ion-modal [isOpen]="isEditModalOpen" (didDismiss)="dismissEditModal()">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Modifier mon Profil</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="dismissEditModal()">
-              <ion-icon name="close" slot="icon-only"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-        <div class="ion-text-center ion-margin-bottom">
-          <ion-avatar style="width: 100px; height: 100px; margin: auto; border: 2px dashed var(--ion-color-medium); cursor: pointer;" 
-                      (click)="avatarFileInput.click()">
-            <img *ngIf="editableProfileInModal.photoURL" [src]="editableProfileInModal.photoURL" alt="Avatar" />
-            <ion-icon *ngIf="!editableProfileInModal.photoURL" name="person-add-outline" style="font-size: 50px; padding-top: 25px;"></ion-icon>
-          </ion-avatar>
-          <input type="file" #avatarFileInput hidden (change)="handleAvatarSelected($event)" accept="image/png, image/jpeg, image/gif" />
-          <ion-label *ngIf="isUploadingAvatar" color="primary"><small>Upload en cours...</small></ion-label>
+    <ng-container *ngIf="(userProfile$ | async) as profile; else noProfileDataOrLoading">
+      <div class="profile-section">
+        <div class="profile-header">
+          <div class="avatar-section">
+            <div class="avatar-container">
+              <img *ngIf="profile.photoURL" [src]="profile.photoURL" alt="Avatar" class="avatar-image"/>
+              <div *ngIf="!profile.photoURL" class="avatar-placeholder">
+                <span class="avatar-icon">👤</span>
+              </div>
+            </div>
+            <div class="profile-summary">
+              <h1 class="profile-name">{{ profile.prenom }} {{ profile.nom }}</h1>
+              <p class="profile-title" *ngIf="profile.titrePoste">{{ profile.titrePoste }}</p>
+              <p class="profile-email">{{ profile.email }}</p>
+            </div>
+          </div>
         </div>
 
-        <ion-item>
-          <ion-label position="stacked">Prénom</ion-label>
-          <ion-input type="text" [(ngModel)]="editableProfileInModal.prenom" placeholder="Votre prénom"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">Nom</ion-label>
-          <ion-input type="text" [(ngModel)]="editableProfileInModal.nom" placeholder="Votre nom"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">Email</ion-label>
-          <ion-input type="email" [value]="editableProfileInModal.email" readonly placeholder="Email (non modifiable)"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">Téléphone</ion-label>
-          <ion-input type="tel" [(ngModel)]="editableProfileInModal.telephone" placeholder="Numéro de téléphone"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">Titre de Poste Actuel/Recherché</ion-label>
-          <ion-input type="text" [(ngModel)]="editableProfileInModal.titrePoste" placeholder="Ex: Développeur Web"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">Adresse</ion-label>
-          <ion-textarea [(ngModel)]="editableProfileInModal.adresse" autoGrow="true" rows="3" placeholder="Votre adresse"></ion-textarea>
-        </ion-item>
-        <ion-item>
-          <ion-label position="stacked">Résumé Personnel / Objectif</ion-label>
-          <ion-textarea [(ngModel)]="editableProfileInModal.resumePersonnel" autoGrow="true" rows="4" placeholder="Parlez un peu de vous..."></ion-textarea>
-        </ion-item>
-        <ion-button expand="block" (click)="handleSaveProfileFromModal()" class="ion-margin-top" [disabled]="isSaving || isUploadingAvatar">
-          <ion-spinner *ngIf="isSaving || isUploadingAvatar" name="crescent" slot="start"></ion-spinner>
-          <ion-icon *ngIf="!isSaving && !isUploadingAvatar" name="save-outline" slot="start"></ion-icon>
-          Enregistrer
-        </ion-button>
-      </ion-content>
+        <div class="profile-info">
+          <div class="info-grid">
+            <div class="info-card">
+              <div class="info-header">
+                <span class="info-icon">👤</span>
+                <h3>Informations personnelles</h3>
+              </div>
+              <div class="info-content">
+                <div class="info-item">
+                  <label>Prénom</label>
+                  <p>{{ profile.prenom || '-' }}</p>
+                </div>
+                <div class="info-item">
+                  <label>Nom</label>
+                  <p>{{ profile.nom || '-' }}</p>
+                </div>
+                <div class="info-item">
+                  <label>Email</label>
+                  <p>{{ profile.email }}</p>
+                </div>
+                <div class="info-item">
+                  <label>Téléphone</label>
+                  <p>{{ profile.telephone || '-' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-header">
+                <span class="info-icon">💼</span>
+                <h3>Informations professionnelles</h3>
+              </div>
+              <div class="info-content">
+                <div class="info-item">
+                  <label>Titre de poste</label>
+                  <p>{{ profile.titrePoste || '-' }}</p>
+                </div>
+                <div class="info-item full-width">
+                  <label>Résumé personnel / Objectif</label>
+                  <p class="resume-text">{{ profile.resumePersonnel || 'Aucun résumé personnel renseigné' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-header">
+                <span class="info-icon">📍</span>
+                <h3>Localisation</h3>
+              </div>
+              <div class="info-content">
+                <div class="info-item full-width">
+                  <label>Adresse</label>
+                  <p class="address-text">{{ profile.adresse || 'Aucune adresse renseignée' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #noProfileDataOrLoading>
+      <div class="empty-state" *ngIf="!isLoading && !errorMessage && !(userProfile$ | async)">
+        <ng-container *ngIf="(currentUserAuth$ | async) as authUser; else notLoggedIn">
+          <div class="empty-content">
+            <div class="empty-icon">👤</div>
+            <h3>Profil non trouvé</h3>
+            <p>Profil non trouvé pour {{ authUser?.email }}.</p>
+            <button class="modern-btn primary-btn" (click)="openEditProfileModal(null)">
+              <span class="btn-icon">➕</span>
+              <span class="btn-text">Compléter mon profil</span>
+            </button>
+          </div>
+        </ng-container>
+        <ng-template #notLoggedIn>
+          <div class="empty-content">
+            <div class="empty-icon">🔒</div>
+            <h3>Connexion requise</h3>
+            <p>Veuillez vous connecter pour voir ou créer votre profil.</p>
+          </div>
+        </ng-template>
+      </div>
     </ng-template>
-  </ion-modal>
+
+    <div class="fab-container" *ngIf="(userProfile$ | async) || (currentUserAuth$ | async)">
+      <button class="floating-edit-btn" (click)="openEditProfileModal(userProfileSubject.value)">
+        <div class="fab-icon">✏️</div>
+        <div class="fab-text">Modifier</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" [class.active]="isEditModalOpen" (click)="dismissEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()" *ngIf="isEditModalOpen">
+      <div class="modal-header">
+        <h3>Modifier mon Profil</h3>
+        <button class="modal-close" (click)="dismissEditModal()">
+          <span class="close-icon">✕</span>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="avatar-edit-section">
+          <div class="avatar-edit-container" (click)="avatarFileInput.click()">
+            <img *ngIf="editableProfileInModal.photoURL" [src]="editableProfileInModal.photoURL" alt="Avatar" class="edit-avatar-image"/>
+            <div *ngIf="!editableProfileInModal.photoURL" class="edit-avatar-placeholder">
+              <span class="edit-avatar-icon">📷</span>
+            </div>
+            <div class="avatar-overlay">
+              <span class="camera-icon">📸</span>
+            </div>
+          </div>
+          <input type="file" #avatarFileInput hidden (change)="handleAvatarSelected($event)" accept="image/png, image/jpeg, image/gif" />
+          <p class="upload-text" *ngIf="isUploadingAvatar">Upload en cours...</p>
+          <p class="upload-text" *ngIf="!isUploadingAvatar">Cliquez pour changer la photo</p>
+        </div>
+
+        <div class="form-section">
+          <h4>Informations personnelles</h4>
+          <div class="form-group">
+            <label>Prénom *</label>
+            <input 
+              type="text" 
+              class="modern-input"
+              [(ngModel)]="editableProfileInModal.prenom" 
+              placeholder="Votre prénom">
+          </div>
+          
+          <div class="form-group">
+            <label>Nom *</label>
+            <input 
+              type="text" 
+              class="modern-input"
+              [(ngModel)]="editableProfileInModal.nom" 
+              placeholder="Votre nom">
+          </div>
+          
+          <div class="form-group">
+            <label>Email</label>
+            <input 
+              type="email" 
+              class="modern-input readonly"
+              [value]="editableProfileInModal.email" 
+              readonly 
+              placeholder="Email (non modifiable)">
+          </div>
+          
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input 
+              type="tel" 
+              class="modern-input"
+              [(ngModel)]="editableProfileInModal.telephone" 
+              placeholder="Numéro de téléphone">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h4>Informations professionnelles</h4>
+          <div class="form-group">
+            <label>Titre de poste actuel/recherché</label>
+            <input 
+              type="text" 
+              class="modern-input"
+              [(ngModel)]="editableProfileInModal.titrePoste" 
+              placeholder="Ex: Développeur Web">
+          </div>
+          
+          <div class="form-group">
+            <label>Résumé personnel / Objectif</label>
+            <textarea 
+              class="modern-textarea"
+              [(ngModel)]="editableProfileInModal.resumePersonnel" 
+              rows="4" 
+              placeholder="Parlez un peu de vous...">
+            </textarea>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h4>Localisation</h4>
+          <div class="form-group">
+            <label>Adresse</label>
+            <textarea 
+              class="modern-textarea"
+              [(ngModel)]="editableProfileInModal.adresse" 
+              rows="3" 
+              placeholder="Votre adresse">
+            </textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="modern-btn outline-btn" (click)="dismissEditModal()">
+          <span class="btn-icon">❌</span>
+          <span class="btn-text">Annuler</span>
+        </button>
+        <button 
+          class="modern-btn primary-btn"
+          (click)="handleSaveProfileFromModal()" 
+          [disabled]="isSaving || isUploadingAvatar">
+          <div class="btn-content">
+            <div class="btn-spinner" *ngIf="isSaving || isUploadingAvatar"></div>
+            <span class="btn-icon" *ngIf="!isSaving && !isUploadingAvatar">💾</span>
+            <span class="btn-text">Enregistrer</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
 </ion-content>

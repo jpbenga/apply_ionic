@@ -1,152 +1,172 @@
-// Variables de couleurs style Spotify
-:host {
-  --filter-bg: var(--ion-color-light, #f8f9fa);
-  --filter-border: var(--ion-color-medium-tint, #e0e0e0);
-  --spotify-green: #1db954;
-  --spotify-dark: #191414;
-  --spotify-gray: #535353;
-  --spotify-light-gray: #b3b3b3;
-}
-
 .filter-panel {
-  background: var(--filter-bg);
-  border-radius: 12px;
-  padding: 16px;
-  margin: 12px 0;
-  border: 1px solid var(--filter-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-  // Animation d'entrée
-  animation: slideInUp 0.3s ease-out;
-
-  @keyframes slideInUp {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  background: var(--app-white);
+  border-radius: var(--app-radius-lg);
+  padding: var(--app-spacing-lg);
+  margin: 0;
+  border: 1px solid rgba(75, 92, 240, 0.08);
+  box-shadow: var(--app-shadow-sm);
+  animation: slideInFromTop 0.4s ease-out;
 }
 
-// Onglets de filtres rapides (style Spotify)
 .filter-tabs {
-  margin-bottom: 16px;
+  margin-bottom: var(--app-spacing-lg);
 
   .filter-tabs-container {
     display: flex;
-    gap: 8px;
+    gap: var(--app-spacing-sm);
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding-bottom: var(--app-spacing-xs);
     
-    // Style scrollbar sur mobile
     &::-webkit-scrollbar {
       display: none;
     }
+    
+    scrollbar-width: none;
   }
 
   .filter-tab {
-    --border-radius: 20px;
-    --padding-start: 16px;
-    --padding-end: 16px;
-    --padding-top: 8px;
-    --padding-bottom: 8px;
+    --border-radius: var(--app-radius-xl);
+    --padding-start: var(--app-spacing-lg);
+    --padding-end: var(--app-spacing-lg);
+    --padding-top: var(--app-spacing-sm);
+    --padding-bottom: var(--app-spacing-sm);
+    --background: var(--app-gray-light);
+    --color: var(--app-dark);
+    --border-width: 2px;
+    --border-color: transparent;
     white-space: nowrap;
-    position: relative;
-    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 14px;
+    min-height: 36px;
+    transition: all 0.3s ease;
     
-    // État actif (style Spotify)
     &.active {
-      transform: scale(1.02);
-      box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+      --background: var(--app-primary);
+      --color: var(--app-white);
+      --border-color: var(--app-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--app-shadow-md);
     }
 
-    // Badge sur les onglets
+    &:hover:not(.active) {
+      --background: var(--app-white);
+      --border-color: var(--app-primary);
+      transform: translateY(-1px);
+      box-shadow: var(--app-shadow-sm);
+    }
+
     .filter-badge {
-      margin-left: 6px;
-      --padding-start: 6px;
-      --padding-end: 6px;
+      margin-left: var(--app-spacing-xs);
+      --padding-start: var(--app-spacing-xs);
+      --padding-end: var(--app-spacing-xs);
       font-size: 10px;
       min-width: 18px;
       height: 18px;
-    }
-
-    // Hover effect
-    &:hover:not(.active) {
-      transform: translateY(-1px);
+      font-weight: 700;
     }
   }
 }
 
-// Contrôles secondaires
 .filter-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--app-spacing-sm);
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--app-spacing-md);
 
   .control-button {
-    --border-radius: 16px;
-    --padding-start: 12px;
-    --padding-end: 12px;
-    --padding-top: 6px;
-    --padding-bottom: 6px;
-    position: relative;
-    transition: all 0.2s ease;
+    --border-radius: var(--app-radius-md);
+    --padding-start: var(--app-spacing-md);
+    --padding-end: var(--app-spacing-md);
+    --padding-top: var(--app-spacing-sm);
+    --padding-bottom: var(--app-spacing-sm);
+    --background: transparent;
+    --border-width: 2px;
+    --border-color: var(--app-gray);
+    --color: var(--app-gray-medium);
+    font-weight: 500;
+    font-size: 14px;
+    min-height: 36px;
+    transition: all 0.3s ease;
+
+    &[color="primary"] {
+      --border-color: var(--app-primary);
+      --color: var(--app-primary);
+      
+      &:hover {
+        --background: var(--app-primary);
+        --color: var(--app-white);
+      }
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--app-shadow-sm);
+      --border-color: var(--app-primary);
+    }
 
     .control-badge {
-      margin-left: 6px;
+      margin-left: var(--app-spacing-xs);
       --padding-start: 4px;
       --padding-end: 4px;
       font-size: 10px;
       min-width: 16px;
       height: 16px;
-    }
-
-    // Animation hover
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      font-weight: 700;
     }
   }
 
   .reset-button {
     margin-left: auto;
-    --border-radius: 16px;
+    --border-radius: var(--app-radius-md);
+    --color: var(--app-gray-medium);
     
     &:hover {
-      --color: var(--ion-color-danger);
+      --color: var(--app-danger);
+      --background: rgba(255, 59, 48, 0.1);
     }
   }
 }
 
-// Popover des statuts
 .statut-popover {
-  --width: 300px;
-  --max-height: 400px;
+  --width: 320px;
+  --max-height: 420px;
+  --background: var(--app-white);
+  --box-shadow: var(--app-shadow-lg);
+  --border-radius: var(--app-radius-lg);
   
   .statut-popover-content {
     --padding-start: 0;
     --padding-end: 0;
     --padding-top: 0;
     --padding-bottom: 0;
+    --background: transparent;
   }
 
   .statut-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid var(--filter-border);
-    background: var(--ion-color-light);
+    padding: var(--app-spacing-lg);
+    border-bottom: 1px solid var(--app-gray);
+    background: var(--app-gray-light);
 
     h6 {
       margin: 0;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 16px;
+      color: var(--app-dark);
+    }
+    
+    ion-button {
+      --color: var(--app-primary);
+      --background: transparent;
+      font-size: 12px;
+      font-weight: 500;
+      
+      &:hover {
+        --background: rgba(75, 92, 240, 0.1);
+      }
     }
   }
 
@@ -154,112 +174,105 @@
     max-height: 300px;
     overflow-y: auto;
     padding: 0;
+    background: transparent;
 
     .statut-item {
       --border-color: transparent;
-      --padding-start: 16px;
-      --padding-end: 16px;
-      --min-height: 44px;
-      transition: background-color 0.2s ease;
+      --padding-start: var(--app-spacing-lg);
+      --padding-end: var(--app-spacing-lg);
+      --min-height: 48px;
+      --background: transparent;
+      transition: all 0.3s ease;
 
       &:hover {
-        --background: var(--ion-color-light);
+        --background: rgba(75, 92, 240, 0.05);
+      }
+
+      ion-checkbox {
+        margin-right: var(--app-spacing-md);
+        --size: 18px;
+        --border-radius: var(--app-radius-sm);
+        --checkmark-width: 2px;
+        --border-color: var(--app-gray);
+        --background-checked: var(--app-primary);
+        --border-color-checked: var(--app-primary);
       }
 
       ion-label h3 {
         font-size: 14px;
         font-weight: 500;
         margin: 0;
-      }
-
-      ion-checkbox {
-        margin-right: 12px;
-        --size: 18px;
-        --border-radius: 4px;
-        --checkmark-width: 2px;
+        color: var(--app-dark);
       }
     }
   }
 }
 
-// Conteneur de recherche
 .search-container {
-  margin-bottom: 12px;
+  margin-bottom: var(--app-spacing-md);
   animation: slideDown 0.3s ease-out;
 
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      max-height: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      max-height: 60px;
-      transform: translateY(0);
-    }
-  }
-
   .custom-searchbar {
-    --background: var(--ion-color-light);
-    --border-radius: 20px;
-    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    --placeholder-color: var(--spotify-light-gray);
-    --icon-color: var(--spotify-gray);
-    padding: 4px;
+    --background: var(--app-gray-light);
+    --border-radius: var(--app-radius-xl);
+    --box-shadow: none;
+    --placeholder-color: var(--app-gray-medium);
+    --icon-color: var(--app-gray-medium);
+    --color: var(--app-dark);
+    padding: 0;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
 
     &.searchbar-has-focus {
-      --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
+      --background: var(--app-white);
+      border-color: var(--app-primary);
+      box-shadow: 0 0 0 3px rgba(75, 92, 240, 0.1);
     }
   }
 }
 
-// Filtres actifs (chips)
 .active-filters {
   .active-filters-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: var(--app-spacing-xs);
+    margin-bottom: var(--app-spacing-sm);
 
     .filter-chip {
-      --background: rgba(var(--ion-color-primary-rgb), 0.1);
-      --color: var(--ion-color-primary);
-      height: 28px;
-      border-radius: 14px;
-      transition: all 0.2s ease;
+      --background: rgba(75, 92, 240, 0.1);
+      --color: var(--app-primary);
+      height: 32px;
+      border-radius: var(--app-radius-lg);
+      transition: all 0.3s ease;
       animation: chipFadeIn 0.3s ease-out;
+      border: 1px solid rgba(75, 92, 240, 0.2);
 
-      @keyframes chipFadeIn {
-        from {
-          opacity: 0;
-          transform: scale(0.8);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
+      &:hover {
+        --background: rgba(75, 92, 240, 0.15);
+        transform: translateY(-1px);
       }
 
       ion-label {
         font-size: 12px;
         font-weight: 500;
-        margin: 0 4px;
+        margin: 0 var(--app-spacing-xs);
+        color: var(--app-primary);
       }
 
       ion-icon {
         font-size: 16px;
         cursor: pointer;
-        margin-left: 4px;
+        margin-left: var(--app-spacing-xs);
+        color: var(--app-primary);
         opacity: 0.7;
-        transition: opacity 0.2s ease;
+        transition: all 0.3s ease;
 
         &:hover {
           opacity: 1;
+          transform: scale(1.1);
         }
       }
 
-      // Animation de suppression
       &:active {
         transform: scale(0.95);
       }
@@ -268,77 +281,241 @@
 
   .results-info {
     text-align: center;
-    padding: 8px;
-    border-top: 1px solid var(--filter-border);
-    margin-top: 8px;
+    padding: var(--app-spacing-sm);
+    border-top: 1px solid var(--app-gray);
+    margin-top: var(--app-spacing-sm);
+    background: var(--app-gray-light);
+    border-radius: var(--app-radius-md);
 
     small {
       font-size: 12px;
       font-weight: 500;
+      color: var(--app-gray-medium);
     }
   }
 }
 
-// Responsive design
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 60px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chipFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (max-width: 768px) {
   .filter-panel {
-    margin: 8px 0;
-    padding: 12px;
-    border-radius: 8px;
+    margin: 0;
+    padding: var(--app-spacing-md);
+    border-radius: var(--app-radius-md);
+  }
+
+  .filter-tabs {
+    margin-bottom: var(--app-spacing-md);
+    
+    .filter-tab {
+      --padding-start: var(--app-spacing-md);
+      --padding-end: var(--app-spacing-md);
+      font-size: 13px;
+      min-height: 32px;
+    }
   }
 
   .filter-controls {
+    gap: var(--app-spacing-xs);
+    
     .control-button {
       flex: 1;
       min-width: 0;
+      font-size: 13px;
+      min-height: 32px;
       
       ion-icon {
-        display: none; // Masquer les icônes sur mobile pour gagner de l'espace
+        font-size: 16px;
       }
     }
 
     .reset-button {
       flex: none;
-      margin-left: 8px;
+      margin-left: var(--app-spacing-xs);
     }
   }
 
   .active-filters .active-filters-container .filter-chip {
-    font-size: 11px;
-    height: 26px;
+    height: 28px;
+    
+    ion-label {
+      font-size: 11px;
+    }
+    
+    ion-icon {
+      font-size: 14px;
+    }
+  }
+
+  .statut-popover {
+    --width: 280px;
+    
+    .statut-header {
+      padding: var(--app-spacing-md);
+      
+      h6 {
+        font-size: 14px;
+      }
+    }
+    
+    .statut-list .statut-item {
+      --padding-start: var(--app-spacing-md);
+      --padding-end: var(--app-spacing-md);
+      --min-height: 44px;
+    }
   }
 }
 
-// Mode sombre
+@media (max-width: 480px) {
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+    
+    .control-button {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .reset-button {
+      margin-left: 0;
+      margin-top: var(--app-spacing-xs);
+      align-self: center;
+      width: auto;
+    }
+  }
+
+  .filter-tabs .filter-tabs-container {
+    justify-content: flex-start;
+    
+    .filter-tab {
+      flex-shrink: 0;
+    }
+  }
+}
+
 @media (prefers-color-scheme: dark) {
-  :host {
-    --filter-bg: var(--ion-color-dark);
-    --filter-border: var(--ion-color-medium);
-  }
-
   .filter-panel {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: var(--app-dark);
+    border-color: #333;
   }
 
-  .statut-popover .statut-header {
-    background: var(--ion-color-dark-tint);
+  .filter-tabs .filter-tab {
+    --background: #2d3748;
+    --color: var(--app-white);
+    
+    &.active {
+      --background: var(--app-primary-light);
+      --color: var(--app-dark);
+    }
+    
+    &:hover:not(.active) {
+      --background: #4a5568;
+      --border-color: var(--app-primary-light);
+    }
   }
-}
 
-// Animations de performance
-.filter-panel * {
-  will-change: transform;
-}
+  .filter-controls .control-button {
+    --border-color: #4a5568;
+    --color: #aaa;
+    
+    &[color="primary"] {
+      --border-color: var(--app-primary-light);
+      --color: var(--app-primary-light);
+    }
+  }
 
-// Amélioration de l'accessibilité
-.filter-tab:focus,
-.control-button:focus {
-  outline: 2px solid var(--ion-color-primary);
-  outline-offset: 2px;
-}
+  .statut-popover {
+    --background: var(--app-dark);
+    
+    .statut-header {
+      background: #2d3748;
+      border-bottom-color: #4a5568;
+      
+      h6 {
+        color: var(--app-white);
+      }
+      
+      ion-button {
+        --color: var(--app-primary-light);
+      }
+    }
+    
+    .statut-list .statut-item {
+      ion-label h3 {
+        color: var(--app-white);
+      }
+      
+      &:hover {
+        --background: rgba(170, 180, 247, 0.1);
+      }
+    }
+  }
 
-// États de chargement
-.loading .filter-panel {
-  opacity: 0.7;
-  pointer-events: none;
+  .search-container .custom-searchbar {
+    --background: #2d3748;
+    --color: var(--app-white);
+    
+    &.searchbar-has-focus {
+      --background: #4a5568;
+      border-color: var(--app-primary-light);
+    }
+  }
+
+  .active-filters {
+    .active-filters-container .filter-chip {
+      --background: rgba(170, 180, 247, 0.2);
+      --color: var(--app-primary-light);
+      border-color: rgba(170, 180, 247, 0.3);
+      
+      ion-label {
+        color: var(--app-primary-light);
+      }
+      
+      ion-icon {
+        color: var(--app-primary-light);
+      }
+    }
+    
+    .results-info {
+      background: #2d3748;
+      border-top-color: #4a5568;
+      
+      small {
+        color: #aaa;
+      }
+    }
+  }
 }

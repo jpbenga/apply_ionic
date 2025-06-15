@@ -2,10 +2,7 @@ import { Component, ViewChild, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
- IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel,
- IonTextarea, IonButton, IonIcon, IonSpinner, IonSegment, IonSegmentButton,
- IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,
- IonCheckbox, IonGrid, IonRow, IonCol, IonRange, IonBadge,
+ IonHeader, IonToolbar, IonContent,
  ToastController
 } from '@ionic/angular/standalone';
 import { HeaderService } from '../../../../shared/services/header/header.service';
@@ -17,8 +14,8 @@ import { CvDataService } from '../../../../services/cv-data/cv-data.service';
 import { GeneratedCv, CvTemplate, CvTheme, CvData } from '../../../../models/cv-template.model';
 import { StatutCandidature } from '../../models/candidature.model';
 import { Router } from '@angular/router';
-import { UserHeaderComponent } from '../../../../shared/components/user-header/user-header.component';
 import { CvPreviewComponent } from '../../../../components/cv-preview/cv-preview.component';
+import { UserHeaderComponent } from '../../../../shared/components/user-header/user-header.component';
 import { Subscription, combineLatest, firstValueFrom } from 'rxjs';
 import { 
  StructuredCvImprovementResponse, 
@@ -33,10 +30,7 @@ import { UserProfile } from 'src/app/features/profile/models/user-profile.model'
  styleUrls: ['./postuler.page.scss'],
  standalone: true,
  imports: [
-   CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
-   IonItem, IonLabel, IonTextarea, IonButton, IonIcon, IonSpinner, IonSegment, IonSegmentButton,
-   IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,
-   IonCheckbox, IonGrid, IonRow, IonCol, IonRange, IonBadge,
+   CommonModule, FormsModule, IonHeader, IonToolbar, IonContent,
    UserHeaderComponent, CvPreviewComponent
  ]
 })
@@ -207,7 +201,7 @@ export class PostulerPage implements OnInit, OnDestroy {
 
  goToMyCv() {
    if (this.isInteractionDisabled) return;
-   this.router.navigate(['/tabs/my-cv']);
+   this.router.navigate(['/my-cv']);
  }
 
  onTemplateChange(template: CvTemplate) {

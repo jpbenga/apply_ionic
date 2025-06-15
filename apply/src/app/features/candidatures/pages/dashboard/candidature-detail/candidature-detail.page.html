@@ -1,474 +1,457 @@
-<ion-header>
-  <app-user-header></app-user-header>
+<ion-header class="modern-header">
+  <ion-toolbar>
+    <div class="header-content">
+      <button class="back-button" (click)="goBack()">
+        <span class="back-icon">←</span>
+      </button>
+      <div class="logo-section">
+        <div class="app-logo">
+          <div class="logo-icon">A</div>
+        </div>
+        <h1 class="page-title">Détail Candidature</h1>
+      </div>
+    </div>
+  </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div *ngIf="isLoading" class="state-container loading-state">
-    <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
-    <p class="state-message">Chargement de la candidature...</p>
-  </div>
-
-  <div *ngIf="errorLoading && !isLoading" class="state-container error-state">
-    <ion-icon name="alert-circle-outline" size="large" color="danger" class="state-icon"></ion-icon>
-    <p class="state-message error-message">{{ errorLoading }}</p>
-    <ion-button fill="outline" (click)="goBack()" class="back-btn">
-      <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
-      Retour au dashboard
-    </ion-button>
-  </div>
-
-  <div *ngIf="candidature && !isLoading && !errorLoading" class="candidature-detail">
-    
-    <div class="detail-header">
-      <div class="header-info">
-        <h1 class="candidature-title">{{ candidature.intitulePoste }}</h1>
-        <h2 class="candidature-company">{{ candidature.entreprise }}</h2>
-        <ion-chip [color]="getStatutColor(candidature.statut)" class="statut-chip">
-          <ion-label>{{ getStatutLabel(candidature.statut) }}</ion-label>
-        </ion-chip>
-      </div>
-      
-      <div class="header-actions">
-        <ion-button fill="outline" size="small" color="danger" (click)="deleteCandidature()">
-          <ion-icon name="trash-outline" slot="start"></ion-icon>
-          Supprimer
-        </ion-button>
+<ion-content class="modern-content">
+  <div class="content-wrapper">
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h3>Chargement de la candidature...</h3>
+        <p>Veuillez patienter pendant que nous récupérons les détails</p>
       </div>
     </div>
 
-    <ion-card class="info-card">
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="briefcase-outline" slot="start"></ion-icon>
-          Informations générales
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12" size-md="6">
-              <ion-item lines="none">
-                <ion-label>
-                  <h3>Poste</h3>
-                  <p>{{ candidature.intitulePoste }}</p>
-                </ion-label>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6">
-              <ion-item lines="none">
-                <ion-label>
-                  <h3>Entreprise</h3>
-                  <p>{{ candidature.entreprise }}</p>
-                </ion-label>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-          
-          <ion-row *ngIf="candidature.lieuTravail || candidature.typeContrat">
-            <ion-col size="12" size-md="6" *ngIf="candidature.lieuTravail">
-              <ion-item lines="none">
-                <ion-label>
-                  <h3>Lieu</h3>
-                  <p>{{ candidature.lieuTravail }}</p>
-                </ion-label>
-              </ion-item>
-            </ion-col>
-            <ion-col size="12" size-md="6" *ngIf="candidature.typeContrat">
-              <ion-item lines="none">
-                <ion-label>
-                  <h3>Type de contrat</h3>
-                  <p>{{ candidature.typeContrat }}</p>
-                </ion-label>
-              </ion-item>
-            </ion-col>
-          </ion-row>
+    <div class="error-state" *ngIf="errorLoading && !isLoading">
+      <div class="error-content">
+        <div class="error-icon">❌</div>
+        <h3>Erreur de chargement</h3>
+        <p class="error-message">{{ errorLoading }}</p>
+        <button class="modern-btn outline-btn" (click)="goBack()">
+          <span class="btn-icon">←</span>
+          <span class="btn-text">Retour au dashboard</span>
+        </button>
+      </div>
+    </div>
 
-          <ion-row>
-            <ion-col size="12">
-              <ion-item lines="none">
-                <ion-label>
-                  <h3>Date de candidature</h3>
-                  <p>{{ formatDate(candidature.dateCandidature) }}</p>
-                </ion-label>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card class="offre-card" *ngIf="candidature.offreTexteComplet || candidature.descriptionPoste">
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="document-text-outline" slot="start"></ion-icon>
-          Détail de l'offre
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="offre-content">
-          <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit;">{{ candidature.offreTexteComplet || candidature.descriptionPoste }}</pre>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card class="cv-detail-card" *ngIf="candidature.cvDataSnapshot || candidature.cvTexteExtrait" id="cv-content">
-      <ion-card-header>
-        <div class="card-title-with-button">
-          <div class="title-left">
-            <ion-icon name="document-outline"></ion-icon>
-            <ion-card-title>CV utilisé pour cette candidature</ion-card-title>
-          </div>
-          <ion-button fill="outline" size="small" (click)="downloadCv()" class="download-btn">
-            <ion-icon name="download-outline" slot="start"></ion-icon>
-            PDF
-          </ion-button>
-        </div>
-      </ion-card-header>
-      <ion-card-content>
-        <div *ngIf="candidature.cvDataSnapshot" class="cv-structured">
-          <div *ngIf="candidature.cvDataSnapshot.experiences && candidature.cvDataSnapshot.experiences.length > 0" class="cv-section">
-            <h3><ion-icon name="briefcase-outline"></ion-icon> Expériences professionnelles</h3>
-            <div *ngFor="let exp of candidature.cvDataSnapshot.experiences" class="cv-item">
-              <h4>{{ exp.poste }} - {{ exp.entreprise }}</h4>
-              <p class="cv-periode">{{ formatDate(exp.dateDebut) }} - {{ exp.dateFin ? formatDate(exp.dateFin) : 'En cours' }}</p>
-              <p *ngIf="exp.lieu" class="cv-lieu">{{ exp.lieu }}</p>
-              <p *ngIf="exp.description" class="cv-description">{{ exp.description }}</p>
-            </div>
-          </div>
-
-          <div *ngIf="candidature.cvDataSnapshot.formations && candidature.cvDataSnapshot.formations.length > 0" class="cv-section">
-            <h3><ion-icon name="school-outline"></ion-icon> Formations</h3>
-            <div *ngFor="let form of candidature.cvDataSnapshot.formations" class="cv-item">
-              <h4>{{ form.diplome }}</h4>
-              <p class="cv-etablissement">{{ form.etablissement }}</p>
-              <p class="cv-periode">{{ formatDate(form.dateDebut) }} - {{ form.dateFin ? formatDate(form.dateFin) : (form.enCours ? 'En cours' : '') }}</p>
-              <p *ngIf="form.ville" class="cv-lieu">{{ form.ville }}</p>
-              <p *ngIf="form.description" class="cv-description">{{ form.description }}</p>
-            </div>
-          </div>
-
-          <div *ngIf="candidature.cvDataSnapshot.competences && candidature.cvDataSnapshot.competences.length > 0" class="cv-section">
-            <h3><ion-icon name="build-outline"></ion-icon> Compétences</h3>
-            <div class="competences-grid">
-              <div *ngFor="let comp of candidature.cvDataSnapshot.competences" class="competence-item">
-                <span class="competence-nom">{{ comp.nom }}</span>
-                <span *ngIf="comp.categorie" class="competence-categorie">{{ comp.categorie }}</span>
+    <div class="candidature-detail" *ngIf="candidature && !isLoading && !errorLoading">
+      <div class="detail-header">
+        <div class="header-info">
+          <div class="candidature-badge">
+            <div class="badge-icon">💼</div>
+            <div class="badge-content">
+              <h1 class="candidature-title">{{ candidature.intitulePoste }}</h1>
+              <h2 class="candidature-company">{{ candidature.entreprise }}</h2>
+              <div class="status-badge" [class]="getStatutColor(candidature.statut)">
+                {{ getStatutLabel(candidature.statut) }}
               </div>
             </div>
           </div>
         </div>
-
-        <div *ngIf="!candidature.cvDataSnapshot && candidature.cvTexteExtrait" class="cv-text">
-          <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit;">{{ candidature.cvTexteExtrait }}</pre>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card class="lettre-motivation-card" *ngIf="candidature.lettreMotivationGeneree">
-      <ion-card-header>
-        <div class="card-title-with-button">
-          <div class="title-left">
-            <ion-icon name="mail-outline"></ion-icon>
-            <ion-card-title>Lettre de motivation générée</ion-card-title>
-          </div>
-          <ion-button fill="outline" size="small" (click)="downloadLettreMotivation()" class="download-btn">
-            <ion-icon name="download-outline" slot="start"></ion-icon>
-            PDF
-          </ion-button>
-        </div>
-      </ion-card-header>
-      <ion-card-content>
-        <div id="lettre-content" class="lettre-motivation-content">
-          <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit;">{{ candidature.lettreMotivationGeneree }}</pre>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card class="status-card">
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="flag-outline" slot="start"></ion-icon>
-          Statut de la candidature
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item>
-          <ion-label position="stacked">Statut actuel</ion-label>
-          <ion-select 
-            [value]="candidature.statut" 
-            (ionChange)="updateStatut($event.detail.value)"
-            interface="popover">
-            <ion-select-option *ngFor="let statut of statutsCandidature" [value]="statut.value">
-              {{ statut.label }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card class="contact-card" *ngIf="candidature.contactRecruteur || candidature.contacts">
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="person-outline" slot="start"></ion-icon>
-          Contact recruteur
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div *ngIf="candidature.contactRecruteur">
-          <ion-item lines="none" *ngIf="candidature.contactRecruteur.nom">
-            <ion-label>
-              <h3>Nom</h3>
-              <p>{{ candidature.contactRecruteur.nom }}</p>
-            </ion-label>
-          </ion-item>
-          <ion-item lines="none" *ngIf="candidature.contactRecruteur.email">
-            <ion-label>
-              <h3>Email</h3>
-              <p>{{ candidature.contactRecruteur.email }}</p>
-            </ion-label>
-            <ion-button fill="clear" slot="end" (click)="sendRelanceEmail()">
-              <ion-icon name="mail-outline"></ion-icon>
-            </ion-button>
-          </ion-item>
-          <ion-item lines="none" *ngIf="candidature.contactRecruteur.telephone">
-            <ion-label>
-              <h3>Téléphone</h3>
-              <p>{{ candidature.contactRecruteur.telephone }}</p>
-            </ion-label>
-          </ion-item>
-        </div>
         
-        <div *ngIf="!candidature.contactRecruteur && candidature.contacts && candidature.contacts.length > 0">
-          <ion-item lines="none" *ngFor="let contact of candidature.contacts">
-            <ion-label>
-              <h3>{{ contact.nom || 'Contact' }}</h3>
-              <p *ngIf="contact.email">{{ contact.email }}</p>
-              <p *ngIf="contact.telephone">{{ contact.telephone }}</p>
-            </ion-label>
-          </ion-item>
+        <div class="header-actions">
+          <button class="modern-btn danger-btn delete-btn" (click)="deleteCandidature()">
+            <span class="btn-icon">🗑️</span>
+            <span class="btn-text">Supprimer</span>
+          </button>
         </div>
-      </ion-card-content>
-    </ion-card>
+      </div>
 
-    <ion-card class="notes-card">
-      <ion-card-header>
-        <div class="card-title-with-button">
-          <div class="title-left">
-            <ion-icon name="document-text-outline"></ion-icon>
-            <ion-card-title>Notes personnelles</ion-card-title>
+      <div class="info-section">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">ℹ️</div>
+            <h3>Informations générales</h3>
           </div>
-          <ion-button 
-            fill="clear" 
-            size="small" 
-            (click)="toggleEditing()">
-            <ion-icon [name]="isEditing ? 'checkmark-outline' : 'create-outline'"></ion-icon>
-          </ion-button>
-        </div>
-      </ion-card-header>
-      <ion-card-content>
-        <div *ngIf="!isEditing && candidature.notesPersonnelles" class="notes-display">
-          <p style="white-space: pre-wrap;">{{ candidature.notesPersonnelles }}</p>
-        </div>
-        <div *ngIf="!isEditing && !candidature.notesPersonnelles" class="notes-empty">
-          <p>Aucune note personnelle</p>
-          <ion-button fill="outline" size="small" (click)="toggleEditing()">
-            <ion-icon name="add-outline" slot="start"></ion-icon>
-            Ajouter des notes
-          </ion-button>
-        </div>
-        <div *ngIf="isEditing" class="notes-edit">
-          <ion-textarea
-            [(ngModel)]="editableNotesPersonnelles"
-            placeholder="Ajoutez vos notes personnelles..."
-            rows="4"
-            fill="outline">
-          </ion-textarea>
-          <div class="edit-actions">
-            <ion-button fill="outline" size="small" (click)="cancelEditing()">
-              <ion-icon name="close-outline" slot="start"></ion-icon>
-              Annuler
-            </ion-button>
-            <ion-button fill="solid" size="small" (click)="saveChanges()">
-              <ion-icon name="save-outline" slot="start"></ion-icon>
-              Sauvegarder
-            </ion-button>
+          <div class="section-content">
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Poste</label>
+                <p>{{ candidature.intitulePoste }}</p>
+              </div>
+              <div class="info-item">
+                <label>Entreprise</label>
+                <p>{{ candidature.entreprise }}</p>
+              </div>
+              <div class="info-item" *ngIf="candidature.lieuTravail">
+                <label>Lieu</label>
+                <p>{{ candidature.lieuTravail }}</p>
+              </div>
+              <div class="info-item" *ngIf="candidature.typeContrat">
+                <label>Type de contrat</label>
+                <p>{{ candidature.typeContrat }}</p>
+              </div>
+              <div class="info-item">
+                <label>Date de candidature</label>
+                <p>{{ formatDate(candidature.dateCandidature) }}</p>
+              </div>
+            </div>
           </div>
         </div>
-      </ion-card-content>
-    </ion-card>
+      </div>
 
-    <ion-card class="suivi-card">
-      <ion-card-header>
-        <div class="card-title-with-button">
-          <div class="title-left">
-            <ion-icon name="list-outline"></ion-icon>
-            <ion-card-title>Suivi de la candidature</ion-card-title>
+      <div class="offre-section" *ngIf="candidature.offreTexteComplet || candidature.descriptionPoste">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">📄</div>
+            <h3>Détail de l'offre</h3>
           </div>
-          <ion-button 
-            fill="clear" 
-            size="small" 
-            (click)="openAddSuiviModal()">
-            <ion-icon name="add-outline"></ion-icon>
-          </ion-button>
+          <div class="section-content">
+            <div class="offre-content">
+              <pre class="offre-text">{{ candidature.offreTexteComplet || candidature.descriptionPoste }}</pre>
+            </div>
+          </div>
         </div>
-      </ion-card-header>
-      <ion-card-content>
-        <div *ngIf="!candidature.suivi || candidature.suivi.length === 0" class="suivi-empty">
-          <p>Aucun suivi enregistré</p>
-          <ion-button fill="outline" size="small" (click)="openAddSuiviModal()">
-            <ion-icon name="add-outline" slot="start"></ion-icon>
-            Ajouter un suivi
-          </ion-button>
-        </div>
-        
-        <ion-list *ngIf="candidature.suivi && candidature.suivi.length > 0" class="suivi-list">
-          <ion-item *ngFor="let itemSuivi of candidature.suivi" class="suivi-item">
-            <ion-icon 
-              [name]="getSuiviIcon(itemSuivi.type)" 
-              [color]="getSuiviColor(itemSuivi.type)"
-              slot="start">
-            </ion-icon>
-            <ion-label>
-              <h3>{{ itemSuivi.description }}</h3>
-              <p *ngIf="itemSuivi.commentaire">{{ itemSuivi.commentaire }}</p>
-              <p *ngIf="itemSuivi.notes" class="suivi-notes">{{ itemSuivi.notes }}</p>
-              <p class="suivi-date">{{ formatDate(itemSuivi.date) }}</p>
-            </ion-label>
-            <ion-chip [color]="getSuiviColor(itemSuivi.type)" slot="end">
-              <ion-label>{{ itemSuivi.type }}</ion-label>
-            </ion-chip>
-          </ion-item>
-        </ion-list>
-      </ion-card-content>
-    </ion-card>
+      </div>
 
-    <ion-card class="documents-card" *ngIf="candidature.cvOriginalUrl || candidature.lettreMotivationUrl">
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="folder-outline" slot="start"></ion-icon>
-          Documents
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-grid>
-          <ion-row>
-            <ion-col size="12" size-md="6" *ngIf="candidature.cvOriginalUrl">
-              <ion-item>
-                <ion-icon name="document-outline" slot="start"></ion-icon>
-                <ion-label>
-                  <h3>CV</h3>
-                  <p>{{ candidature.cvOriginalNom || 'CV.pdf' }}</p>
-                </ion-label>
-                <ion-button fill="clear" slot="end" [href]="candidature.cvOriginalUrl" target="_blank">
-                  <ion-icon name="open-outline"></ion-icon>
-                </ion-button>
-              </ion-item>
-            </ion-col>
+      <div class="cv-section" *ngIf="candidature.cvDataSnapshot || candidature.cvTexteExtrait">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">📃</div>
+            <h3>CV utilisé pour cette candidature</h3>
+            <button class="modern-btn outline-btn download-btn" (click)="downloadCv()">
+              <span class="btn-icon">📥</span>
+              <span class="btn-text">PDF</span>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="cv-structured" *ngIf="candidature.cvDataSnapshot">
+              <div class="cv-section-block" *ngIf="candidature.cvDataSnapshot.experiences && candidature.cvDataSnapshot.experiences.length > 0">
+                <h4 class="cv-section-title">
+                  <span class="cv-section-icon">💼</span>
+                  Expériences professionnelles
+                </h4>
+                <div class="cv-items">
+                  <div class="cv-item" *ngFor="let exp of candidature.cvDataSnapshot.experiences">
+                    <div class="cv-item-header">
+                      <h5>{{ exp.poste }} - {{ exp.entreprise }}</h5>
+                      <span class="cv-item-period">{{ formatDate(exp.dateDebut) }} - {{ exp.dateFin ? formatDate(exp.dateFin) : 'En cours' }}</span>
+                    </div>
+                    <p class="cv-item-location" *ngIf="exp.lieu">📍 {{ exp.lieu }}</p>
+                    <p class="cv-item-description" *ngIf="exp.description">{{ exp.description }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cv-section-block" *ngIf="candidature.cvDataSnapshot.formations && candidature.cvDataSnapshot.formations.length > 0">
+                <h4 class="cv-section-title">
+                  <span class="cv-section-icon">🎓</span>
+                  Formations
+                </h4>
+                <div class="cv-items">
+                  <div class="cv-item" *ngFor="let form of candidature.cvDataSnapshot.formations">
+                    <div class="cv-item-header">
+                      <h5>{{ form.diplome }}</h5>
+                      <span class="cv-item-period">{{ formatDate(form.dateDebut) }} - {{ form.dateFin ? formatDate(form.dateFin) : (form.enCours ? 'En cours' : '') }}</span>
+                    </div>
+                    <p class="cv-item-school">{{ form.etablissement }}</p>
+                    <p class="cv-item-location" *ngIf="form.ville">📍 {{ form.ville }}</p>
+                    <p class="cv-item-description" *ngIf="form.description">{{ form.description }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cv-section-block" *ngIf="candidature.cvDataSnapshot.competences && candidature.cvDataSnapshot.competences.length > 0">
+                <h4 class="cv-section-title">
+                  <span class="cv-section-icon">🛠️</span>
+                  Compétences
+                </h4>
+                <div class="competences-grid">
+                  <div class="competence-tag" *ngFor="let comp of candidature.cvDataSnapshot.competences">
+                    <span class="competence-name">{{ comp.nom }}</span>
+                    <span class="competence-category" *ngIf="comp.categorie">{{ comp.categorie }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cv-text" *ngIf="!candidature.cvDataSnapshot && candidature.cvTexteExtrait">
+              <pre class="cv-text-content">{{ candidature.cvTexteExtrait }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lettre-section" *ngIf="candidature.lettreMotivationGeneree">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">📬</div>
+            <h3>Lettre de motivation générée</h3>
+            <button class="modern-btn outline-btn download-btn" (click)="downloadLettreMotivation()">
+              <span class="btn-icon">📥</span>
+              <span class="btn-text">PDF</span>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="lettre-content">
+              <pre class="lettre-text">{{ candidature.lettreMotivationGeneree }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="status-section">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">🚩</div>
+            <h3>Statut de la candidature</h3>
+          </div>
+          <div class="section-content">
+            <div class="status-selector">
+              <label>Statut actuel</label>
+              <select 
+                class="modern-select"
+                [value]="candidature.statut" 
+                (change)="updateStatut($any($event.target).value)">
+                <option *ngFor="let statut of statutsCandidature" [value]="statut.value">
+                  {{ statut.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-section" *ngIf="candidature.contactRecruteur || candidature.contacts">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">👤</div>
+            <h3>Contact recruteur</h3>
+            <button class="modern-btn secondary-btn" (click)="sendRelanceEmail()">
+              <span class="btn-icon">📧</span>
+              <span class="btn-text">Relance</span>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="contact-info" *ngIf="candidature.contactRecruteur">
+              <div class="contact-item" *ngIf="candidature.contactRecruteur.nom">
+                <label>Nom</label>
+                <p>{{ candidature.contactRecruteur.nom }}</p>
+              </div>
+              <div class="contact-item" *ngIf="candidature.contactRecruteur.email">
+                <label>Email</label>
+                <p>{{ candidature.contactRecruteur.email }}</p>
+              </div>
+              <div class="contact-item" *ngIf="candidature.contactRecruteur.telephone">
+                <label>Téléphone</label>
+                <p>{{ candidature.contactRecruteur.telephone }}</p>
+              </div>
+            </div>
             
-            <ion-col size="12" size-md="6" *ngIf="candidature.lettreMotivationUrl">
-              <ion-item>
-                <ion-icon name="document-text-outline" slot="start"></ion-icon>
-                <ion-label>
-                  <h3>Lettre de motivation</h3>
-                  <p>{{ candidature.lettreMotivationNom || 'Lettre.pdf' }}</p>
-                </ion-label>
-                <ion-button fill="clear" slot="end" [href]="candidature.lettreMotivationUrl" target="_blank">
-                  <ion-icon name="open-outline"></ion-icon>
-                </ion-button>
-              </ion-item>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-        
-        <div class="documents-actions">
-          <ion-button fill="outline" size="small" (click)="generateDocuments()">
-            <ion-icon name="refresh-outline" slot="start"></ion-icon>
-            Régénérer documents
-          </ion-button>
+            <div class="contact-info" *ngIf="!candidature.contactRecruteur && candidature.contacts && candidature.contacts.length > 0">
+              <div class="contact-item" *ngFor="let contact of candidature.contacts">
+                <label>{{ contact.nom || 'Contact' }}</label>
+                <p *ngIf="contact.email">{{ contact.email }}</p>
+                <p *ngIf="contact.telephone">{{ contact.telephone }}</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </ion-card-content>
-    </ion-card>
+      </div>
+
+      <div class="notes-section">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">📝</div>
+            <h3>Notes personnelles</h3>
+            <button class="modern-btn ghost-btn" (click)="toggleEditing()">
+              <span class="btn-icon">{{ isEditing ? '✅' : '✏️' }}</span>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="notes-display" *ngIf="!isEditing && candidature.notesPersonnelles">
+              <p class="notes-text">{{ candidature.notesPersonnelles }}</p>
+            </div>
+            <div class="notes-empty" *ngIf="!isEditing && !candidature.notesPersonnelles">
+              <p>Aucune note personnelle</p>
+              <button class="modern-btn outline-btn" (click)="toggleEditing()">
+                <span class="btn-icon">➕</span>
+                <span class="btn-text">Ajouter des notes</span>
+              </button>
+            </div>
+            <div class="notes-edit" *ngIf="isEditing">
+              <textarea
+                class="notes-textarea"
+                [(ngModel)]="editableNotesPersonnelles"
+                placeholder="Ajoutez vos notes personnelles..."
+                rows="4">
+              </textarea>
+              <div class="edit-actions">
+                <button class="modern-btn outline-btn" (click)="cancelEditing()">
+                  <span class="btn-icon">❌</span>
+                  <span class="btn-text">Annuler</span>
+                </button>
+                <button class="modern-btn primary-btn" (click)="saveChanges()">
+                  <span class="btn-icon">💾</span>
+                  <span class="btn-text">Sauvegarder</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="suivi-section">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">📋</div>
+            <h3>Suivi de la candidature</h3>
+            <button class="modern-btn ghost-btn" (click)="openAddSuiviModal()">
+              <span class="btn-icon">➕</span>
+            </button>
+          </div>
+          <div class="section-content">
+            <div class="suivi-empty" *ngIf="!candidature.suivi || candidature.suivi.length === 0">
+              <p>Aucun suivi enregistré</p>
+              <button class="modern-btn outline-btn" (click)="openAddSuiviModal()">
+                <span class="btn-icon">➕</span>
+                <span class="btn-text">Ajouter un suivi</span>
+              </button>
+            </div>
+            
+            <div class="suivi-list" *ngIf="candidature.suivi && candidature.suivi.length > 0">
+              <div class="suivi-item" *ngFor="let itemSuivi of candidature.suivi">
+                <div class="suivi-header">
+                  <div class="suivi-icon">{{ getSuiviIcon(itemSuivi.type) }}</div>
+                  <div class="suivi-info">
+                    <h5>{{ itemSuivi.description }}</h5>
+                    <span class="suivi-date">{{ formatDate(itemSuivi.date) }}</span>
+                  </div>
+                  <div class="suivi-badge" [class]="getSuiviColor(itemSuivi.type)">
+                    {{ itemSuivi.type }}
+                  </div>
+                </div>
+                <p class="suivi-comment" *ngIf="itemSuivi.commentaire">{{ itemSuivi.commentaire }}</p>
+                <p class="suivi-notes" *ngIf="itemSuivi.notes">{{ itemSuivi.notes }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="documents-section" *ngIf="candidature.cvOriginalUrl || candidature.lettreMotivationUrl">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-icon">📂</div>
+            <h3>Documents</h3>
+          </div>
+          <div class="section-content">
+            <div class="documents-grid">
+              <div class="document-item" *ngIf="candidature.cvOriginalUrl">
+                <div class="document-icon">📄</div>
+                <div class="document-info">
+                  <h5>CV</h5>
+                  <p>{{ candidature.cvOriginalNom || 'CV.pdf' }}</p>
+                </div>
+                <a class="document-link" [href]="candidature.cvOriginalUrl" target="_blank">
+                  <span class="link-icon">🔗</span>
+                </a>
+              </div>
+              
+              <div class="document-item" *ngIf="candidature.lettreMotivationUrl">
+                <div class="document-icon">📝</div>
+                <div class="document-info">
+                  <h5>Lettre de motivation</h5>
+                  <p>{{ candidature.lettreMotivationNom || 'Lettre.pdf' }}</p>
+                </div>
+                <a class="document-link" [href]="candidature.lettreMotivationUrl" target="_blank">
+                  <span class="link-icon">🔗</span>
+                </a>
+              </div>
+            </div>
+            
+            <div class="documents-actions">
+              <button class="modern-btn outline-btn" (click)="generateDocuments()">
+                <span class="btn-icon">🔄</span>
+                <span class="btn-text">Régénérer documents</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fab-container">
+      <div class="fab-menu">
+        <button class="fab-main" (click)="toggleFabMenu()">
+          <span class="fab-icon">⋮</span>
+        </button>
+        <div class="fab-actions" [class.active]="fabMenuOpen">
+          <button class="fab-action" (click)="sendRelanceEmail()" title="Envoyer une relance">
+            <span class="fab-action-icon">📧</span>
+          </button>
+          <button class="fab-action" (click)="openAddSuiviModal()" title="Ajouter un suivi">
+            <span class="fab-action-icon">➕</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <ion-modal [isOpen]="isAddingSuivi" (ionModalDidDismiss)="closeAddSuiviModal()">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Ajouter un suivi</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="closeAddSuiviModal()">
-              <ion-icon name="close"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
+  <div class="modal-overlay" [class.active]="isAddingSuivi" (click)="closeAddSuiviModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()" *ngIf="isAddingSuivi">
+      <div class="modal-header">
+        <h3>Ajouter un suivi</h3>
+        <button class="modal-close" (click)="closeAddSuiviModal()">
+          <span class="close-icon">✕</span>
+        </button>
+      </div>
       
-      <ion-content class="modal-content">
-        <div class="modal-form">
-          <ion-item>
-            <ion-label position="stacked">Type de suivi *</ion-label>
-            <ion-select [(ngModel)]="nouveauSuiviType" interface="popover">
-              <ion-select-option *ngFor="let type of typesDeSuivi" [value]="type.value">
-                {{ type.label }}
-              </ion-select-option>
-            </ion-select>
-          </ion-item>
-          
-          <ion-item>
-            <ion-label position="stacked">Description *</ion-label>
-            <ion-input 
-              [(ngModel)]="nouveauSuiviDescription" 
-              placeholder="Ex: Entretien téléphonique avec le recruteur">
-            </ion-input>
-          </ion-item>
-          
-          <ion-item>
-            <ion-label position="stacked">Commentaire</ion-label>
-            <ion-textarea 
-              [(ngModel)]="nouveauSuiviCommentaire" 
-              placeholder="Commentaires additionnels..."
-              rows="3">
-            </ion-textarea>
-          </ion-item>
-          
-          <ion-item>
-            <ion-label position="stacked">Notes</ion-label>
-            <ion-textarea 
-              [(ngModel)]="nouveauSuiviNotes" 
-              placeholder="Notes détaillées..."
-              rows="3">
-            </ion-textarea>
-          </ion-item>
-          
-          <div class="modal-actions">
-            <ion-button fill="outline" (click)="closeAddSuiviModal()">
-              <ion-icon name="close-outline" slot="start"></ion-icon>
-              Annuler
-            </ion-button>
-            <ion-button 
-              fill="solid" 
-              (click)="addSuivi()"
-              [disabled]="!nouveauSuiviDescription.trim()">
-              <ion-icon name="add-outline" slot="start"></ion-icon>
-              Ajouter
-            </ion-button>
-          </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Type de suivi *</label>
+          <select class="modern-select" [(ngModel)]="nouveauSuiviType">
+            <option *ngFor="let type of typesDeSuivi" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
         </div>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
+        
+        <div class="form-group">
+          <label>Description *</label>
+          <input 
+            type="text"
+            class="modern-input"
+            [(ngModel)]="nouveauSuiviDescription" 
+            placeholder="Ex: Entretien téléphonique avec le recruteur">
+        </div>
+        
+        <div class="form-group">
+          <label>Commentaire</label>
+          <textarea 
+            class="modern-textarea"
+            [(ngModel)]="nouveauSuiviCommentaire" 
+            placeholder="Commentaires additionnels..."
+            rows="3">
+          </textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea 
+            class="modern-textarea"
+            [(ngModel)]="nouveauSuiviNotes" 
+            placeholder="Notes détaillées..."
+            rows="3">
+          </textarea>
+        </div>
+      </div>
 
-  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-    <ion-fab-button color="primary">
-      <ion-icon name="ellipsis-vertical"></ion-icon>
-    </ion-fab-button>
-    <ion-fab-list side="top">
-      <ion-fab-button (click)="sendRelanceEmail()" color="secondary">
-        <ion-icon name="mail-outline"></ion-icon>
-      </ion-fab-button>
-      <ion-fab-button (click)="openAddSuiviModal()" color="tertiary">
-        <ion-icon name="add-outline"></ion-icon>
-      </ion-fab-button>
-    </ion-fab-list>
-  </ion-fab>
+      <div class="modal-footer">
+        <button class="modern-btn outline-btn" (click)="closeAddSuiviModal()">
+          <span class="btn-icon">❌</span>
+          <span class="btn-text">Annuler</span>
+        </button>
+        <button 
+          class="modern-btn primary-btn"
+          (click)="addSuivi()"
+          [disabled]="!nouveauSuiviDescription.trim()">
+          <span class="btn-icon">➕</span>
+          <span class="btn-text">Ajouter</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </ion-content>

@@ -3,3 +3,116 @@ ion-router-outlet {
   z-index: 1;
   pointer-events: auto;
 }
+
+ion-tab-bar {
+  --background: var(--app-white);
+  --border: 1px solid rgba(75, 92, 240, 0.08);
+  box-shadow: 0 -2px 16px rgba(75, 92, 240, 0.08);
+  padding: var(--app-spacing-sm) 0;
+  border-radius: var(--app-radius-lg) var(--app-radius-lg) 0 0;
+}
+
+ion-tab-button {
+  --color: var(--app-gray-medium);
+  --color-selected: var(--app-primary);
+  --background: transparent;
+  --background-focused: rgba(75, 92, 240, 0.05);
+  --ripple-color: rgba(75, 92, 240, 0.1);
+  font-weight: 500;
+  padding: var(--app-spacing-sm);
+  border-radius: var(--app-radius-md);
+  margin: 0 var(--app-spacing-xs);
+  transition: all 0.3s ease;
+
+  &.tab-selected {
+    --color: var(--app-primary);
+    
+    ion-icon {
+      transform: scale(1.1);
+      color: var(--app-primary);
+    }
+
+    ion-label {
+      font-weight: 600;
+      color: var(--app-primary);
+    }
+  }
+
+  &:hover {
+    --background: rgba(75, 92, 240, 0.05);
+  }
+
+  ion-icon {
+    font-size: 24px;
+    margin-bottom: var(--app-spacing-xs);
+    transition: all 0.3s ease;
+    color: inherit;
+  }
+
+  ion-label {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0.5px;
+    margin-top: 0;
+    transition: all 0.3s ease;
+    color: inherit;
+  }
+}
+
+@media (max-width: 768px) {
+  ion-tab-bar {
+    padding: var(--app-spacing-xs) 0;
+  }
+
+  ion-tab-button {
+    padding: var(--app-spacing-xs);
+    margin: 0 2px;
+
+    ion-icon {
+      font-size: 22px;
+    }
+
+    ion-label {
+      font-size: 11px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  ion-tab-button {
+    ion-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    ion-label {
+      font-size: 10px;
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-tab-bar {
+    --background: var(--app-dark);
+    --border: 1px solid #333;
+  }
+
+  ion-tab-button {
+    --color: #aaa;
+    --color-selected: var(--app-primary-light);
+    --background-focused: rgba(170, 180, 247, 0.1);
+
+    &.tab-selected {
+      --color: var(--app-primary-light);
+      
+      ion-icon {
+        color: var(--app-primary-light);
+      }
+
+      ion-label {
+        color: var(--app-primary-light);
+      }
+    }
+  }
+}

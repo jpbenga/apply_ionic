@@ -1,12 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule, DatePipe, TitleCasePipe } from '@angular/common';
-import {
-  IonCard, IonCardContent, IonCardHeader, IonCardTitle,
-  IonBadge, IonButton, IonIcon, IonText
-} from '@ionic/angular/standalone';
-import { Candidature } from '../../models/candidature.model'; // MODIFIED
-// import { addIcons } from 'ionicons'; // SUPPRIMÉ
-// import { eyeOutline, trashOutline, checkboxOutline, checkmarkCircle } from 'ionicons/icons'; // SUPPRIMÉ
+import { Candidature, StatutCandidature } from '../../models/candidature.model';
 
 @Component({
   selector: 'app-candidature-card',
@@ -16,9 +10,7 @@ import { Candidature } from '../../models/candidature.model'; // MODIFIED
   imports: [
     CommonModule,
     DatePipe,
-    TitleCasePipe,
-    IonCard, IonCardContent, IonCardHeader, IonCardTitle,
-    IonBadge, IonButton, IonIcon, IonText
+    TitleCasePipe
   ]
 })
 export class CandidatureCardComponent {
@@ -29,11 +21,11 @@ export class CandidatureCardComponent {
   @Output() deleteCandidature = new EventEmitter<string>();
   @Output() selectionChanged = new EventEmitter<string>();
 
-  constructor() {
-    // addIcons({ eyeOutline, trashOutline, checkboxOutline, checkmarkCircle }); // SUPPRIMÉ
-  }
-
-  onViewDetails() {
+  onViewDetails(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    
     if (this.isSelectionMode) {
       this.onToggleSelection();
     } else if (this.candidature?.id) {
@@ -68,7 +60,12 @@ export class CandidatureCardComponent {
         return 'success';
       case 'entretien_planifie':
       case 'entretien_final':
+      case 'en_cours_rh':
         return 'primary';
+      case 'offre_recue':
+        return 'success';
+      case 'test_technique':
+        return 'warning';
       case 'refusee_entreprise':
       case 'refusee_candidat':
         return 'danger';
@@ -76,8 +73,30 @@ export class CandidatureCardComponent {
         return 'dark';
       case 'standby':
         return 'warning';
+      case 'envoyee':
+        return 'secondary';
+      case 'brouillon':
+        return 'medium';
       default:
         return 'medium';
     }
+  }
+
+  getStatusLabel(statut: StatutCandidature): string {
+    const statusLabels: { [key in StatutCandidature]: string } = {
+      'brouillon': 'Brouillon',
+      'envoyee': 'Envoyée',
+      'en_cours_rh': 'En cours RH',
+      'entretien_planifie': 'Entretien planifié',
+      'test_technique': 'Test technique',
+      'entretien_final': 'Entretien final',
+      'offre_recue': 'Offre reçue',
+      'acceptee': 'Acceptée',
+      'refusee_candidat': 'Refusée par moi',
+      'refusee_entreprise': 'Refusée',
+      'archivee': 'Archivée',
+      'standby': 'En attente'
+    };
+    return statusLabels[statut] || statut;
   }
 }

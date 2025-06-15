@@ -5,9 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Observable, of, Subscription, combineLatest } from 'rxjs';
 import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 import {
-  IonHeader, IonContent, IonSpinner, IonIcon,
-  IonButton, IonRefresher, IonRefresherContent,
-  IonItem, IonLabel, IonSelect, IonSelectOption, IonFab, IonFabButton, IonText
+  IonHeader, IonContent, IonToolbar,
+  IonRefresher, IonRefresherContent
 } from '@ionic/angular/standalone';
 import { HeaderService } from 'src/app/shared/services/header/header.service';
 import { CandidatureService, GetCandidaturesOptions } from 'src/app/shared/services/candidature/candidature.service';
@@ -28,9 +27,8 @@ import { ToastController, AlertController } from '@ionic/angular/standalone';
     CommonModule,
     RouterModule,
     FormsModule,
-    IonHeader, IonContent, IonSpinner, IonIcon, IonButton,
-    IonRefresher, IonRefresherContent, IonItem, IonLabel, IonSelect, IonSelectOption,
-    IonFab, IonFabButton, IonText,
+    IonHeader, IonContent, IonToolbar,
+    IonRefresher, IonRefresherContent,
     UserHeaderComponent,
     CandidatureCardComponent,
     FilterPanelComponent

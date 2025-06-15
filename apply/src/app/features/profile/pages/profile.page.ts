@@ -4,21 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { Observable, of, Subscription, BehaviorSubject } from 'rxjs';
 import { first, tap, catchError, finalize } from 'rxjs/operators';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput,
-  IonTextarea, IonButton, IonIcon, IonAvatar, IonSpinner, IonList,
-  IonFab, IonFabButton,
-  IonModal, IonButtons
+  IonHeader, IonContent
 } from '@ionic/angular/standalone';
-import { HeaderService } from '../../../shared/services/header/header.service'; // CORRECTED
+import { HeaderService } from '../../../shared/services/header/header.service';
 import { ProfileService } from '../services/profile.service';
 import { UserProfile } from '../models/user-profile.model';
-import { AuthService } from '../../auth/services/auth/auth.service'; // CORRECTED
+import { AuthService } from '../../auth/services/auth/auth.service';
 import { User } from '@angular/fire/auth';
-import { UserHeaderComponent } from '../../../shared/components/user-header/user-header.component'; // MODIFIED
+import { UserHeaderComponent } from '../../../shared/components/user-header/user-header.component';
 import { ToastController, ModalController } from '@ionic/angular/standalone';
-import { StorageService } from '../../../shared/services/storage/storage.service'; // MODIFIED
-// import { addIcons } from 'ionicons'; // SUPPRIMÉ
-// import { personCircleOutline, createOutline, saveOutline, close, personAddOutline } from 'ionicons/icons'; // SUPPRIMÉ
+import { StorageService } from '../../../shared/services/storage/storage.service';
 
 @Component({
   selector: 'app-profile',
@@ -27,10 +22,7 @@ import { StorageService } from '../../../shared/services/storage/storage.service
   standalone: true,
   imports: [
     CommonModule, FormsModule,
-    IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput,
-    IonTextarea, IonButton, IonIcon, IonAvatar, IonSpinner, IonList,
-    IonFab, IonFabButton,
-    IonModal, IonButtons,
+    IonHeader, IonContent,
     UserHeaderComponent
   ]
 })
@@ -61,7 +53,6 @@ export class ProfilePage implements OnInit, OnDestroy {
     private storageService: StorageService
   ) {
     this.currentUserAuth$ = this.authService.user$;
-    // addIcons({ personCircleOutline, createOutline, saveOutline, close, personAddOutline }); // SUPPRIMÉ
   }
 
   ngOnInit() {
