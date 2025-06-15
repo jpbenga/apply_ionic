@@ -1,25 +1,31 @@
-export const getCoverLetterPrompt = (jobOfferText: string, cvText: string): string => {
-    return `
-  CONTEXTE: Tu es un assistant de rédaction expert. Rédige une lettre de motivation professionnelle et convaincante pour le poste décrit dans l'offre d'emploi ci-dessous, en te basant STRICTEMENT sur les informations contenues dans le CV fourni.
-  
-  OFFRE D'EMPLOI :
-  \`\`\`
-  ${jobOfferText}
-  \`\`\`
-  
-  CV DU CANDIDAT :
-  \`\`\`
-  ${cvText}
-  \`\`\`
-  
-  INSTRUCTIONS SPÉCIFIQUES :
-  1.  **Ton et Style :** Adopte un ton professionnel, positif et adapté au secteur d'activité implicite de l'offre.
-  2.  **Structure :** Commence par une introduction mentionnant le poste visé et où l'offre a été vue (si possible, sinon omets ce détail). Développe ensuite 1 ou 2 paragraphes mettant en avant les expériences/compétences du CV les plus pertinentes pour l'offre. Termine par une conclusion exprimant l'enthousiasme et proposant une rencontre.
-  3.  **Contenu :** Ne mentionne QUE des informations présentes dans le CV. Ne brode pas, n'invente pas de compétences. Mets en valeur les points forts du CV qui correspondent aux exigences de l'offre.
-  4.  **Salutation :** Utilise une formule de politesse standard (ex: "Veuillez agréer, Madame, Monsieur, l'expression de mes salutations distinguées.") si le nom du recruteur n'est pas connu.
-  5.  **Format :** Produis uniquement le texte de la lettre, sans introduction ou commentaire supplémentaire de ta part.
-  6.  **IMPORTANT :** Rédige TOUTE la lettre à la première personne du singulier ("Je", "Mon expérience", "Je serais ravi", etc.).
-  
-  Rédige la lettre maintenant.
-  `;
-  };
+import { UserProfile } from 'src/app/features/profile/models/user-profile.model';
+
+export const getCoverLetterPrompt = (
+    jobOfferText: string,
+    cvText: string,
+): string => {
+    return `
+CONTEXTE: Tu es un assistant de rédaction expert. Rédige les paragraphes du corps d'une lettre de motivation professionnelle et convaincante pour le poste décrit ci-dessous, en te basant STRICTEMENT sur les informations du CV.
+
+OFFRE D'EMPLOI :
+\`\`\`
+${jobOfferText}
+\`\`\`
+
+CV DU CANDIDAT :
+\`\`\`
+${cvText}
+\`\`\`
+
+INSTRUCTIONS SPÉCIFIQUES :
+1.  **Format :** Produis UNIQUEMENT les paragraphes du corps de la lettre. NE PAS inclure de salutation (comme "Madame, Monsieur,") NI de formule de politesse finale (comme "Veuillez agréer...").
+2.  **Contenu :**
+    -   Rédige à la première personne ("Je").
+    -   Base-toi exclusivement sur les informations fournies dans le CV pour argumenter. N'invente rien.
+    -   Mets en avant les expériences et compétences qui correspondent le mieux à l'offre.
+    -   Adopte un ton professionnel et positif.
+    -   Sépare clairement les paragraphes par un saut de ligne. Chaque paragraphe doit être une unité de sens.
+
+Rédige les paragraphes du corps de la lettre maintenant.
+`;
+};

@@ -164,7 +164,7 @@
       </ion-card-content>
     </ion-card>
 
-    <ion-card class="lettre-motivation-card" *ngIf="candidature.lettreMotivationGeneree" id="lettre-content">
+    <ion-card class="lettre-motivation-card" *ngIf="candidature.lettreMotivationGeneree">
       <ion-card-header>
         <div class="card-title-with-button">
           <div class="title-left">
@@ -178,7 +178,7 @@
         </div>
       </ion-card-header>
       <ion-card-content>
-        <div class="lettre-motivation-content">
+        <div id="lettre-content" class="lettre-motivation-content">
           <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: inherit;">{{ candidature.lettreMotivationGeneree }}</pre>
         </div>
       </ion-card-content>

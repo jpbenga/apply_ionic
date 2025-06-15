@@ -15,7 +15,7 @@ import {
   Timestamp 
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { StorageService } from '../storage/storage.service';
+import { StorageService } from 'src/app/shared/services/storage/storage.service';
 import { Observable, of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 

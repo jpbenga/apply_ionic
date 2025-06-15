@@ -19,7 +19,7 @@ import { Candidature, StatutCandidature } from '../../models/candidature.model';
 import { Router } from '@angular/router';
 import { UserHeaderComponent } from '../../../../shared/components/user-header/user-header.component';
 import { CvPreviewComponent } from '../../../../components/cv-preview/cv-preview.component';
-import { Subscription, combineLatest } from 'rxjs';
+import { Subscription, combineLatest, firstValueFrom } from 'rxjs';
 import { Timestamp } from '@angular/fire/firestore';
 import { 
  StructuredCvImprovementResponse, 
@@ -27,6 +27,8 @@ import {
  SectionImprovement,
  SuggestedCompetence
 } from '../../../../models/cv-structured-improvement.model';
+import { ProfileService } from '../../../../features/profile/services/profile.service';
+import { UserProfile } from 'src/app/features/profile/models/user-profile.model';
 
 @Component({
  selector: 'app-postuler',
@@ -94,6 +96,7 @@ export class PostulerPage implements OnInit, OnDestroy {
    private cvGenerationService: CvGenerationService,
    private cvTemplateService: CvTemplateService,
    private cvDataService: CvDataService,
+   private profileService: ProfileService,
    private toastController: ToastController,
    private router: Router
  ) { }
@@ -428,34 +431,71 @@ export class PostulerPage implements OnInit, OnDestroy {
    this.presentToast('CV conservé tel quel. Vous pouvez maintenant personnaliser et générer votre lettre.', 'success');
  }
 
- async generateCoverLetter() {
-   if (this.isInteractionDisabled) return;
-   
-   if (!this.jobOfferText || !this.currentCvData) {
-     this.presentToast('Données requises manquantes pour la lettre', 'warning');
-     return;
-   }
+  async generateCoverLetter() {
+    if (this.isInteractionDisabled) return;
+    
+    if (!this.jobOfferText || !this.currentCvData) {
+      this.presentToast('Données requises manquantes pour la lettre', 'warning');
+      return;
+    }
 
-   this.isGeneratingCoverLetter = true;
-   this.updateGlobalSpinnerMessage();
-   this.generatedCoverLetter = null;
+    this.isGeneratingCoverLetter = true;
+    this.updateGlobalSpinnerMessage();
+    this.generatedCoverLetter = null;
 
-   try {
-     const cvText = this.generateTextFromCvData(this.currentCvData);
-     const letterResult = await this.aiService.generateCoverLetter(this.jobOfferText, cvText);
-     
-     this.generatedCoverLetter = letterResult;
-     this.presentToast('Lettre de motivation générée !', 'success');
-     
-   } catch (error) {
-     let errorMessage = "Erreur lors de la génération de la lettre.";
-     if (error instanceof Error) { 
-       errorMessage = error.message; 
-     }
-     this.presentToast(errorMessage, 'danger');
-   } finally {
-     this.isGeneratingCoverLetter = false;
-   }
+    try {
+      const userProfile = await firstValueFrom(this.profileService.getUserProfile());
+      if (!userProfile) {
+        throw new Error('Profil utilisateur non trouvé. Assurez-vous d\'être connecté et que votre profil est complet.');
+      }
+
+      const cvText = this.generateTextFromCvData(this.currentCvData);
+      
+      const letterBody = await this.aiService.generateCoverLetter(this.jobOfferText, cvText);
+      
+      this.generatedCoverLetter = this.buildFullLetter(userProfile, this.atsAnalysisResult, letterBody);
+      this.presentToast('Lettre de motivation générée !', 'success');
+      
+    } catch (error) {
+      let errorMessage = "Erreur lors de la génération de la lettre.";
+      if (error instanceof Error) { 
+        errorMessage = error.message; 
+      }
+      this.presentToast(errorMessage, 'danger');
+    } finally {
+      this.isGeneratingCoverLetter = false;
+    }
+  }
+
+ private buildFullLetter(profile: UserProfile, atsResult: ATSAnalysisResult | null, letterBody: string): string {
+    const today = new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+    const companyName = atsResult?.company || 'l\'entreprise';
+    const jobTitle = atsResult?.jobTitle || 'Candidature spontanée';
+
+    const senderInfo = [
+        `${profile.prenom || ''} ${profile.nom || ''}`,
+        profile.adresse || '',
+        profile.telephone || '',
+        profile.email || ''
+    ].filter(line => line).join('\n');
+
+    const recipientInfo = `${companyName}\nÀ l'attention du service de recrutement`;
+    
+    const letter = `
+${senderInfo}
+
+${recipientInfo}
+
+Lyon, le ${today}
+
+**Objet : Candidature au poste de ${jobTitle}**
+
+${letterBody}
+
+${profile.prenom || ''} ${profile.nom || ''}
+    `;
+
+    return letter.trim();
  }
 
  async saveCandidature() {

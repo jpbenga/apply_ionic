@@ -56,3 +56,5 @@ export class ProfileService {
     return setDoc(userDocRef, dataToSave, { merge: false }); // merge: false pour une vraie création
   }
 }
+
+export { UserProfile };
