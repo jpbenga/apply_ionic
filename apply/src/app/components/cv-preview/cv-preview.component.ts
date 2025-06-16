@@ -56,6 +56,7 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    console.log('CvPreview: ngOnChanges triggered', changes);
     const templateChanged = changes['template'];
     const themeChanged = changes['theme'];
     const modeChanged = changes['previewMode'];
@@ -68,6 +69,7 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
     );
   
     if (!hasSignificantChanges) {
+      console.log('CvPreview: No significant changes detected');
       return;
     }
   
@@ -179,6 +181,17 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
   }
 
   private renderTemplate() {
+    console.log('CvPreview: renderTemplate called');
+    console.log('CvPreview: Current state:', {
+      isLoading: this.isLoading,
+      isRendering: this.isRendering,
+      error: this.error,
+      hasTemplate: this.hasTemplate,
+      hasCvData: this.hasCvData,
+      template: this.template,
+      cvData: this.cvData,
+      templateContainer: this.templateContainer
+    });
     // Guard : éviter les re-rendus pendant qu'un rendu est en cours
     if (this.isRendering) {
       console.log('CvPreview: Rendu déjà en cours, abandon');
@@ -226,7 +239,9 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
       }
   
       // Crée le nouveau composant
+      console.log('CvPreview: Creating component from class:', componentClass);
       this.currentComponentRef = this.templateContainer.createComponent(componentClass);
+      console.log('CvPreview: Component created:', this.currentComponentRef);
       
       // Configure les données du composant
       this.configureTemplateComponent();
@@ -242,6 +257,13 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
     } finally {
       this.isRendering = false;
       this.cdr.markForCheck();
+      console.log('CvPreview: renderTemplate finished. New state:', {
+        isLoading: this.isLoading,
+        isRendering: this.isRendering,
+        error: this.error,
+        hasTemplate: this.hasTemplate,
+        hasCvData: this.hasCvData
+      });
     }
   }
 
@@ -259,6 +281,9 @@ export class CvPreviewComponent implements OnChanges, OnDestroy {
     const instance = this.currentComponentRef.instance;
     
     console.log('CvPreview: Configuration du composant template');
+    console.log('CvPreview: CV Data:', this.cvData);
+    console.log('CvPreview: User Profile:', this.userProfile);
+    console.log('CvPreview: Theme:', this.theme);
     
     // CORRECTION : S'assurer que le thème est toujours défini
     const themeToApply = this.buildThemeObject();

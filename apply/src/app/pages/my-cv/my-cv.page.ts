@@ -562,12 +562,23 @@ export class MyCvPage implements OnInit, OnDestroy {
   async deleteExperience(id?: string, item?: IonItemSliding) {
     if (item) await item.close();
     if (!id) return;
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Suppression en cours...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
     try {
       await this.cvDataService.deleteExperience(id);
       this.presentToast('Expérience supprimée.', 'success');
       this.loadExperiences();
+    } catch (error) {
+      this.presentToast("Erreur suppression expérience.", "danger");
+      console.error('Error deleting experience:', error);
+    } finally {
+      if (loading) await loading.dismiss();
     }
-    catch { this.presentToast("Erreur suppression expérience.", "danger"); }
   }
 
   async addFormation() { await this.openFormationModal(); }
@@ -575,12 +586,23 @@ export class MyCvPage implements OnInit, OnDestroy {
   async deleteFormation(id?: string, item?: IonItemSliding) {
     if (item) await item.close();
     if (!id) return;
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Suppression en cours...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
     try {
       await this.cvDataService.deleteFormation(id);
       this.presentToast('Formation supprimée.', 'success');
       this.loadFormations();
+    } catch (error) {
+      this.presentToast("Erreur suppression formation.", "danger");
+      console.error('Error deleting formation:', error);
+    } finally {
+      if (loading) await loading.dismiss();
     }
-    catch { this.presentToast("Erreur suppression formation.", "danger"); }
   }
 
   async addCompetence() { await this.openCompetenceModal(); }
@@ -588,8 +610,23 @@ export class MyCvPage implements OnInit, OnDestroy {
   async deleteCompetence(id?: string, item?: IonItemSliding) {
     if (item) await item.close();
     if (!id) return;
-    try { await this.cvDataService.deleteCompetence(id); this.presentToast('Compétence supprimée.', 'success'); this.loadCompetences(); }
-    catch { this.presentToast("Erreur suppression compétence.", "danger"); }
+
+    const loading = await this.loadingCtrl.create({
+      message: 'Suppression en cours...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    try {
+      await this.cvDataService.deleteCompetence(id);
+      this.presentToast('Compétence supprimée.', 'success');
+      this.loadCompetences();
+    } catch (error) {
+      this.presentToast("Erreur suppression compétence.", "danger");
+      console.error('Error deleting competence:', error);
+    } finally {
+      if (loading) await loading.dismiss();
+    }
   }
 
   async openExperienceModal(experience?: Experience) {
@@ -759,6 +796,12 @@ export class MyCvPage implements OnInit, OnDestroy {
           text: 'Supprimer tout',
           role: 'destructive',
           handler: async () => {
+            const loading = await this.loadingCtrl.create({
+              message: 'Suppression de toutes les expériences...',
+              spinner: 'crescent'
+            });
+            await loading.present();
+
             try {
               const currentUser = this.authService.getCurrentUser();
               if (!currentUser) {
@@ -767,19 +810,25 @@ export class MyCvPage implements OnInit, OnDestroy {
               }
 
               const experiences = await this.cvDataService.getExperiences().pipe(first()).toPromise();
+              if (!experiences || experiences.length === 0) {
+                this.presentToast('Aucune expérience à supprimer.', 'primary');
+                return;
+              }
               
-              for (const exp of experiences || []) {
+              for (const exp of experiences) {
                 if (exp.id) {
                   await this.cvDataService.deleteExperience(exp.id);
                 }
               }
               
-              this.presentToast(`${experiences?.length || 0} expérience(s) supprimée(s).`, 'success');
+              this.presentToast(`${experiences.length} expérience(s) supprimée(s).`, 'success');
               this.loadExperiences();
               
             } catch (error) {
               console.error('Erreur lors de la suppression des expériences:', error);
               this.presentToast('Erreur lors de la suppression des expériences.', 'danger');
+            } finally {
+              if (loading) await loading.dismiss();
             }
           }
         }
@@ -802,6 +851,12 @@ export class MyCvPage implements OnInit, OnDestroy {
           text: 'Supprimer tout',
           role: 'destructive',
           handler: async () => {
+            const loading = await this.loadingCtrl.create({
+              message: 'Suppression de toutes les formations...',
+              spinner: 'crescent'
+            });
+            await loading.present();
+
             try {
               const currentUser = this.authService.getCurrentUser();
               if (!currentUser) {
@@ -810,19 +865,25 @@ export class MyCvPage implements OnInit, OnDestroy {
               }
 
               const formations = await this.cvDataService.getFormations().pipe(first()).toPromise();
+              if (!formations || formations.length === 0) {
+                this.presentToast('Aucune formation à supprimer.', 'primary');
+                return;
+              }
               
-              for (const form of formations || []) {
+              for (const form of formations) {
                 if (form.id) {
                   await this.cvDataService.deleteFormation(form.id);
                 }
               }
               
-              this.presentToast(`${formations?.length || 0} formation(s) supprimée(s).`, 'success');
+              this.presentToast(`${formations.length} formation(s) supprimée(s).`, 'success');
               this.loadFormations();
               
             } catch (error) {
               console.error('Erreur lors de la suppression des formations:', error);
               this.presentToast('Erreur lors de la suppression des formations.', 'danger');
+            } finally {
+              if (loading) await loading.dismiss();
             }
           }
         }
@@ -845,6 +906,12 @@ export class MyCvPage implements OnInit, OnDestroy {
           text: 'Supprimer tout',
           role: 'destructive',
           handler: async () => {
+            const loading = await this.loadingCtrl.create({
+              message: 'Suppression de toutes les compétences...',
+              spinner: 'crescent'
+            });
+            await loading.present();
+
             try {
               const currentUser = this.authService.getCurrentUser();
               if (!currentUser) {
@@ -853,19 +920,25 @@ export class MyCvPage implements OnInit, OnDestroy {
               }
 
               const competences = await this.cvDataService.getCompetences().pipe(first()).toPromise();
+              if (!competences || competences.length === 0) {
+                this.presentToast('Aucune compétence à supprimer.', 'primary');
+                return;
+              }
               
-              for (const comp of competences || []) {
+              for (const comp of competences) {
                 if (comp.id) {
                   await this.cvDataService.deleteCompetence(comp.id);
                 }
               }
               
-              this.presentToast(`${competences?.length || 0} compétence(s) supprimée(s).`, 'success');
+              this.presentToast(`${competences.length} compétence(s) supprimée(s).`, 'success');
               this.loadCompetences();
               
             } catch (error) {
               console.error('Erreur lors de la suppression des compétences:', error);
               this.presentToast('Erreur lors de la suppression des compétences.', 'danger');
+            } finally {
+              if (loading) await loading.dismiss();
             }
           }
         }
