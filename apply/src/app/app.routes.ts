@@ -66,6 +66,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/candidatures/pages/postuler/postuler.page').then(m => m.PostulerPage), // MODIFIED
         data: { title: 'Postuler', showBackButton: false }
       },
+      { // New route for job-inbox
+        path: 'job-inbox',
+        loadChildren: () => import('./features/job-inbox/job-inbox.module').then(m => m.JobInboxPageModule),
+        data: { title: 'Boîte à Offres', showBackButton: false } // Assuming JobInboxPageModule will define its own routing for the page component
+      },
       // Route pour 'stats' supprimée
       {
         path: '',

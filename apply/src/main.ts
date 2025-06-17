@@ -1,5 +1,5 @@
 // src/main.ts
-import { enableProdMode } from '@angular/core';
+import { enableProdMode, importProvidersFrom } from '@angular/core'; // Added importProvidersFrom
 import { bootstrapApplication } from '@angular/platform-browser';
 import { RouteReuseStrategy, provideRouter } from '@angular/router';
 import { provideIonicAngular, IonicRouteStrategy } from '@ionic/angular/standalone';
@@ -15,6 +15,11 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getFunctions, provideFunctions } from '@angular/fire/functions';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 
+// Import new services
+import { GcpAuthService } from './app/services/email-integration/gcp-auth.service';
+import { EmailParserService } from './app/services/email-integration/email-parser.service';
+import { HttpClientModule } from '@angular/common/http'; // Needed for services if they make http requests
+
 if (environment.production) {
   enableProdMode();
 }
@@ -28,6 +33,9 @@ bootstrapApplication(AppComponent, {
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideFunctions(() => getFunctions(getApp(), 'europe-west1')),
-    provideStorage(() => getStorage())
+    provideStorage(() => getStorage()),
+    importProvidersFrom(HttpClientModule), // Add HttpClientModule
+    GcpAuthService, // Add GcpAuthService
+    EmailParserService // Add EmailParserService
   ],
 });
