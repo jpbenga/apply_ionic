@@ -133,32 +133,34 @@
       </div>
     </ng-template>
   </ion-list>
+  </div> <!-- Closing .cv-section-card for Experiences -->
 
-  <div class="section-header-with-actions ion-margin-top">
-    <ion-list-header>
-      <ion-label>Mes Formations</ion-label>
-    </ion-list-header>
-    <ion-button 
+  <!-- Formations Section -->
+  <div class="cv-section-card">
+    <div class="section-header-with-actions"> <!-- Removed ion-margin-top -->
+      <ion-list-header>
+        <ion-label>Mes Formations</ion-label>
+      </ion-list-header>
+    <app-styled-button
       *ngIf="(formations$ | async)?.length && (formations$ | async)!.length > 0"
       fill="clear" 
       size="small" 
       color="danger"
       (click)="deleteAllFormations()"
       class="delete-all-button">
-      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-    </ion-button>
-  </div>
+      <ion-icon name="trash-outline" slot="icon-only" aria-label="Supprimer tout"></ion-icon>
+    </app-styled-button>
+    </div>
+    <div *ngIf="isLoadingFormations" class="ion-text-center ion-padding loading-placeholder">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+    <div *ngIf="errorLoadingFormations && !isLoadingFormations" class="ion-text-center ion-padding error-placeholder">
+      <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
+      <p style="color: var(--ion-color-danger);">{{ errorLoadingFormations }}</p>
+      <app-styled-button fill="outline" (click)="loadFormations()">Réessayer</app-styled-button>
+    </div>
 
-  <div *ngIf="isLoadingFormations" class="ion-text-center ion-padding">
-    <ion-spinner name="crescent"></ion-spinner>
-  </div>
-  <div *ngIf="errorLoadingFormations && !isLoadingFormations" class="ion-text-center ion-padding">
-    <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
-    <p style="color: var(--ion-color-danger);">{{ errorLoadingFormations }}</p>
-    <ion-button fill="outline" (click)="loadFormations()">Réessayer</ion-button>
-  </div>
-
-  <ion-list *ngIf="!isLoadingFormations && (formations$ | async) as formationsArray">
+    <ion-list *ngIf="!isLoadingFormations && (formations$ | async) as formationsArray" class="data-list">
     <ng-container *ngIf="formationsArray.length > 0; else noFormations">
       <ion-item-sliding *ngFor="let form of getDisplayedFormations(formationsArray); let i = index" #slidingItemForm>
         <ion-item button detail="false" (click)="editFormation(form, slidingItemForm)">
@@ -200,28 +202,31 @@
       </div>
     </ng-template>
   </ion-list>
+  </div> <!-- Closing .cv-section-card for Formations -->
 
-  <div class="section-header-with-actions ion-margin-top">
-    <ion-list-header>
-      <ion-label>Mes Compétences</ion-label>
-    </ion-list-header>
-    <ion-button 
+  <!-- Competences Section -->
+  <div class="cv-section-card">
+    <div class="section-header-with-actions"> <!-- Removed ion-margin-top -->
+      <ion-list-header>
+        <ion-label>Mes Compétences</ion-label>
+      </ion-list-header>
+    <app-styled-button
       *ngIf="(competences$ | async)?.length && (competences$ | async)!.length > 0"
       fill="clear" 
       size="small" 
       color="danger"
       (click)="deleteAllCompetences()"
       class="delete-all-button">
-      <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-    </ion-button>
-  </div>
-  <div *ngIf="isLoadingCompetences" class="ion-text-center ion-padding"><ion-spinner name="crescent"></ion-spinner></div>
-  <div *ngIf="errorLoadingCompetences && !isLoadingCompetences" class="ion-text-center ion-padding">
-    <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
-    <p style="color: var(--ion-color-danger);">{{ errorLoadingCompetences }}</p>
-    <ion-button fill="outline" (click)="loadCompetences()">Réessayer</ion-button>
-  </div>
-  <ion-list *ngIf="!isLoadingCompetences && (competences$ | async) as competencesArray">
+      <ion-icon name="trash-outline" slot="icon-only" aria-label="Supprimer tout"></ion-icon>
+    </app-styled-button>
+    </div>
+    <div *ngIf="isLoadingCompetences" class="ion-text-center ion-padding loading-placeholder"><ion-spinner name="crescent"></ion-spinner></div>
+    <div *ngIf="errorLoadingCompetences && !isLoadingCompetences" class="ion-text-center ion-padding error-placeholder">
+      <ion-icon name="cloud-offline-outline" size="large" color="danger"></ion-icon>
+      <p style="color: var(--ion-color-danger);">{{ errorLoadingCompetences }}</p>
+      <app-styled-button fill="outline" (click)="loadCompetences()">Réessayer</app-styled-button>
+    </div>
+    <ion-list *ngIf="!isLoadingCompetences && (competences$ | async) as competencesArray" class="data-list">
     <ng-container *ngIf="competencesArray.length > 0; else noCompetences">
       <ion-item-sliding *ngFor="let comp of getDisplayedCompetences(competencesArray); let i = index" #slidingItemComp>
         <ion-item button detail="false" (click)="editCompetence(comp, slidingItemComp)">

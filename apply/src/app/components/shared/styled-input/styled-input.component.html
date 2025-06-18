@@ -1,9 +1,28 @@
-<ion-item [class.ion-invalid]="errorText" [class.ion-valid]="!errorText && control?.valid && control?.touched" lines="inset">
+<ion-item
+  [class.ion-invalid]="errorText || (control && control.invalid && control.touched)"
+  [class.ion-valid]="!errorText && control && control.valid && control.touched"
+  lines="inset">
   <ion-icon *ngIf="leadingIcon" [name]="leadingIcon" slot="start" aria-hidden="true"></ion-icon>
 
-  <ion-label *ngIf="label" [position]="placeholder || value ? 'floating' : 'stacked'">{{ label }}</ion-label>
+  <ion-label *ngIf="label" [position]="(placeholder || value || (control && control.value)) ? 'floating' : 'stacked'">{{ label }}</ion-label>
 
+  <!-- Reactive Forms Input -->
   <ion-input
+    *ngIf="control"
+    [type]="type"
+    [placeholder]="placeholder ? placeholder : (label && !(control.value) ? ' ' : '')"
+    [disabled]="disabled"
+    [readonly]="readonly"
+    [required]="required"
+    [id]="inputId"
+    [formControl]="control"
+    (ionInput)="onValueChange($event)"
+    (ionBlur)="control.markAsTouched()"
+  ></ion-input>
+
+  <!-- Template-Driven Input -->
+  <ion-input
+    *ngIf="!control"
     [type]="type"
     [placeholder]="placeholder ? placeholder : (label && !value ? ' ' : '')"
     [value]="value"
@@ -12,16 +31,14 @@
     [required]="required"
     [id]="inputId"
     [name]="name"
-    [formControl]="control"
     (ionInput)="onValueChange($event)"
-    (ionBlur)="control?.markAsTouched()"
   ></ion-input>
 
   <ion-icon *ngIf="trailingIcon" [name]="trailingIcon" slot="end" aria-hidden="true"></ion-icon>
 </ion-item>
 
-<div *ngIf="errorText" class="ion-padding-start ion-padding-top-micro">
+<div *ngIf="errorText || (control && control.invalid && control.touched && getCustomErrorText())" class="ion-padding-start ion-padding-top-micro">
   <ion-text color="danger">
-    <small>{{ errorText }}</small>
+    <small>{{ errorText || getCustomErrorText() }}</small>
   </ion-text>
 </div>

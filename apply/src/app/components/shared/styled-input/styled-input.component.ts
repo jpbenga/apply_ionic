@@ -125,7 +125,39 @@ export class StyledInputComponent implements OnInit {
 
   onValueChange(event: Event): void {
     const target = event.target as HTMLInputElement;
+    // For template-driven, ensure this.value is updated if not using ngModel directly for it.
+    // If using ngModel, this might be redundant or could be simplified if ngModelChange is used.
+    // However, the current HTML for the template-driven part uses [value] and (ionInput).
     this.value = target.value;
     this.valueChanged.emit(this.value);
+  }
+
+  /**
+   * Generates an error message string from the control's errors.
+   * This is used when no explicit errorText input is provided but the control is invalid.
+   */
+  getCustomErrorText(): string {
+    if (!this.control || !this.control.errors || !this.control.touched) {
+      return '';
+    }
+
+    if (this.control.hasError('required')) {
+      return 'Ce champ est requis.';
+    }
+    if (this.control.hasError('email')) {
+      return 'Format email invalide.';
+    }
+    if (this.control.hasError('minlength')) {
+      const requiredLength = this.control.errors['minlength'].requiredLength;
+      return `Minimum ${requiredLength} caractères.`;
+    }
+    if (this.control.hasError('maxlength')) {
+      const requiredLength = this.control.errors['maxlength'].requiredLength;
+      return `Maximum ${requiredLength} caractères.`;
+    }
+    // Add more custom error checks as needed
+    // e.g. pattern, custom validators
+
+    return 'Valeur invalide.'; // Default for other errors
   }
 }

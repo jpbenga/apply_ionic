@@ -131,8 +131,13 @@ export class DashboardPage implements OnInit, OnDestroy {
 
     // Ensure the FilterService has the initial default sort order from the component's filterOptions
     this.filterService.setSortByDate(this.filterOptions.sortByDate);
-    this.filterService.setSearchText(this.filterOptions.searchText); // Init searchText in service
-    this.filterService.setSelectedStatuts(this.filterOptions.selectedStatuts); // Init statuses in service
+    this.filterService.setSearchTerm(this.filterOptions.searchText); // Corrected: setSearchText -> setSearchTerm
+    // For initializing statuses, assuming FilterService starts empty or with its own defaults.
+    // If dashboard needs to push an initial state for statuses:
+    this.filterService.clearSelectedStatuts(); // Clear any existing
+    this.filterOptions.selectedStatuts.forEach(statut => { // Add from component's initial config
+      this.filterService.addSelectedStatut(statut);
+    });
   }
 
   /**
@@ -164,22 +169,29 @@ export class DashboardPage implements OnInit, OnDestroy {
     ]).pipe(
       map(([currentFilterOptions, candidaturesFromService]) => {
         // Augment candidatures with mock data for new card fields
-        const augmentedCandidatures = candidaturesFromService.map((cand, index) => ({
-          ...cand,
-          // Use existing data if available, otherwise provide mock data
-          companyLogoUrl: cand.companyLogoUrl || `https://picsum.photos/seed/${cand.id || index}/48/48`, // Mock logo
-          aiScore: cand.aiScore || (70 + (parseInt(cand.id || `${index}`, 16) % 30)), // Mock AI score
-          keywordsArray: cand.keywordsArray || ['Mot-clé ' + (index % 3 + 1), 'Tech ' + (index % 2 + 1)], // Mock keywords
-        }));
+        const augmentedCandidatures = candidaturesFromService.map((cand, index) => {
+          // Ensure cand is treated as Candidature type for proper type checking
+          const currentCand = cand as Candidature;
+          return {
+            ...currentCand,
+            companyLogoUrl: currentCand.companyLogoUrl || `https://picsum.photos/seed/${currentCand.id || index}/48/48`,
+            aiScore: currentCand.aiScore !== undefined ? currentCand.aiScore : (70 + (parseInt(currentCand.id || `${index}`, 16) % 30)),
+            keywordsArray: currentCand.keywordsArray || ['Mot-clé ' + (index % 3 + 1), 'Tech ' + (index % 2 + 1)],
+            // Ensure dateSoumission and source are at least initialized if not present, or handled by card
+            dateSoumission: currentCand.dateSoumission || null, // Or a mock date
+            source: currentCand.source || 'Apply', // Or a mock source
+          } as Candidature; // Cast to Candidature to ensure type conformity
+        });
         return {
-          filterOptions: currentFilterOptions, // Use options from service
+          filterOptions: currentFilterOptions,
           candidatures: augmentedCandidatures
         };
       }),
       catchError(error => {
         this.errorLoading = 'Impossible de charger les candidatures.';
         console.error('Erreur chargement candidatures:', error);
-        return of({ filterOptions: this.filterOptions, candidatures: [] });
+        // Ensure the returned object matches the expected structure, even in errors
+        return of({ filterOptions: this.filterOptions, candidatures: [] as Candidature[] });
       }),
       finalize(() => {
         if (event && event.target && typeof event.target.complete === 'function') {
@@ -433,24 +445,21 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   onSearchTextChanged(): void {
-    this.filterService.setSearchText(this.searchText);
+    this.filterService.setSearchTerm(this.searchText); // Corrected: setSearchText -> setSearchTerm
   }
 
   applyFilter(statusFilter: string): void {
     this.activeFilterChip = statusFilter;
     console.log('Applying filter:', statusFilter);
-    // This is a simplified filter application.
-    // In a real scenario, you'd map statusFilter to actual StatutCandidature values
-    // and potentially handle multiple selections or more complex logic.
-    if (statusFilter === 'all') {
-      this.filterService.setSelectedStatuts([]);
-    } else {
-      // Assuming statusFilter directly maps to a StatutCandidature value for simplicity.
-      // This might need adjustment based on how StatutCandidature enum/type is defined.
-      // For example, if StatutCandidature.ENTRETIEN_PLANIFIE is 'entretien_planifie'
-      this.filterService.setSelectedStatuts([statusFilter.toUpperCase() as Candidature['statut']]);
+
+    this.filterService.clearSelectedStatuts(); // Clear previous statuses
+    if (statusFilter !== 'all') {
+      // Assuming statusFilter is a string that can be cast or matches StatutCandidature values
+      // The toUpperCase() and cast might need adjustment if statusFilter values from HTML
+      // don't directly map to StatutCandidature enum/type values.
+      this.filterService.addSelectedStatut(statusFilter.toUpperCase() as Candidature['statut']);
     }
-    // No need to call loadCandidaturesWithFilters() if using reactive FilterService pattern
+    // The reactive stream from filterService.filterOptions$ will trigger data reload.
   }
 
   setSortByDate(sortOrder: 'asc' | 'desc'): void {

@@ -33,23 +33,31 @@ export class CandidatureCardComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     this.updateStatusColor();
     // Ensure keywordsArray is initialized if not present, for template safety
-    if (this.candidature && !this.candidature.keywordsArray) {
-      this.candidature.keywordsArray = [];
-    }
-    if (this.candidature && typeof this.candidature.aiScore === 'string') {
-        this.candidature.aiScore = parseFloat(this.candidature.aiScore);
+    if (this.candidature) { // Check if candidature is defined
+      if (!this.candidature.keywordsArray) {
+        this.candidature.keywordsArray = [];
+      }
+      if (typeof this.candidature.aiScore === 'string') {
+        const parsedScore = parseFloat(this.candidature.aiScore);
+        this.candidature.aiScore = isNaN(parsedScore) ? undefined : parsedScore; // Assign undefined if NaN
+      } else if (typeof this.candidature.aiScore === 'undefined') {
+        // aiScore is already undefined, nothing to do, or set a default visual if needed
+      }
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['candidature']) {
+    if (changes['candidature'] && this.candidature) { // Check if candidature is defined
       this.updateStatusColor();
-      if (this.candidature && !this.candidature.keywordsArray) {
+      if (!this.candidature.keywordsArray) {
         this.candidature.keywordsArray = [];
       }
-      if (this.candidature && typeof this.candidature.aiScore === 'string') {
-        this.candidature.aiScore = parseFloat(this.candidature.aiScore);
-    }
+      if (typeof this.candidature.aiScore === 'string') {
+        const parsedScore = parseFloat(this.candidature.aiScore);
+        this.candidature.aiScore = isNaN(parsedScore) ? undefined : parsedScore; // Assign undefined if NaN
+      } else if (typeof this.candidature.aiScore === 'undefined') {
+        // aiScore is already undefined, or set a default visual
+      }
     }
   }
 
@@ -111,19 +119,23 @@ export class CandidatureCardComponent implements OnInit, OnChanges {
   getStatusClass(statut?: StatutCandidature): string {
     if (!statut) return 'default';
     switch (statut) {
-      case StatutCandidature.ACCEPTEE: return 'accepted';
-      case StatutCandidature.ENTRETIEN_PLANIFIE:
-      case StatutCandidature.ENTRETIEN_FINAL:
+      case 'acceptee': return 'accepted';
+      case 'entretien_planifie':
+      case 'entretien_final':
         return 'interview';
-      case StatutCandidature.OFFRE_RECUE: return 'offer';
-      case StatutCandidature.REFUSEE_ENTREPRISE:
-      case StatutCandidature.REFUSEE_CANDIDAT:
+      case 'offre_recue': return 'offer';
+      case 'refusee_entreprise':
+      case 'refusee_candidat':
         return 'rejected';
-      case StatutCandidature.EN_ATTENTE_REPONSE:
-      case StatutCandidature.SOUMISE:
-         return 'applied'; // Using 'applied' for these as per prototype example
-      case StatutCandidature.ARCHIVEE: return 'archived'; // Needs style in SCSS
-      case StatutCandidature.STANDBY: return 'standby'; // Needs style in SCSS
+      case 'en_attente_reponse':
+      case 'envoyee': // 'envoyee' is from the model, maps to 'applied' style
+         return 'applied';
+      case 'archivee': return 'archived';
+      case 'standby': return 'standby';
+      // Adding other statuses from the model for completeness, though they might use 'default' style
+      case 'brouillon': return 'default'; // Or a specific 'draft' style
+      case 'en_cours_rh': return 'applied'; // Or a specific 'in-progress' style
+      case 'test_technique': return 'interview'; // Or a specific 'test' style
       default: return 'default';
     }
   }
@@ -131,18 +143,23 @@ export class CandidatureCardComponent implements OnInit, OnChanges {
   // Helper to get actual CSS variable string for statusColor property
   private getCSSColorVariable(statut?: StatutCandidature): string {
     switch (statut) {
-      case StatutCandidature.ACCEPTEE: return 'var(--ion-color-success)'; // Green in prototype was #16A34A
-      case StatutCandidature.ENTRETIEN_PLANIFIE:
-      case StatutCandidature.ENTRETIEN_FINAL:
-        return 'var(--ion-color-success)'; // Green in prototype was #10B981
-      case StatutCandidature.OFFRE_RECUE: return 'var(--ion-color-warning)'; // Yellow in prototype was #F59E0B
-      case StatutCandidature.REFUSEE_ENTREPRISE:
-      case StatutCandidature.REFUSEE_CANDIDAT:
-        return 'var(--ion-color-danger)'; // Red
-      case StatutCandidature.SOUMISE:
-      case StatutCandidature.EN_ATTENTE_REPONSE:
-        return 'var(--ion-color-primary)'; // Blue in prototype was #3B82F6
-      default: return 'var(--ion-color-medium)'; // Default grey
+      case 'acceptee': return 'var(--ion-color-success)';
+      case 'entretien_planifie':
+      case 'entretien_final':
+      case 'test_technique': // Grouping test_technique with interview for color
+        return 'var(--ion-color-success)';
+      case 'offre_recue': return 'var(--ion-color-warning)';
+      case 'refusee_entreprise':
+      case 'refusee_candidat':
+        return 'var(--ion-color-danger)';
+      case 'envoyee': // 'envoyee' is from the model
+      case 'en_attente_reponse':
+      case 'en_cours_rh': // Grouping en_cours_rh with applied/primary color
+        return 'var(--ion-color-primary)';
+      case 'standby': return 'var(--ion-color-warning)'; // Standby could also be warning or medium
+      case 'brouillon': return 'var(--ion-color-medium)'; // Brouillon is likely medium
+      case 'archivee': return 'var(--ion-color-dark)'; // Archivee could be dark or medium
+      default: return 'var(--ion-color-medium)';
     }
   }
 }

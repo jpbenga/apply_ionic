@@ -66,9 +66,16 @@ export interface Candidature {
   
   // Informations sur la candidature
   statut: StatutCandidature;
-  dateCandidature: Timestamp;
-  sourceOffre?: 'LinkedIn' | 'Indeed' | 'Pole Emploi' | 'Site entreprise' | 'Recommandation' | 'Autre';
+  dateCandidature: any; // Keep as any for flexibility with existing data, or use Timestamp
+  sourceOffre?: 'LinkedIn' | 'Indeed' | 'Pole Emploi' | 'Site entreprise' | 'Recommandation' | 'Autre'; // This is existing, maybe reuse as 'source'
   urlOffre?: string;
+
+  // New optional fields for card display
+  companyLogoUrl?: string;
+  aiScore?: number | string; // Keep flexible for parsing
+  keywordsArray?: string[];
+  dateSoumission?: any; // Using 'any' as requested, consider Timestamp
+  source?: string; // Generic source, potentially replacing/complementing sourceOffre
   
   // CV et documents
   cvOriginalUrl?: string;

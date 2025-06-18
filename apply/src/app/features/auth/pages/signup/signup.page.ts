@@ -106,7 +106,7 @@ export class SignupPage implements OnInit {
       return 'Veuillez saisir une adresse email valide.';
     }
     if (control.hasError('minlength')) {
-      const requiredLength = control.errors?.minlength.requiredLength;
+      const requiredLength = control.errors?.['minlength']?.requiredLength;
       return `Doit contenir au moins ${requiredLength} caractères.`;
     }
     // For confirmPassword, check overall form error if control itself is valid but mismatch exists
