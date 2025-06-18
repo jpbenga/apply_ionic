@@ -1,0 +1,191 @@
+<ion-content>
+  <div class="postuler-page-container"> <!-- Main container for this page -->
+    <header class="page-header">
+      <app-logo size="large"></app-logo>
+      <div class="ai-status-header">
+        <div class="ai-avatar-header"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+        <div class="ai-status-text-header">Copilote IA Actif</div>
+      </div>
+    </header>
+
+    <div class="main-layout-grid">
+      <!-- Main Workflow Area -->
+      <div class="workflow-content-area" [ngSwitch]="currentScreenStep">
+
+        <!-- Step 1: Input Job Offer -->
+        <div *ngSwitchCase="1" class="step-wrapper fade-in-up">
+          <app-card class="step-card-item active">
+            <div class="step-card-header">
+              <div class="step-number-badge">1</div>
+              <div class="step-info-text">
+                <h2 class="step-main-title">Importez l'offre d'emploi</h2>
+                <p class="step-main-description">Votre IA va analyser l'offre et optimiser votre candidature.</p>
+              </div>
+            </div>
+            <div class="step-card-content-area">
+              <div class="input-methods-container">
+                <div class="input-method-option" [class.active]="selectedInputMethod === 'text'" (click)="selectInputMethod('text')">
+                  <div class="method-option-icon"><ion-icon name="document-text-outline"></ion-icon></div>
+                  <div class="method-option-title">Coller le texte</div>
+                  <div class="method-option-description">Copiez-collez la description du poste.</div>
+                </div>
+                <div class="input-method-option" [class.active]="selectedInputMethod === 'url'" (click)="selectInputMethod('url')">
+                  <div class="method-option-icon"><ion-icon name="link-outline"></ion-icon></div>
+                  <div class="method-option-title">Importer un lien</div>
+                  <div class="method-option-description">URL de l'offre d'emploi.</div>
+                </div>
+              </div>
+
+              <div *ngIf="selectedInputMethod === 'text'" class="job-input-field-area">
+                <app-textarea placeholder="Collez ici la description complète de l'offre d'emploi..."
+                              [value]="jobOfferText"
+                              (valueChanged)="jobOfferText = $event" rows="8">
+                </app-textarea>
+              </div>
+              <div *ngIf="selectedInputMethod === 'url'" class="job-input-field-area">
+                <app-input type="url" placeholder="https://exemple-entreprise.com/offres/product-manager"
+                           [value]="jobOfferUrl"
+                           (valueChanged)="jobOfferUrl = $event">
+                </app-input>
+              </div>
+              <app-button text="Lancer l'analyse IA" styleType="secondary" (buttonClick)="startAnalysis()" fullWidth="true" class="action-button-spacing">
+                <ion-icon name="sparkles-outline" slot="start"></ion-icon>
+              </app-button>
+            </div>
+          </app-card>
+        </div>
+
+        <!-- Step 2: AI Processing -->
+        <div *ngSwitchCase="2" class="step-wrapper fade-in-up">
+          <app-card class="step-card-item active">
+            <div class="step-card-header">
+              <div class="step-number-badge">2</div>
+              <div class="step-info-text">
+                <h2 class="step-main-title">Analyse IA en cours</h2>
+                <p class="step-main-description">Votre copilote examine l'offre et prépare votre candidature.</p>
+              </div>
+            </div>
+            <div class="step-card-content-area ai-processing-content">
+              <div class="processing-avatar-icon"><ion-icon name="cog-outline" class="rotate-animation"></ion-icon></div>
+              <h3 class="processing-main-title">Apply analyse tout pour vous</h3>
+              <p class="processing-main-description">{{ currentProcessingStepDescription }}</p>
+              <div class="processing-steps-container">
+                <div class="processing-step-item" *ngFor="let stepKey of objectKeys(processingProgress)" [ngClass]="processingProgress[stepKey]">
+                  <div class="processing-step-icon">
+                     <ion-icon *ngIf="processingProgress[stepKey] === 'pending'" name="ellipse-outline"></ion-icon>
+                     <ion-icon *ngIf="processingProgress[stepKey] === 'in_progress'" name="sync-outline" class="rotate-animation"></ion-icon>
+                     <ion-icon *ngIf="processingProgress[stepKey] === 'completed'" name="checkmark-circle-outline"></ion-icon>
+                     <ion-icon *ngIf="processingProgress[stepKey] === 'error'" name="alert-circle-outline"></ion-icon>
+                  </div>
+                  <div class="processing-step-label">{{ stepKey | titlecase }}</div>
+                </div>
+              </div>
+            </div>
+          </app-card>
+        </div>
+
+        <!-- Step 3: Results -->
+        <div *ngSwitchCase="3" class="step-wrapper fade-in-up">
+          <app-card class="step-card-item active">
+            <div class="step-card-header">
+              <div class="step-number-badge">3</div>
+              <div class="step-info-text">
+                <h2 class="step-main-title">🎉 Votre candidature est prête !</h2>
+                <p class="step-main-description">Apply a optimisé tous vos documents pour maximiser vos chances.</p>
+              </div>
+            </div>
+            <div class="step-card-content-area results-dashboard-area">
+              <!-- Compatibility Analysis Card -->
+              <app-card class="result-sub-card">
+                <div class="result-card-header">
+                  <div class="result-card-icon analysis"><ion-icon name="stats-chart-outline"></ion-icon></div>
+                  <h4 class="result-card-title">Analyse de compatibilité</h4>
+                </div>
+                <div class="compatibility-summary">
+                  <div class="score-display-circle" [style.--score-percent]="analysisResult.compatibilityScore">{{ analysisResult.compatibilityScore }}%</div>
+                  <div class="score-text-details">
+                    <div class="score-main-label">Excellent match</div>
+                    <div class="score-sub-description">Votre profil correspond aux exigences.</div>
+                  </div>
+                </div>
+                <div class="keywords-display-section">
+                  <h5 class="keywords-section-title">Mots-clés Identifiés :</h5>
+                  <div class="keywords-tags-list">
+                    <span *ngFor="let keyword of analysisResult.keywords" class="keyword-item-tag">{{ keyword }}</span>
+                    <span *ngIf="analysisResult.missingSkills?.length > 0" class="keyword-item-tag missing">
+                      Manquant: {{ analysisResult.missingSkills.join(', ') }}
+                    </span>
+                  </div>
+                </div>
+              </app-card>
+
+              <!-- CV Optimization Card -->
+              <app-card class="result-sub-card">
+                <div class="result-card-header">
+                  <div class="result-card-icon optimization"><ion-icon name="document-text-outline"></ion-icon></div>
+                  <h4 class="result-card-title">CV Optimisé</h4>
+                </div>
+                <div class="document-preview-placeholder" (click)="previewDocument('cv')">
+                  <ion-icon name="document-attach-outline" class="preview-placeholder-icon"></ion-icon>
+                  <p>Aperçu du CV</p>
+                </div>
+              </app-card>
+
+              <!-- Cover Letter Card -->
+              <app-card class="result-sub-card">
+                <div class="result-card-header">
+                  <div class="result-card-icon personalization"><ion-icon name="mail-outline"></ion-icon></div>
+                  <h4 class="result-card-title">Lettre de Motivation</h4>
+                </div>
+                <div class="document-preview-placeholder" (click)="previewDocument('letter')">
+                  <ion-icon name="document-attach-outline" class="preview-placeholder-icon"></ion-icon>
+                  <p>Aperçu de la Lettre</p>
+                </div>
+              </app-card>
+
+              <div class="result-actions-buttons">
+                <app-button text="Télécharger tout" styleType="primary" (buttonClick)="downloadDocuments()"></app-button>
+                <app-button text="Sauvegarder" styleType="success" (buttonClick)="saveApplication()"></app-button>
+              </div>
+            </div>
+          </app-card>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="sidebar-area">
+        <app-card class="sidebar-card progress-tracker-card">
+          <div class="sidebar-card-header">
+             <h3 class="sidebar-card-title">Progression</h3>
+          </div>
+          <div class="sidebar-card-content">
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" [style.width.%]="(currentScreenStep / 3) * 100"></div>
+            </div>
+            <ul class="progress-steps-list">
+              <li class="progress-step-item" [class.active]="currentScreenStep === 1" [class.completed]="currentScreenStep > 1">
+                <div class="step-dot-indicator"></div> Importation de l'offre
+              </li>
+              <li class="progress-step-item" [class.active]="currentScreenStep === 2" [class.completed]="currentScreenStep > 2">
+                <div class="step-dot-indicator"></div> Analyse IA
+              </li>
+              <li class="progress-step-item" [class.active]="currentScreenStep === 3">
+                <div class="step-dot-indicator"></div> Candidature finalisée
+              </li>
+            </ul>
+          </div>
+        </app-card>
+
+        <app-card class="sidebar-card ai-insights-card">
+           <div class="sidebar-card-header">
+            <div class="ai-insights-icon"><ion-icon name="bulb-outline"></ion-icon></div>
+            <h3 class="sidebar-card-title">Insights de l'IA</h3>
+          </div>
+          <div class="sidebar-card-content">
+            <p class="ai-tip-text">{{ aiTip }}</p>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</ion-content>

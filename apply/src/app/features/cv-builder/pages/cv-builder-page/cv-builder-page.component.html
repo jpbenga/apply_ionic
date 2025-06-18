@@ -1,0 +1,162 @@
+<ion-content>
+  <div class="cv-builder-page-container">
+    <!-- Header -->
+    <header class="page-header">
+      <app-logo size="medium"></app-logo> <!-- Prototype uses 40px icon, so medium seems right -->
+      <div class="user-info-display">
+        <div class="user-avatar-placeholder">{{ userName.substring(0,1).toUpperCase() }}</div>
+        <span>{{ userName }}</span>
+      </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="main-progress-container">
+      <div class="progress-steps-indicator">
+        <div class="progress-step-item" [class.active]="currentCvStep === 1" [class.completed]="currentCvStep > 1">
+          <div class="step-indicator-circle">1</div>
+          <div class="step-indicator-label">Importer l'offre</div>
+        </div>
+        <div class="progress-step-item" [class.active]="currentCvStep === 2" [class.completed]="currentCvStep > 2">
+          <div class="step-indicator-circle">2</div>
+          <div class="step-indicator-label">Analyse IA</div>
+        </div>
+        <div class="progress-step-item" [class.active]="currentCvStep === 3">
+          <div class="step-indicator-circle">3</div>
+          <div class="step-indicator-label">Votre candidature</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step Content Area -->
+    <div class="step-content-area" [ngSwitch]="currentCvStep">
+
+      <!-- Step 1: Input Job Offer -->
+      <div *ngSwitchCase="1" class="step-wrapper fade-in-up">
+        <app-card>
+          <div class="card-section-header">
+            <h1 class="card-main-title">Commencez votre candidature</h1>
+            <p class="card-main-subtitle">Apply va analyser l'offre et optimiser automatiquement votre CV et lettre de motivation.</p>
+          </div>
+          <div class="input-method-options">
+            <div class="input-option-item" [class.active]="selectedInputMethod === 'text'" (click)="selectInputMethod('text')">
+              <div class="option-item-header">
+                <ion-icon name="document-text-outline" class="option-item-icon"></ion-icon>
+                <span class="option-item-title">Coller le texte de l'offre</span>
+              </div>
+              <p class="option-item-description">Copiez-collez directement la description du poste.</p>
+            </div>
+            <div class="input-option-item" [class.active]="selectedInputMethod === 'url'" (click)="selectInputMethod('url')">
+              <div class="option-item-header">
+                <ion-icon name="link-outline" class="option-item-icon"></ion-icon>
+                <span class="option-item-title">Importer depuis un lien</span>
+              </div>
+              <p class="option-item-description">Collez l'URL de l'offre d'emploi.</p>
+            </div>
+          </div>
+          <div *ngIf="selectedInputMethod === 'text'" class="input-field-wrapper">
+            <app-textarea placeholder="Copiez et collez ici la description complète de l'offre d'emploi..."
+                          [value]="jobDescriptionText"
+                          (valueChanged)="jobDescriptionText = $event" rows="7">
+            </app-textarea>
+          </div>
+          <div *ngIf="selectedInputMethod === 'url'" class="input-field-wrapper">
+            <app-input type="url" placeholder="https://exemple-entreprise.com/offres/product-manager-senior"
+                       [value]="jobDescriptionUrl"
+                       (valueChanged)="jobDescriptionUrl = $event">
+            </app-input>
+          </div>
+          <app-button text="Analyser avec l'IA" styleType="secondary" (buttonClick)="startAIAnalysis()" fullWidth="true" class="analyze-button">
+            <ion-icon name="sparkles-outline" slot="start"></ion-icon>
+          </app-button>
+        </app-card>
+      </div>
+
+      <!-- Step 2: AI Processing -->
+      <div *ngSwitchCase="2" class="step-wrapper fade-in-up">
+        <app-card>
+          <div class="ai-processing-display">
+            <div class="ai-processing-avatar">
+              <ion-icon name="rocket-outline" class="processing-avatar-icon"></ion-icon>
+            </div>
+            <div class="ai-processing-status">{{ currentProcessingMessage }}</div>
+            <div class="ai-processing-description">Notre IA examine l'offre, optimise votre CV et rédige votre lettre personnalisée.</div>
+            <div class="overall-progress-bar">
+              <div class="overall-progress-fill" [style.width.%]="overallProgressPercent"></div>
+            </div>
+            <div class="detailed-progress-steps">
+                <div *ngFor="let stepKey of objectKeys(processingProgress)" class="detailed-step-item" [ngClass]="processingProgress[stepKey]">
+                    <ion-icon *ngIf="processingProgress[stepKey] === 'pending'" name="ellipse-outline" class="detailed-step-icon pending"></ion-icon>
+                    <ion-icon *ngIf="processingProgress[stepKey] === 'in_progress'" name="sync-outline" class="detailed-step-icon in-progress rotate-animation"></ion-icon>
+                    <ion-icon *ngIf="processingProgress[stepKey] === 'completed'" name="checkmark-circle-outline" class="detailed-step-icon completed"></ion-icon>
+                    {{ stepKey | titlecase }}
+                </div>
+            </div>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Step 3: Results Dashboard -->
+      <div *ngSwitchCase="3" class="step-wrapper fade-in-up results-step-wrapper">
+        <app-card>
+          <div class="card-section-header">
+            <h1 class="card-main-title">🎉 Votre candidature est prête !</h1>
+            <p class="card-main-subtitle">Apply a optimisé vos documents pour maximiser vos chances.</p>
+          </div>
+          <div class="results-layout-grid">
+            <app-card class="result-detail-card">
+              <div class="result-detail-header">
+                <ion-icon name="analytics-outline" class="result-detail-icon analysis"></ion-icon>
+                <h2 class="result-detail-title">Analyse de compatibilité</h2>
+              </div>
+              <div class="compatibility-score-display">
+                <div class="score-visual-circle" [style.--score-percent]="analysisData.compatibilityScore">{{ analysisData.compatibilityScore }}%</div>
+                <div class="score-summary-text">
+                  <div class="score-main-text" [style.color]="analysisData.compatibilityScore > 80 ? 'var(--ion-color-success)' : (analysisData.compatibilityScore > 60 ? 'var(--ion-color-warning)' : 'var(--ion-color-danger)')">
+                    {{ analysisData.compatibilityScore > 80 ? 'Excellente compatibilité' : (analysisData.compatibilityScore > 60 ? 'Bonne compatibilité' : 'Peut être amélioré') }}
+                  </div>
+                  <div class="score-sub-text">{{ analysisData.toneAnalysis }}</div>
+                </div>
+              </div>
+              <div class="keywords-tags-container">
+                <span *ngFor="let keyword of analysisData.matchingKeywords" class="keyword-tag matched">{{ keyword }}</span>
+                <span *ngFor="let keyword of analysisData.missingKeywords" class="keyword-tag missing">{{ keyword }} (manquant)</span>
+              </div>
+            </app-card>
+            <app-card class="result-detail-card">
+              <div class="result-detail-header">
+                <ion-icon name="document-text-outline" class="result-detail-icon cv"></ion-icon>
+                <h2 class="result-detail-title">CV Optimisé</h2>
+              </div>
+              <div class="document-preview-area">
+                <ion-icon name="document-outline" class="doc-preview-icon"></ion-icon>
+                <p>CV prêt à télécharger</p>
+                <small>X améliorations appliquées</small>
+              </div>
+            </app-card>
+            <app-card class="result-detail-card">
+              <div class="result-detail-header">
+                <ion-icon name="mail-outline" class="result-detail-icon letter"></ion-icon>
+                <h2 class="result-detail-title">Lettre de Motivation</h2>
+              </div>
+              <div class="document-preview-area">
+                <ion-icon name="document-outline" class="doc-preview-icon"></ion-icon>
+                <p>Lettre personnalisée générée</p>
+                <small>Adaptée au poste</small>
+              </div>
+            </app-card>
+          </div>
+        </app-card>
+
+        <!-- Sticky Action Bar -->
+        <div class="sticky-action-bar" *ngIf="currentCvStep === 3">
+          <app-button text="Télécharger les documents" styleType="outline" (buttonClick)="downloadDocuments()" fullWidth="true">
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+          </app-button>
+          <app-button text="Sauvegarder la candidature" styleType="primary" (buttonClick)="saveApplication()" fullWidth="true">
+            <ion-icon name="save-outline" slot="start"></ion-icon>
+          </app-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

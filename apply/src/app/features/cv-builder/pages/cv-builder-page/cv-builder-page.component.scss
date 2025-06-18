@@ -1,0 +1,288 @@
+// Base variables from theme/variables.scss are available globally
+
+:host {
+  display: block;
+}
+
+ion-content {
+  // --background: linear-gradient(135deg, var(--ion-color-light, #F9FAFB) 0%, var(--ion-color-background, #FFFFFF) 100%);
+  --background: var(--ion-color-light-tint);
+}
+
+.cv-builder-page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px 20px 20px; // Bottom padding for sticky bar if it's inside container
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  margin-bottom: 24px; // Reduced margin
+}
+// app-logo styling is handled by the component itself
+
+.user-info-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ion-color-light-contrast, white);
+  padding: 6px 12px;
+  border-radius: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.user-avatar-placeholder {
+  width: 28px; height: 28px; // Adjusted
+  background: var(--ion-color-primary, #4F46E5);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ion-color-primary-contrast, white);
+  font-weight: 600; font-size: 12px;
+}
+.user-info-display span {
+  font-weight: 500; font-size: 14px;
+  color: var(--ion-color-text, #1F2937);
+}
+
+/* Progress Bar */
+.main-progress-container {
+  margin-bottom: 32px; // Reduced margin
+}
+.progress-steps-indicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; // Align items to the top for label wrapping
+}
+.progress-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  position: relative;
+  text-align: center;
+  &:not(:last-child)::after { // Connector line
+    content: '';
+    position: absolute;
+    top: 16px; // Vertically center with circle
+    left: 50%;
+    width: 100%; // Make it span between items
+    height: 2px;
+    background: var(--ion-color-medium-tint, #E5E7EB);
+    transform: translateX(calc(-50% + 24px)); // Adjust to connect centers, 24px = half of circle + gap
+    z-index: 0; // Behind circles
+  }
+  &.active:not(:last-child)::after,
+  &.completed:not(:last-child)::after {
+    background: var(--ion-color-primary, #4F46E5);
+  }
+}
+.step-indicator-circle {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ion-color-medium-tint, #E5E7EB);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ion-color-medium-shade, #6B7280);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative; z-index: 1; // Above connector line
+}
+.progress-step-item.active .step-indicator-circle {
+  background: var(--ion-color-primary, #4F46E5);
+  color: var(--ion-color-primary-contrast, white);
+}
+.progress-step-item.completed .step-indicator-circle {
+  background: var(--ion-color-success, #10B981);
+  color: var(--ion-color-success-contrast, white);
+}
+.step-indicator-label {
+  font-size: 12px;
+  color: var(--ion-color-medium-shade, #6B7280);
+  max-width: 70px; // Prevent long labels from breaking layout
+}
+.progress-step-item.active .step-indicator-label {
+  color: var(--ion-color-primary, #4F46E5);
+  font-weight: 500; // Adjusted
+}
+
+/* Step Content Area */
+.step-content-area {
+  // General wrapper for content switched by ngSwitch
+}
+.step-wrapper { // Animation wrapper for each step
+  &.fade-in-up { animation: fadeInUpAnimation 0.5s ease-out forwards; }
+}
+@keyframes fadeInUpAnimation {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// app-card styling is handled by the component.
+// Specific headers within app-card for this page:
+.card-section-header { margin-bottom: 24px; text-align: center; }
+.card-main-title {
+  font-size: 22px; font-weight: 700; // Adjusted
+  color: var(--ion-color-text, #1F2937);
+  margin-bottom: 8px;
+}
+.card-main-subtitle {
+  color: var(--ion-color-medium-shade, #6B7280);
+  font-size: 15px; // Adjusted
+}
+
+/* Step 1: Input */
+.input-method-options {
+  display: grid; grid-template-columns: 1fr; // Stacked by default, can go to 1fr 1fr on wider
+  gap: 16px; margin-bottom: 24px;
+  @media (min-width: 576px) { grid-template-columns: 1fr 1fr; }
+}
+.input-option-item {
+  border: 2px solid var(--ion-color-medium-tint, #E5E7EB);
+  border-radius: 12px; padding: 16px; cursor: pointer; // Adjusted
+  transition: all 0.3s ease;
+  &:hover { border-color: var(--ion-color-primary-shade, #4338CA); }
+  &.active {
+    border-color: var(--ion-color-primary, #4F46E5);
+    background: var(--ion-color-primary-tint, #F0F9FF);
+    box-shadow: 0 0 0 2px var(--ion-color-primary, #4F46E5);
+  }
+}
+.option-item-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; } // Adjusted
+.option-item-icon { font-size: 20px; color: var(--ion-color-primary, #4F46E5); } // Adjusted
+.option-item-title { font-weight: 600; color: var(--ion-color-text, #1F2937); font-size: 15px; } // Adjusted
+.option-item-description { color: var(--ion-color-medium-shade, #6B7280); font-size: 13px; } // Adjusted
+.input-field-wrapper { margin-bottom: 16px; }
+.analyze-button { margin-top: 16px; } // Ensure space for button
+
+/* Step 2: AI Processing */
+.ai-processing-display {
+  text-align: center; padding: 40px 20px; // Adjusted
+}
+.ai-processing-avatar {
+  width: 70px; height: 70px; // Adjusted
+  background: linear-gradient(135deg, var(--ion-color-primary, #4F46E5), var(--ion-color-secondary, #7C3AED));
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px; // Adjusted
+  .processing-avatar-icon { font-size: 36px; color: var(--ion-color-primary-contrast, white); } // Adjusted
+}
+.ai-processing-status { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--ion-color-text, #1F2937); }
+.ai-processing-description { color: var(--ion-color-medium-shade, #6B7280); margin-bottom: 24px; font-size: 14px; }
+.overall-progress-bar {
+  width: 100%; height: 6px;
+  background: var(--ion-color-medium-tint, #E5E7EB);
+  border-radius: 3px; overflow: hidden; margin-bottom: 20px;
+}
+.overall-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ion-color-primary, #4F46E5), var(--ion-color-secondary, #7C3AED));
+  width: 0%; /* Controlled by [style.width.%] */
+  transition: width 0.5s ease-in-out;
+}
+.detailed-progress-steps { display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 320px; margin:0 auto;}
+.detailed-step-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; font-size: 14px;
+    border-radius: 6px;
+    background-color: var(--ion-color-light-tint);
+    color: var(--ion-color-medium-shade);
+    border: 1px solid var(--ion-color-light-shade);
+
+    .detailed-step-icon { font-size: 18px; }
+    &.pending .detailed-step-icon { color: var(--ion-color-medium-shade); }
+    &.in_progress {
+        color: var(--ion-color-primary-shade);
+        background-color: var(--ion-color-primary-tint);
+        border-color: var(--ion-color-primary);
+        .detailed-step-icon { color: var(--ion-color-primary); }
+    }
+    &.completed {
+        color: var(--ion-color-success-shade);
+        background-color: var(--ion-color-success-tint);
+        border-color: var(--ion-color-success);
+        .detailed-step-icon { color: var(--ion-color-success); }
+    }
+}
+.rotate-animation { animation: spinAnimation 1.5s linear infinite; } // Re-use spin from other pages
+
+/* Step 3: Results Dashboard */
+.results-step-wrapper { padding-bottom: 80px; } // Space for sticky action bar
+.results-layout-grid {
+  display: grid; grid-template-columns: 1fr; gap: 20px; // Adjusted
+  @media (min-width: 768px) { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+}
+.result-detail-card { /* Applied to app-card */ }
+.result-detail-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; } // Adjusted
+.result-detail-icon {
+  font-size: 20px; width: 32px; height: 32px; // Adjusted
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  color: var(--ion-color-light-contrast, white);
+  &.analysis { background: var(--ion-color-primary, #3B82F6); }
+  &.cv { background: var(--ion-color-success, #10B981); }
+  &.letter { background: var(--ion-color-secondary, #8B5CF6); }
+}
+.result-detail-title { font-weight: 600; color: var(--ion-color-text, #1F2937); font-size: 16px; } // Adjusted
+.compatibility-score-display { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.score-visual-circle {
+  width: 50px; height: 50px; // Adjusted
+  border-radius: 50%;
+  background: conic-gradient(var(--ion-color-success) 0deg calc(var(--score-percent, 0) * 3.6deg), var(--ion-color-light-shade) calc(var(--score-percent, 0) * 3.6deg) 360deg);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ion-color-text, #1F2937); font-weight: 700; font-size: 14px; // Adjusted
+  flex-shrink: 0;
+}
+.score-summary-text { flex: 1; }
+.score-main-text { font-size: 13px; font-weight: 600; margin-bottom: 2px; } // Adjusted
+.score-sub-text { font-size: 12px; color: var(--ion-color-medium-shade, #6B7280); } // Adjusted
+.keywords-tags-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; } // Adjusted
+.keyword-tag {
+  padding: 3px 10px; border-radius: 14px; font-size: 11px; font-weight: 500; // Adjusted
+  &.matched { background: var(--ion-color-success-tint, #F0FDF4); color: var(--ion-color-success-shade, #166534); border: 1px solid var(--ion-color-success-shade, #BBF7D0); }
+  &.missing { background: var(--ion-color-warning-tint, #FEF3C7); color: var(--ion-color-warning-shade, #92400E); border: 1px solid var(--ion-color-warning-shade, #FDE68A); }
+}
+.document-preview-area {
+  background: var(--ion-color-light-tint, #F9FAFB);
+  border-radius: 8px; padding: 16px; margin-bottom: 12px; // Adjusted
+  border: 1px dashed var(--ion-color-medium-tint, #D1D5DB);
+  min-height: 80px; display: flex; flex-direction:column; align-items: center; justify-content: center;
+  text-align: center; color: var(--ion-color-medium-shade, #6B7280);
+  .doc-preview-icon { font-size: 32px; margin-bottom: 8px; } // Adjusted
+  p { font-size: 13px; font-weight: 500; color: var(--ion-color-text); margin-bottom:2px;} // Adjusted
+  small { font-size: 11px; } // Adjusted
+}
+
+/* Sticky Action Bar */
+.sticky-action-bar {
+  background: var(--ion-color-light-contrast, white);
+  border-radius: 16px 16px 0 0; // Rounded top corners
+  padding: 16px 24px; // Adjusted
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08); // Shadow on top
+  border-top: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
+  display: grid; grid-template-columns: 1fr; gap: 12px; // Adjusted
+  max-width: 800px; // Match container width
+  margin: 0 auto; // Center it
+
+  @media (min-width: 576px) { grid-template-columns: 1fr 1fr; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cv-builder-page-container { padding: 0 16px 16px 16px; }
+  .page-header { margin-bottom: 20px; padding: 12px 0; }
+  .main-progress-container { margin-bottom: 24px; }
+  .step-indicator-label { font-size: 11px; max-width: 60px; }
+  .card-main-title { font-size: 20px; }
+  .card-main-subtitle { font-size: 14px; }
+  .results-layout-grid { grid-template-columns: 1fr; } // Ensure single column on smaller
+}
+
+@media (max-width: 575px) {
+    .input-method-options { grid-template-columns: 1fr; }
+    .sticky-action-bar { padding: 16px; }
+}
+
+@keyframes spinAnimation { to { transform: rotate(360deg); } }

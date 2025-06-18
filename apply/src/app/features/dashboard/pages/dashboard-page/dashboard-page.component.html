@@ -1,0 +1,148 @@
+<ion-content>
+  <div class="dashboard-container">
+    <!-- Header -->
+    <header class="page-header">
+      <app-logo size="large"></app-logo>
+      <div class="user-profile-display" (click)="openProfileSettings()">
+        <div class="user-avatar-initials">{{ userName.substring(0, 2).toUpperCase() }}</div>
+        <span class="user-name-text">{{ userName }}</span>
+        <ion-icon name="chevron-down-outline" class="profile-dropdown-icon"></ion-icon>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-main-section fade-in">
+      <div class="hero-content-wrapper">
+        <div class="hero-text-content">
+          <div class="hero-greeting-text">👋 Salut {{ userName }} !</div>
+          <h1 class="hero-main-title">Votre carrière décolle</h1>
+          <p class="hero-main-subtitle">Votre copilote IA a travaillé pour vous cette semaine.</p>
+          <div class="hero-stats-grid">
+            <div class="hero-stat-item">
+              <div class="stat-item-value">{{ heroStats.applicationsSent }}</div>
+              <div class="stat-item-label">Candidatures envoyées</div>
+            </div>
+            <div class="hero-stat-item">
+              <div class="stat-item-value">{{ heroStats.interviewsScheduled }}</div>
+              <div class="stat-item-label">Entretiens programmés</div>
+            </div>
+            <div class="hero-stat-item">
+              <div class="stat-item-value">{{ heroStats.offersReceived }}</div>
+              <div class="stat-item-label">Offres reçues</div>
+            </div>
+          </div>
+        </div>
+        <div class="ai-assistant-box">
+          <div class="ai-assistant-avatar"><ion-icon name="hardware-chip-outline"></ion-icon></div>
+          <div class="ai-assistant-message">3 nouvelles opportunités détectées</div>
+          <div class="ai-assistant-description">Votre IA a trouvé des postes parfaitement adaptés.</div>
+          <app-button text="Voir les opportunités" styleType="secondary" (buttonClick)="showOpportunities()"></app-button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Metrics Dashboard -->
+    <section class="metrics-dashboard-grid fade-in">
+      <app-card *ngFor="let metric of metrics" class="metric-display-card" [ngClass]="metric.colorClass">
+        <div class="metric-card-header">
+          <div class="metric-card-icon"><ion-icon [name]="metric.icon"></ion-icon></div>
+          <div class="metric-card-title">{{ metric.label }}</div>
+        </div>
+        <div class="metric-card-value">{{ metric.value }}</div>
+        <!-- <div class="metric-card-change positive"><span>↗️ +5 cette semaine</span></div> -->
+        <!-- <div class="metric-card-trend">Tendance</div> -->
+      </app-card>
+    </section>
+
+    <!-- Smart Filters -->
+    <section class="smart-filters-section fade-in">
+      <div class="filters-section-header">
+        <div class="filters-section-title">
+          <ion-icon name="options-outline"></ion-icon> Vos candidatures
+          <span class="total-applications-count">({{ allApplications.length }} total)</span>
+        </div>
+        <ion-searchbar class="applications-search-bar"
+                       placeholder="Rechercher par entreprise, poste..."
+                       (ionChange)="onSearchChange($event)"
+                       [value]="searchTerm"
+                       debounce="300">
+        </ion-searchbar>
+      </div>
+      <div class="quick-filter-chips">
+        <div class="filter-chip-item" [class.active]="isFilterActive('all')" (click)="filterByStatus('all')">
+          Toutes <span class="chip-item-count">{{ allApplications.length }}</span>
+        </div>
+        <div class="filter-chip-item" [class.active]="isFilterActive('entretien-planifié')" (click)="filterByStatus('entretien-planifié')">
+          🎯 Entretiens <span class="chip-item-count">{{ allApplications.filter(a => a.status === 'Entretien planifié').length }}</span>
+        </div>
+        <div class="filter-chip-item" [class.active]="isFilterActive('offre-reçue')" (click)="filterByStatus('offre-reçue')">
+          🎉 Offres <span class="chip-item-count">{{ allApplications.filter(a => a.status === 'Offre reçue').length }}</span>
+        </div>
+        <!-- Add more filters as needed -->
+      </div>
+    </section>
+
+    <!-- Applications Section -->
+    <section class="applications-display-section fade-in">
+      <div class="section-display-header">
+        <h2 class="section-main-title">Mes candidatures</h2>
+        <div class="view-mode-toggle">
+          <ion-button fill="clear" [class.active]="viewMode === 'grid'" (click)="toggleViewMode('grid')">
+            <ion-icon name="grid-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" [class.active]="viewMode === 'list'" (click)="toggleViewMode('list')">
+            <ion-icon name="list-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="applications-items-grid" *ngIf="viewMode === 'grid'">
+        <app-card *ngFor="let app of filteredApplications" class="application-item-card" [style.--status-color]="app.statusColor" (click)="viewApplication(app.id)">
+          <div class="app-card-main-header">
+            <div class="app-company-logo" [style.background-image]="'url(' + (app.logoUrl || '/assets/default-logo.png') + ')'">
+              <span *ngIf="!app.logoUrl">{{ app.company.substring(0,1) }}</span>
+            </div>
+            <div class="app-card-info-block">
+              <div class="app-company-name">{{ app.company }}</div>
+              <div class="app-job-title">{{ app.title }}</div>
+            </div>
+            <div class="app-card-status-badge" [ngClass]="app.status.toLowerCase().replace(/\s+/g, '-')">{{ app.status }}</div>
+          </div>
+          <div class="app-ai-insights-block">
+            <div class="app-ai-match-score">
+              <ion-icon name="hardware-chip-outline" class="ai-icon-small"></ion-icon>
+              Match {{ app.aiMatch }}%
+            </div>
+            <div class="app-keywords-list">
+              <span *ngFor="let keyword of app.keywords?.slice(0, 2)" class="app-keyword-tag">{{ keyword }}</span>
+            </div>
+          </div>
+          <div class="app-card-main-footer">
+            <div class="app-card-meta-info">
+              <div class="meta-info-item"><ion-icon name="calendar-outline"></ion-icon> {{ app.dateApplied }}</div>
+              <div class="meta-info-item" *ngIf="app.nextStep"><ion-icon name="flag-outline"></ion-icon> {{ app.nextStep }}</div>
+            </div>
+            <!-- Hover actions could be added here if not relying on click for details -->
+          </div>
+        </app-card>
+      </div>
+
+      <!-- List view could be implemented here with *ngIf="viewMode === 'list'" -->
+
+      <div *ngIf="filteredApplications.length === 0" class="empty-applications-state">
+        <div class="empty-state-icon"><ion-icon name="documents-outline"></ion-icon></div>
+        <h3 class="empty-state-title">Aucune candidature pour l'instant</h3>
+        <p class="empty-state-description">Commencez par créer une nouvelle candidature pour voir vos opportunités prendre vie ici.</p>
+        <app-button text="Lancer une nouvelle candidature" styleType="primary" (buttonClick)="createNewApplication()">
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        </app-button>
+      </div>
+    </section>
+
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+      <ion-fab-button (click)="createNewApplication()">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </div>
+</ion-content>

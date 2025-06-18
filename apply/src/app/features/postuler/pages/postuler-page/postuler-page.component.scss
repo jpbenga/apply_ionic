@@ -1,0 +1,478 @@
+// Import global variables if not automatically available
+// @use 'theme/variables' as v; // Example if using Sass modules
+
+// Base page styling
+:host {
+  display: block; // Ensure the component takes up space
+}
+
+ion-content {
+  // --background: var(--ion-color-light, #f4f5f8); // A light background for the whole page
+}
+
+.postuler-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 20px 20px; // No top padding, header handles it
+  min-height: 100vh;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0; // Padding for content within the header
+  border-bottom: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  margin-bottom: 32px; // Increased margin
+}
+
+// app-logo is styled by its own component, size="large"
+
+.ai-status-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ion-color-light-contrast, white); // Contrast to page bg
+  padding: 10px 16px; // Adjusted padding
+  border-radius: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07); // Softer shadow
+  border: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+}
+
+.ai-avatar-header {
+  width: 32px; // Adjusted size
+  height: 32px;
+  background: linear-gradient(135deg, var(--ion-color-primary, #4F46E5), var(--ion-color-secondary, #7C3AED));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ion-color-primary-contrast, white);
+  ion-icon { font-size: 18px; }
+}
+
+.ai-status-text-header {
+  font-weight: 600;
+  color: var(--ion-color-text, #1F2937);
+  font-size: 14px; // Adjusted
+}
+
+/* Main Layout */
+.main-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px; // Adjusted sidebar width
+  gap: 32px; // Adjusted gap
+  align-items: start;
+}
+
+.workflow-content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; // Spacing between cards if multiple are shown (not with ngSwitch)
+}
+
+.sidebar-area {
+  position: sticky;
+  top: 20px; // Sticky top position
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Step Wrapper for Animations */
+.step-wrapper {
+  &.fade-in-up { // Basic fade-in-up animation
+    animation: fadeInUpAnimation 0.5s ease-out forwards;
+  }
+}
+@keyframes fadeInUpAnimation {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Common Step Card Styling (using app-card as base) */
+.step-card-item { // Class to be applied to app-card instances in the workflow area
+  // app-card provides base background, border-radius, shadow.
+  // We might override or extend them here if needed.
+  // Example: border: 1px solid var(--ion-color-primary-shade);
+  &.active { // Special styling for the active step card
+    // border-left: 4px solid var(--ion-color-primary, #4F46E5);
+  }
+}
+
+.step-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px; // Adjusted
+  border-bottom: 1px solid var(--ion-color-medium-tint, #F3F4F6);
+}
+
+.step-number-badge {
+  width: 40px; // Adjusted
+  height: 40px;
+  border-radius: 50%;
+  background: var(--ion-color-light-shade, #F3F4F6);
+  color: var(--ion-color-dark-shade, #6B7280);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px; // Adjusted
+  transition: all 0.3s ease;
+}
+.step-card-item.active .step-number-badge { // When app-card has .active
+  background: var(--ion-color-primary, #4F46E5);
+  color: var(--ion-color-primary-contrast, white);
+}
+
+.step-info-text { flex: 1; }
+.step-main-title {
+  font-size: 18px; // Adjusted
+  font-weight: 700;
+  color: var(--ion-color-text, #1F2937);
+  margin-bottom: 2px; // Adjusted
+}
+.step-main-description {
+  color: var(--ion-color-medium-shade, #6B7280);
+  font-size: 14px;
+}
+
+.step-card-content-area {
+  padding: 24px 32px; // Adjusted
+}
+
+/* Step 1: Input Specific Styles */
+.input-methods-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px; // Adjusted
+  margin-bottom: 24px;
+}
+.input-method-option {
+  border: 2px solid var(--ion-color-medium-tint, #E5E7EB);
+  border-radius: 12px; // Rounded
+  padding: 20px; // Adjusted
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  &:hover {
+    border-color: var(--ion-color-primary-shade, #4338CA);
+    transform: translateY(-2px);
+  }
+  &.active {
+    border-color: var(--ion-color-primary, #4F46E5);
+    background: var(--ion-color-primary-tint, #F0F9FF); // Light primary tint
+    box-shadow: 0 0 0 2px var(--ion-color-primary, #4F46E5); // Focus ring effect
+  }
+}
+.method-option-icon {
+  width: 48px; height: 48px; // Adjusted
+  background: linear-gradient(135deg, var(--ion-color-primary, #4F46E5), var(--ion-color-secondary, #7C3AED));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px; // Adjusted
+  color: var(--ion-color-primary-contrast, white);
+  ion-icon { font-size: 24px; }
+}
+.method-option-title {
+  font-weight: 600; // Adjusted
+  color: var(--ion-color-text, #1F2937);
+  margin-bottom: 6px; // Adjusted
+  font-size: 14px; // Adjusted
+}
+.method-option-description {
+  color: var(--ion-color-medium-shade, #6B7280);
+  font-size: 12px; // Adjusted
+}
+.job-input-field-area {
+  margin-bottom: 16px; // Space before button
+  app-textarea, app-input { width: 100%; }
+}
+.action-button-spacing { margin-top: 16px; }
+
+
+/* Step 2: AI Processing Specific Styles */
+.ai-processing-content {
+  text-align: center;
+  padding: 40px 20px; // Adjusted
+}
+.processing-avatar-icon {
+  width: 80px; height: 80px; // Adjusted
+  background: linear-gradient(135deg, var(--ion-color-primary, #4F46E5), var(--ion-color-secondary, #7C3AED));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px; // Adjusted
+  color: var(--ion-color-primary-contrast, white);
+  ion-icon { font-size: 40px; }
+}
+.rotate-animation { animation: spinAnimation 2s linear infinite; } // Re-use spin from signup/signin
+.processing-main-title {
+  font-size: 20px; // Adjusted
+  font-weight: 700;
+  color: var(--ion-color-text, #1F2937);
+  margin-bottom: 12px;
+}
+.processing-main-description {
+  color: var(--ion-color-medium-shade, #6B7280);
+  margin-bottom: 24px; // Adjusted
+  font-size: 16px;
+}
+.processing-steps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; // Adjusted
+  text-align: left;
+  max-width: 360px; // Adjusted
+  margin: 0 auto;
+}
+.processing-step-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px; // Adjusted
+  background: var(--ion-color-light-tint, #F9FAFB);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent; // For smooth transition
+  &.pending .processing-step-icon { color: var(--ion-color-medium-shade, #6B7280); }
+  &.in_progress {
+    background: var(--ion-color-primary-tint, #F0F9FF);
+    border-color: var(--ion-color-primary, #0EA5E9);
+    .processing-step-icon { color: var(--ion-color-primary, #0EA5E9); }
+  }
+  &.completed {
+    background: var(--ion-color-success-tint, #F0FDF4);
+    border-color: var(--ion-color-success, #16A34A);
+    .processing-step-icon { color: var(--ion-color-success, #16A34A); }
+  }
+   &.error {
+    background: var(--ion-color-danger-tint, #fef2f2);
+    border-color: var(--ion-color-danger, #ef4444);
+    .processing-step-icon { color: var(--ion-color-danger, #ef4444); }
+  }
+}
+.processing-step-icon {
+  width: 20px; height: 20px; // Adjusted
+  display: flex; align-items: center; justify-content: center;
+  ion-icon { font-size: 18px; } // Adjusted
+}
+.processing-step-label { font-size: 14px; }
+
+
+/* Step 3: Results Specific Styles */
+.results-dashboard-area {
+  display: grid;
+  grid-template-columns: 1fr; // Stack results cards
+  gap: 20px;
+}
+.result-sub-card { // Class for app-card instances used within results
+  // app-card provides base. Add specific margin or subtle variations if needed.
+  margin-bottom: 0; // Reset if app-card has default margin
+}
+.result-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px; // Adjusted
+}
+.result-card-icon {
+  width: 36px; height: 36px; // Adjusted
+  border-radius: 8px; // Adjusted
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ion-color-primary-contrast, white);
+  ion-icon { font-size: 20px; }
+  &.analysis { background: linear-gradient(135deg, var(--ion-color-primary, #3B82F6), var(--ion-color-primary-shade, #1D4ED8)); }
+  &.optimization { background: linear-gradient(135deg, var(--ion-color-success, #10B981), var(--ion-color-success-shade, #059669)); }
+  &.personalization { background: linear-gradient(135deg, var(--ion-color-secondary, #8B5CF6), var(--ion-color-secondary-shade, #7C3AED)); }
+}
+.result-card-title {
+  font-size: 16px; // Adjusted
+  font-weight: 700;
+  color: var(--ion-color-text, #1F2937);
+}
+
+.compatibility-summary {
+  display: flex;
+  align-items: center;
+  gap: 20px; // Adjusted
+  margin-bottom: 20px;
+}
+.score-display-circle {
+  width: 70px; height: 70px; // Adjusted
+  border-radius: 50%;
+  background: conic-gradient(var(--ion-color-success, #10B981) 0deg calc(var(--score-percent, 0) * 3.6deg), var(--ion-color-light-shade, #E5E7EB) calc(var(--score-percent, 0) * 3.6deg) 360deg);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ion-color-text, #1F2937);
+  font-weight: 700;
+  font-size: 18px; // Adjusted
+  position: relative;
+  flex-shrink: 0;
+}
+.score-text-details { flex: 1; }
+.score-main-label {
+  font-size: 20px; // Adjusted
+  font-weight: 700;
+  color: var(--ion-color-success, #10B981);
+  margin-bottom: 2px; // Adjusted
+}
+.score-sub-description { color: var(--ion-color-medium-shade, #6B7280); font-size: 14px; }
+
+.keywords-display-section { margin-bottom: 16px; }
+.keywords-section-title {
+  font-size: 13px; // Adjusted
+  font-weight: 600;
+  color: var(--ion-color-dark-shade, #374151);
+  margin-bottom: 8px; // Adjusted
+}
+.keywords-tags-list {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+.keyword-item-tag {
+  background: var(--ion-color-success-tint, #F0FDF4);
+  border: 1px solid var(--ion-color-success, #BBF7D0);
+  color: var(--ion-color-success-shade, #166534);
+  padding: 4px 10px; // Adjusted
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500; // Adjusted
+  &.missing {
+    background: var(--ion-color-warning-tint, #FEF3C7);
+    border-color: var(--ion-color-warning, #FDE68A);
+    color: var(--ion-color-warning-shade, #92400E);
+  }
+}
+
+.document-preview-placeholder {
+  background: var(--ion-color-light-tint, #F9FAFB);
+  border: 2px dashed var(--ion-color-medium-tint, #D1D5DB);
+  border-radius: 12px;
+  padding: 30px 20px; // Adjusted
+  text-align: center;
+  margin-bottom: 16px; // Adjusted
+  min-height: 150px; // Adjusted
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  &:hover {
+    border-color: var(--ion-color-primary, #4F46E5);
+    background: var(--ion-color-primary-tint, #F0F9FF);
+  }
+  .preview-placeholder-icon {
+    font-size: 40px; // Adjusted
+    margin-bottom: 12px; // Adjusted
+    color: var(--ion-color-medium-shade, #6B7280);
+  }
+  p { font-weight: 500; color: var(--ion-color-text, #1F2937); margin:0; }
+}
+
+.result-actions-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+
+/* Sidebar Styling */
+.sidebar-card { // Class for app-card instances in the sidebar
+  margin-bottom: 0; // Reset if app-card has default margin
+}
+.sidebar-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px; // Adjusted
+  padding: 16px 20px; // Adjusted for sidebar cards
+  border-bottom: 1px solid var(--ion-color-medium-tint, #F3F4F6);
+}
+.sidebar-card-title {
+  font-size: 16px; // Adjusted
+  font-weight: 700;
+  color: var(--ion-color-text, #1F2937);
+}
+.sidebar-card-content {
+  padding: 20px; // Adjusted
+}
+
+.progress-tracker-card { /* Specifics for progress tracker card */ }
+.progress-bar-container {
+  width: 100%; height: 8px;
+  background: var(--ion-color-light-shade, #E5E7EB);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 12px; // Adjusted
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ion-color-primary, #4F46E5), var(--ion-color-secondary, #7C3AED));
+  width: 0%; /* Updated by [style.width.%] */
+  transition: width 0.5s ease;
+}
+.progress-steps-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 10px; // Adjusted
+}
+.progress-step-item {
+  display: flex; align-items: center; gap: 10px; // Adjusted
+  padding: 10px; // Adjusted
+  background: var(--ion-color-light-tint, #F9FAFB);
+  border-radius: 8px;
+  font-size: 13px; // Adjusted
+  color: var(--ion-color-medium-shade, #6B7280);
+  &.active {
+    background: var(--ion-color-primary-tint, #F0F9FF);
+    color: var(--ion-color-primary-shade, #4338CA);
+    font-weight: 600;
+    .step-dot-indicator { background: var(--ion-color-primary, #3B82F6); }
+  }
+  &.completed {
+    background: var(--ion-color-success-tint, #F0FDF4);
+    color: var(--ion-color-success-shade, #059669);
+    .step-dot-indicator { background: var(--ion-color-success, #10B981); }
+  }
+}
+.step-dot-indicator {
+  width: 12px; height: 12px; // Adjusted
+  border-radius: 50%;
+  background: var(--ion-color-medium-tint, #D1D5DB);
+  flex-shrink: 0;
+}
+
+.ai-insights-card { /* Specifics for AI insights card */
+  background: linear-gradient(135deg, var(--ion-color-primary, #4F46E5), var(--ion-color-secondary, #7C3AED));
+  color: var(--ion-color-primary-contrast, white);
+  .sidebar-card-header { border-bottom-color: rgba(255,255,255,0.2); }
+  .sidebar-card-title { color: var(--ion-color-primary-contrast, white); }
+  .ai-insights-icon ion-icon { font-size: 20px; }
+}
+.ai-tip-text {
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px; // Adjusted
+  padding: 12px; // Adjusted
+  font-size: 13px; // Adjusted
+  line-height: 1.5;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+
+/* Responsive Adjustments */
+@media (max-width: 968px) {
+  .main-layout-grid {
+    grid-template-columns: 1fr; // Stack workflow and sidebar
+    gap: 24px;
+  }
+  .sidebar-area {
+    position: static; // No longer sticky
+    order: -1; // Show sidebar above workflow on mobile
+  }
+  .input-methods-container { grid-template-columns: 1fr; } // Stack input methods
+}
+
+@media (max-width: 767px) {
+  .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .ai-status-header { align-self: flex-start; } // Align to start of column
+  .step-card-content-area { padding: 20px; } // Reduce padding
+  .results-dashboard-area { gap: 16px; }
+  .result-actions-buttons { grid-template-columns: 1fr; } // Stack action buttons
+}

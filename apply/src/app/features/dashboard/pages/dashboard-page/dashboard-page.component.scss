@@ -1,0 +1,315 @@
+// Import global variables if not automatically available
+// @use 'theme/variables' as v;
+
+// Base page styling
+:host {
+  display: block;
+}
+
+ion-content {
+  // --background: linear-gradient(135deg, var(--ion-color-light, #F9FAFB) 0%, var(--ion-color-background, #FFFFFF) 100%);
+  --background: var(--ion-color-light-tint); // Use a light global background
+}
+
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px 80px 20px; // Bottom padding for FAB clearance
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0; // Adjusted padding
+  border-bottom: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  margin-bottom: 32px; // Adjusted
+}
+
+.user-profile-display {
+  display: flex;
+  align-items: center;
+  gap: 10px; // Adjusted
+  background: var(--ion-color-light-contrast, white);
+  padding: 6px 12px; // Adjusted
+  border-radius: 20px; // Adjusted
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07); // Softer shadow
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  &:hover {
+    background-color: var(--ion-color-light, #f4f5f8);
+  }
+}
+.user-avatar-initials {
+  width: 32px; height: 32px; // Adjusted
+  background: linear-gradient(135deg, var(--ion-color-primary, #4F46E5), var(--ion-color-secondary, #7C3AED));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ion-color-primary-contrast, white);
+  font-weight: 600;
+  font-size: 12px; // For initials
+}
+.user-name-text {
+  font-weight: 500; // Adjusted
+  color: var(--ion-color-text, #1F2937);
+  font-size: 14px;
+}
+.profile-dropdown-icon { font-size: 16px; color: var(--ion-color-medium-shade); }
+
+
+/* Hero Section */
+.hero-main-section {
+  background: linear-gradient(135deg, var(--ion-color-primary, #4F46E5) 0%, var(--ion-color-secondary, #7C3AED) 100%);
+  border-radius: 20px; // Adjusted
+  padding: 32px; // Adjusted
+  color: var(--ion-color-primary-contrast, white);
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+  &::before { // Background pattern from prototype
+    content: ''; position: absolute; top: -50%; right: -50%;
+    width: 200%; height: 200%;
+    background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></svg>') repeat;
+    animation: floatAnimation 20s linear infinite; // Renamed
+    z-index: 0;
+  }
+}
+@keyframes floatAnimation { 0% { transform: translate(0,0); } 100% { transform: translate(-60px, -60px); } }
+
+.hero-content-wrapper {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 32px; align-items: center;
+}
+.hero-text-content { display: flex; flex-direction: column; gap: 12px; } // Adjusted gap
+.hero-greeting-text { font-size: 16px; opacity: 0.9; }
+.hero-main-title { font-size: 32px; font-weight: 800; line-height: 1.2; } // Adjusted
+.hero-main-subtitle { font-size: 16px; opacity: 0.9; } // Adjusted
+.hero-stats-grid { display: flex; gap: 24px; margin-top: 8px; } // Adjusted
+.hero-stat-item { text-align: center; }
+.stat-item-value { font-size: 28px; font-weight: 800; color: var(--ion-color-accent-yellow, #FBBF24); margin-bottom: 2px; } // Adjusted
+.stat-item-label { font-size: 13px; opacity: 0.8; } // Adjusted
+
+.ai-assistant-box {
+  background: rgba(255,255,255,0.1);
+  border-radius: 16px; padding: 20px; // Adjusted
+  backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);
+  text-align: center; min-width: 260px; // Adjusted
+}
+.ai-assistant-avatar {
+  width: 70px; height: 70px; // Adjusted
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 12px; font-size: 28px; // Adjusted
+  animation: aiPulseAnimation 2s infinite; // Renamed
+  ion-icon { color: var(--ion-color-primary-contrast); }
+}
+@keyframes aiPulseAnimation { 0%,100% {transform:scale(1);opacity:1;} 50% {transform:scale(1.05);opacity:0.8;} }
+.ai-assistant-message { font-weight: 600; margin-bottom: 6px; font-size: 15px; } // Adjusted
+.ai-assistant-description { font-size: 13px; opacity: 0.8; margin-bottom: 16px; } // Adjusted
+// app-button styling for ai-action is handled by styleType="secondary"
+
+/* Metrics Dashboard */
+.metrics-dashboard-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); // Adjusted minmax
+  gap: 20px; margin-bottom: 32px; // Adjusted
+}
+.metric-display-card { // Applied to app-card
+  // app-card provides base. Additional transition for hover:
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  &:hover { transform: translateY(-3px); }
+  // Color classes for icon backgrounds (applied via [ngClass] on app-card perhaps, or style icon directly)
+  &.metric-primary .metric-card-icon { background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade)); }
+  &.metric-secondary .metric-card-icon { background: linear-gradient(135deg, var(--ion-color-secondary), var(--ion-color-secondary-shade)); }
+  &.metric-success .metric-card-icon { background: linear-gradient(135deg, var(--ion-color-success), var(--ion-color-success-shade)); }
+  &.metric-warning .metric-card-icon { background: linear-gradient(135deg, var(--ion-color-warning), var(--ion-color-warning-shade)); }
+}
+.metric-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; } // Adjusted
+.metric-card-icon {
+  width: 36px; height: 36px; // Adjusted
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  color: var(--ion-color-primary-contrast, white);
+  ion-icon { font-size: 20px; }
+}
+.metric-card-title { font-weight: 500; color: var(--ion-color-text-medium-contrast, #333); font-size: 14px; } // Adjusted
+.metric-card-value { font-size: 24px; font-weight: 700; color: var(--ion-color-text, #1F2937); margin-bottom: 6px; } // Adjusted
+
+/* Smart Filters */
+.smart-filters-section {
+  background: var(--ion-color-light-contrast, white);
+  border-radius: 16px; padding: 20px; // Adjusted
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06); // Softer shadow
+  border: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  margin-bottom: 32px;
+}
+.filters-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;}
+.filters-section-title {
+  font-weight: 700; color: var(--ion-color-text, #1F2937); font-size: 18px; // Adjusted
+  display: flex; align-items: center; gap: 8px;
+  ion-icon { font-size: 20px; color: var(--ion-color-primary); }
+}
+.total-applications-count { color: var(--ion-color-medium-shade, #6B7280); font-weight: 400; margin-left: 6px; font-size: 14px; }
+.applications-search-bar { // For ion-searchbar
+  --border-radius: 12px; --box-shadow: none;
+  border: 2px solid var(--ion-color-medium-tint, #E5E7EB);
+  border-radius: 12px; // Ensure this radius is visible
+  max-width: 350px; flex-grow: 1;
+  &:focus-within { border-color: var(--ion-color-primary); }
+}
+.quick-filter-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 0; } // No margin if last element
+.filter-chip-item {
+  background: var(--ion-color-light, #F3F4F6);
+  color: var(--ion-color-dark-shade, #374151);
+  padding: 6px 12px; border-radius: 18px; // Adjusted
+  border: 2px solid transparent; cursor: pointer; transition: all 0.3s ease;
+  font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; // Adjusted
+  &:hover { background: var(--ion-color-light-shade, #E5E7EB); }
+  &.active {
+    background: var(--ion-color-primary-tint, #F0F9FF);
+    border-color: var(--ion-color-primary, #3B82F6);
+    color: var(--ion-color-primary-shade, #1E40AF);
+    font-weight: 600;
+    .chip-item-count { background: rgba(var(--ion-color-primary-rgb, 59,130,246), 0.15); color: var(--ion-color-primary-shade, #1E40AF); }
+  }
+}
+.chip-item-count {
+  background: var(--ion-color-medium-tint, #E5E7EB);
+  color: var(--ion-color-medium-contrast, #374151);
+  padding: 2px 6px; border-radius: 8px; font-size: 11px; margin-left: 4px; // Adjusted
+}
+
+/* Applications Section */
+.applications-display-section { margin-bottom: 32px; }
+.section-display-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; } // Adjusted
+.section-main-title { font-size: 22px; font-weight: 700; color: var(--ion-color-text, #1F2937); } // Adjusted
+.view-mode-toggle {
+  display: flex; background: var(--ion-color-light, #F3F4F6);
+  border-radius: 8px; padding: 4px; // Adjusted
+  ion-button {
+    --padding-start: 10px; --padding-end: 10px; // Adjusted
+    --border-radius: 6px; // Adjusted
+    height: 32px; // Adjusted
+    font-size: 14px; // For icon size if text was used
+    color: var(--ion-color-medium-shade, #6B7280);
+    &.active {
+      background: var(--ion-color-light-contrast, white);
+      color: var(--ion-color-primary, #4F46E5);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08); // Softer shadow
+    }
+  }
+}
+.applications-items-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); // Adjusted minmax
+  gap: 20px; // Adjusted
+}
+
+/* Simplified Application Card (applied to app-card) */
+.application-item-card { // Applied to app-card
+  // app-card provides base. Add specific styles for the top border.
+  position: relative; overflow: hidden; cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  &:hover { transform: translateY(-3px); }
+  &::before { // Status color border
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: var(--status-color, var(--ion-color-medium, #ccc)); // Fallback color
+  }
+}
+.app-card-main-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; } // Adjusted
+.app-company-logo {
+  width: 40px; height: 40px; // Adjusted
+  border-radius: 8px; // Adjusted
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ion-color-light-contrast, white); font-weight: 600; font-size: 16px; // Adjusted
+  flex-shrink: 0; background-size: cover; background-position: center;
+  background-color: var(--ion-color-medium-tint); // Fallback bg for logo
+  span { display: block; } // For initial when no logoUrl
+}
+.app-card-info-block { flex: 1; min-width: 0; }
+.app-company-name { font-size: 16px; font-weight: 600; color: var(--ion-color-text, #1F2937); margin-bottom: 2px; } // Adjusted
+.app-job-title { color: var(--ion-color-medium-shade, #6B7280); font-size: 14px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.app-card-status-badge {
+  padding: 4px 10px; border-radius: 14px; font-size: 11px; font-weight: 600; // Adjusted
+  text-transform: uppercase; letter-spacing: 0.5px;
+  display: inline-flex; align-items: center; gap: 4px; // Adjusted
+  background-color: var(--status-color, var(--ion-color-medium, #ccc));
+  color: var(--ion-color-primary-contrast, white); // Assuming contrast color for status badges
+  // Specific status class styling for text color if badge bg is light
+  &.en-attente-de-réponse { background-color: var(--ion-color-medium-tint); color: var(--ion-color-medium-shade); }
+  &.entretien-planifié { background-color: var(--ion-color-warning-tint); color: var(--ion-color-warning-shade); }
+  &.offre-reçue { background-color: var(--ion-color-success-tint); color: var(--ion-color-success-shade); }
+
+}
+.app-ai-insights-block { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 13px;} // Adjusted
+.app-ai-match-score {
+  background: var(--ion-color-primary-tint, #F0F9FF);
+  border: 1px solid var(--ion-color-primary, #0EA5E9);
+  border-radius: 8px; padding: 4px 8px; font-weight: 500; // Adjusted
+  color: var(--ion-color-primary-shade, #0C4A6E); display: inline-flex; align-items: center; gap: 4px;
+  .ai-icon-small { font-size: 14px; } // For ion-icon
+}
+.app-keywords-list { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+.app-keyword-tag {
+  background: var(--ion-color-light, #F0FDF4);
+  border: 1px solid var(--ion-color-medium-tint, #BBF7D0);
+  color: var(--ion-color-dark-shade, #166534);
+  padding: 2px 6px; border-radius: 6px; font-size: 10px; font-weight: 500; // Adjusted
+}
+.app-card-main-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 12px; padding-top: 12px; // Adjusted
+  border-top: 1px solid var(--ion-color-light-shade, #F3F4F6);
+}
+.app-card-meta-info { display: flex; flex-direction: column; gap: 2px; } // Adjusted
+.meta-info-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ion-color-medium-shade, #6B7280); // Adjusted
+  ion-icon { font-size: 14px; }
+}
+
+/* Empty State */
+.empty-applications-state {
+  text-align: center; padding: 60px 30px; color: var(--ion-color-medium-shade, #6B7280); // Adjusted
+  border: 2px dashed var(--ion-color-medium-tint, #E5E7EB); border-radius: 16px;
+  margin-top: 20px;
+}
+.empty-state-icon {
+  width: 100px; height: 100px; // Adjusted
+  background: linear-gradient(135deg, var(--ion-color-light, #F3F4F6), var(--ion-color-light-shade, #E5E7EB));
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px; ion-icon { font-size: 48px; color: var(--ion-color-medium-contrast); } // Adjusted
+}
+.empty-state-title { font-size: 20px; font-weight: 700; color: var(--ion-color-text, #1F2937); margin-bottom: 10px; } // Adjusted
+.empty-state-description { font-size: 14px; margin-bottom: 24px; max-width: 380px; margin-left: auto; margin-right: auto; } // Adjusted
+// app-button used for empty state action
+
+/* FAB - Ionic handles most styling */
+ion-fab-button {
+  --background: linear-gradient(135deg, var(--ion-color-primary, #4F46E5), var(--ion-color-secondary, #7C3AED));
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb, 79,70,229), 0.4); // Use primary RGB
+  &:hover { --background-hover: linear-gradient(135deg, var(--ion-color-primary-shade), var(--ion-color-secondary-shade)); }
+}
+
+
+/* Animations */
+.fade-in { animation: fadeInAnimation 0.6s ease forwards; } // Renamed
+@keyframes fadeInAnimation { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+
+/* Responsive */
+@media (max-width: 968px) {
+  .hero-content-wrapper { grid-template-columns: 1fr; text-align: center; }
+  .hero-stats-grid { justify-content: center; }
+  .ai-assistant-box { margin-top: 24px; }
+  .metrics-dashboard-grid { grid-template-columns: 1fr; }
+  .applications-items-grid { grid-template-columns: 1fr; }
+  .filters-section-header { flex-direction: column; gap: 16px; align-items: stretch; }
+  .applications-search-bar { max-width: none; }
+}
+
+@media (max-width: 767px) {
+  .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .user-profile-display { align-self: flex-end; }
+  .hero-main-title { font-size: 28px; }
+  .stat-item-value { font-size: 24px; }
+  .section-main-title { font-size: 20px; }
+  .quick-filter-chips { gap: 8px; justify-content: center;}
+  .filter-chip-item { padding: 6px 10px; font-size: 12px; }
+}

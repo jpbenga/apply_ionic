@@ -1,0 +1,156 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/dashboard" (click)="goBack()"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mon Profil</ion-title>
+    <!-- <app-logo size="small" slot="end"></app-logo> --> <!-- Optional: Logo in header -->
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="profile-page-container">
+    <!-- Profile Hero -->
+    <div class="profile-hero-section fade-in">
+      <div class="profile-avatar-wrapper" (click)="openEditModal()">
+        <img *ngIf="userProfileData.avatarUrl" [src]="userProfileData.avatarUrl" alt="Avatar" class="profile-avatar-image">
+        <div *ngIf="!userProfileData.avatarUrl" class="profile-avatar-initials">
+          {{ userProfileData.displayName?.substring(0, 2).toUpperCase() || 'AP' }}
+        </div>
+      </div>
+      <h1 class="profile-user-name">{{ userProfileData.displayName }}</h1>
+      <p class="profile-user-title">{{ userProfileData.professionalTitle || 'Titre non défini' }}</p>
+      <div class="profile-completion-status">
+        <div class="completion-status-circle" [style.--completion-percent]="profileCompletionPercent">
+          {{ profileCompletionPercent }}%
+        </div>
+        <div class="completion-status-text">
+          <div class="completion-text-title">Profil {{ profileCompletionPercent === 100 ? 'Complet' : 'Presque complet' }}</div>
+          <div class="completion-text-subtitle" *ngIf="profileCompletionPercent < 100">Encore quelques infos à ajouter</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impact Card -->
+    <app-card class="impact-stats-card fade-in">
+      <div class="impact-card-header">
+        <ion-icon name="stats-chart-outline" class="impact-header-icon"></ion-icon>
+        <h2 class="impact-card-title">Impact de votre profil sur Apply</h2>
+      </div>
+      <div class="impact-stats-grid">
+        <div class="impact-stat-item">
+          <div class="stat-item-value">{{ impactStats.applicationsSent }}</div>
+          <div class="stat-item-label">Candidatures</div>
+        </div>
+        <div class="impact-stat-item">
+          <div class="stat-item-value">{{ impactStats.interviewsObtained }}</div>
+          <div class="stat-item-label">Entretiens</div>
+        </div>
+        <div class="impact-stat-item">
+          <div class="stat-item-value">{{ impactStats.timeSavedHours }}h</div>
+          <div class="stat-item-label">Temps Économisé</div>
+        </div>
+      </div>
+    </app-card>
+
+    <!-- Tip Card -->
+    <div class="ai-tip-card fade-in" *ngIf="tipContent">
+      <div class="tip-card-header">
+        <ion-icon name="bulb-outline" class="tip-header-icon"></ion-icon>
+        <h3 class="tip-card-title">{{ tipContent.title }}</h3>
+      </div>
+      <p class="tip-card-content">{{ tipContent.description }}</p>
+    </div>
+
+    <!-- Profile Sections -->
+    <div class="profile-sections-list">
+      <app-card *ngFor="let section of profileSectionsConfig" class="profile-section-item fade-in">
+        <div class="section-item-header" (click)="toggleSection(section.id)">
+          <div class="section-header-info">
+            <ion-icon [name]="section.icon" class="section-info-icon" [ngClass]="section.id"></ion-icon>
+            <h3 class="section-info-title">{{ section.title }}</h3>
+          </div>
+          <div class="section-header-status">
+            <span class="status-indicator-badge" [class.complete]="section.completionPercent === 100" [class.incomplete]="section.completionPercent < 100">
+              {{ section.completionPercent === 100 ? 'Complet' : section.completionPercent + '% Complet' }}
+            </span>
+            <app-button (click)="openEditModal(section.id); $event.stopPropagation()" styleType="outline" size="small" class="edit-section-button">
+                <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
+            </app-button>
+            <ion-icon [name]="expandedSections[section.id] ? 'chevron-up-outline' : 'chevron-down-outline'" class="section-toggle-icon"></ion-icon>
+          </div>
+        </div>
+        <div class="section-item-content" *ngIf="expandedSections[section.id]">
+          <div class="field-display-group">
+            <div *ngFor="let field of section.fields" class="field-display-item">
+              <label class="field-item-label">{{ field.label }}</label>
+              <p class="field-item-value" [class.empty]="!userProfileData[field.key]">
+                {{ userProfileData[field.key] || 'Non renseigné' }}
+              </p>
+            </div>
+             <p *ngIf="section.fields.length === 0 && section.id !== 'personal'">Aucune information pour cette section.</p>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="profile-edit-modal-overlay" *ngIf="isModalOpen" (click)="closeEditModal()">
+      <div class="profile-edit-modal" (click)="$event.stopPropagation()">
+        <div class="modal-main-header">
+          <h2 class="modal-header-title">Modifier mon profil</h2>
+          <app-button (click)="closeEditModal()" styleType="default" fill="clear" class="modal-close-button">
+            <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+          </app-button>
+        </div>
+        <div class="modal-scrollable-content">
+          <div class="avatar-upload-section">
+            <div class="avatar-preview-area" (click)="avatarUploadInput.click()">
+              <img *ngIf="editingSectionData.avatarUrl" [src]="editingSectionData.avatarUrl" alt="Avatar Preview" class="avatar-image-preview">
+              <div *ngIf="!editingSectionData.avatarUrl" class="avatar-upload-placeholder">
+                <ion-icon name="camera-outline"></ion-icon>
+                <span>Changer photo</span>
+              </div>
+            </div>
+            <input #avatarUploadInput type="file" accept="image/*" (change)="handleAvatarUpload($event)" style="display: none;">
+          </div>
+
+          <div *ngFor="let section of profileSectionsConfig" class="modal-form-section">
+            <h3 class="form-section-title">
+              <ion-icon [name]="section.icon" class="form-section-icon"></ion-icon>
+              {{ section.title }}
+            </h3>
+            <div class="form-fields-grid">
+              <ng-container *ngFor="let field of section.fields">
+                <app-input *ngIf="field.type !== 'textarea'"
+                           [type]="field.type"
+                           [label]="field.label"
+                           [placeholder]="field.placeholder || ''"
+                           [(value)]="editingSectionData[field.key]"
+                           class="form-field-item">
+                </app-input>
+                <app-textarea *ngIf="field.type === 'textarea'"
+                              [label]="field.label"
+                              [placeholder]="field.placeholder || ''"
+                              [(value)]="editingSectionData[field.key]"
+                              rows="4"
+                              class="form-field-item full-width">
+                </app-textarea>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+        <div class="modal-action-buttons">
+          <app-button text="Annuler" styleType="outline" (buttonClick)="closeEditModal()" fullWidth="true"></app-button>
+          <app-button text="Enregistrer" styleType="primary" (buttonClick)="saveProfileChanges()" fullWidth="true"></app-button>
+        </div>
+      </div>
+    </div>
+
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+      <ion-fab-button (click)="openEditModal()">
+        <ion-icon name="create-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </div>
+</ion-content>
