@@ -2,13 +2,12 @@ import { Component, ViewChild, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
- IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel,
- IonTextarea, IonButton, IonIcon, IonSpinner, IonSegment, IonSegmentButton,
- IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,
- IonCheckbox, IonGrid, IonRow, IonCol, IonRange, IonBadge,
- ToastController
-} from '@ionic/angular/standalone';
-import { HeaderService } from '../../../../shared/services/header/header.service';
+  IonContent, IonTextarea, IonIcon, IonSpinner, IonSegment, IonSegmentButton, // Removed IonItem, IonLabel, IonButton (native)
+  IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,    // IonCard shell still used for now
+  IonCheckbox, IonGrid, IonRow, IonCol, IonRange, IonBadge,
+  ToastController
+} from '@ionic/angular/standalone'; // Removed IonHeader, IonToolbar, IonTitle
+// import { HeaderService } from '../../../../shared/services/header/header.service'; // Removed
 import { AIService, ATSAnalysisResult } from '../../../../services/ai/ai.service';
 import { CandidatureService } from '../../services/candidature/candidature.service';
 import { CvGenerationService } from '../../../../services/cv-generation/cv-generation.service';
@@ -17,9 +16,10 @@ import { CvDataService } from '../../../../services/cv-data/cv-data.service';
 import { GeneratedCv, CvTemplate, CvTheme, CvData } from '../../../../models/cv-template.model';
 import { StatutCandidature } from '../../models/candidature.model';
 import { Router } from '@angular/router';
-import { UserHeaderComponent } from '../../../../shared/components/user-header/user-header.component';
+// import { UserHeaderComponent } from '../../../../shared/components/user-header/user-header.component'; // Removed
 import { CvPreviewComponent } from '../../../../components/cv-preview/cv-preview.component';
 import { Subscription, combineLatest, firstValueFrom } from 'rxjs';
+import { StyledButtonComponent } from '../../../../components/shared/styled-button/styled-button.component'; // Added
 import { 
  StructuredCvImprovementResponse, 
  StructuredCvImprovementResult
@@ -33,11 +33,11 @@ import { UserProfile } from 'src/app/features/profile/models/user-profile.model'
  styleUrls: ['./postuler.page.scss'],
  standalone: true,
  imports: [
-   CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent,
-   IonItem, IonLabel, IonTextarea, IonButton, IonIcon, IonSpinner, IonSegment, IonSegmentButton,
+   CommonModule, FormsModule, IonContent, // Removed IonHeader, IonToolbar, IonTitle, IonItem, IonLabel, IonButton (native)
+   IonTextarea, IonIcon, IonSpinner, IonSegment, IonSegmentButton,
    IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonCardSubtitle,
    IonCheckbox, IonGrid, IonRow, IonCol, IonRange, IonBadge,
-   UserHeaderComponent, CvPreviewComponent
+   CvPreviewComponent, StyledButtonComponent // Removed UserHeaderComponent, Added StyledButtonComponent
  ]
 })
 export class PostulerPage implements OnInit, OnDestroy {
@@ -87,7 +87,7 @@ export class PostulerPage implements OnInit, OnDestroy {
  private subscriptions: Subscription[] = [];
 
  constructor(
-   private headerService: HeaderService,
+   // private headerService: HeaderService, // Removed
    private aiService: AIService,
    private candidatureService: CandidatureService,
    private cvGenerationService: CvGenerationService,
@@ -103,8 +103,8 @@ export class PostulerPage implements OnInit, OnDestroy {
  }
 
  ionViewWillEnter() {
-   this.headerService.updateTitle('Postuler');
-   this.headerService.setShowBackButton(false);
+   // this.headerService.updateTitle('Postuler'); // Removed
+   // this.headerService.setShowBackButton(false); // Removed
    this.checkStructuredCvData();
  }
 

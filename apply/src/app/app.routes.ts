@@ -91,5 +91,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/my-cv/my-cv.page').then(m => m.MyCvPage),
     canActivate: [redirectUnauthorizedToLoginGuard], // MODIFIÉ
     data: { title: 'Mon CV Structuré', showBackButton: true }
+  },
+  {
+    path: 'onboarding',
+    loadComponent: () => import('./features/onboarding/pages/onboarding/onboarding.page').then( m => m.OnboardingPage),
+    canActivate: [redirectUnauthorizedToLoginGuard],
+    data: { title: 'Bienvenue', showBackButton: false }
   }
 ];

@@ -1,20 +1,274 @@
-ion-card {
-    margin-left: 0;
-    margin-right: 0;
-    margin-bottom: 16px; // Espace entre les cartes
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); // Ombre légère
+:host {
+  display: block; // Ensures the component takes up block space for layout
+}
+
+.application-card {
+  background: var(--ion-color-white, #ffffff);
+  border-radius: var(--border-radius-large, 20px); // Using a larger radius from prototype
+  padding: 20px; // Adjusted from 24px
+  box-shadow: var(--card-shadow-medium, 0 4px 20px rgba(0,0,0,0.08)); // A slightly more prominent shadow
+  border: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  cursor: pointer;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+  position: relative;
+  overflow: hidden;
+
+  // Top border for status color
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--status-color, var(--ion-color-medium));
+    transition: background var(--transition-speed, 0.3s) ease;
   }
-  
-  ion-card-title {
-    font-size: 1.1em;
-    font-weight: bold;
+
+  &:hover:not(.is-in-selection-mode) { // Only apply hover effect if not in selection mode for clarity
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
   }
-  
-  ion-card-subtitle {
-    font-size: 0.9em;
-    color: var(--ion-color-medium);
+
+  &.is-in-selection-mode {
+    // Optional: Slight visual cue that cards are clickable for selection
+    // box-shadow: 0 0 0 1px var(--ion-color-primary-tint);
   }
-  
-  ion-item ion-icon {
-    margin-right: 8px;
+
+  &.is-selected {
+    transform: scale(0.97);
+    border: 2px solid var(--ion-color-primary);
+    box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
   }
+}
+
+// Checkmark styles
+.selection-checkmark, .selection-checkbox-outline {
+  position: absolute;
+  top: 12px; // Adjust position to not overlap too much with status border
+  right: 12px;
+  font-size: 26px; // Adjust icon size
+  background-color: rgba(var(--ion-color-white-rgb), 0.8); // Slight white background for visibility
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; // Container size
+  height: 30px;
+  z-index: 5; // Ensure it's above other card content
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start; // Align items to the start for varied heights
+  gap: 16px;
+  margin-bottom: 16px; // Adjusted from 20px
+}
+
+.company-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-medium, 12px); // Consistent border radius
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ion-color-primary-contrast, #ffffff); // Text color for initials
+  font-weight: 700;
+  font-size: 18px;
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  // Default background color will be set by [style.background] binding if no logo URL
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0; // Prevents text overflow issues
+
+  .company-name {
+    font-size: 17px; // Adjusted
+    font-weight: 700;
+    color: var(--ion-text-color, #1F2937);
+    margin-bottom: 2px; // Adjusted
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .job-title {
+    color: var(--ion-color-medium-shade, #6B7280);
+    font-size: 14px; // Adjusted
+    margin-bottom: 8px; // Adjusted from 12px
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.card-status {
+  align-self: flex-start; // Keep badge at the top
+}
+
+.status-badge {
+  padding: 5px 10px; // Adjusted
+  border-radius: var(--border-radius-xl, 16px); // Consistent large radius for badges
+  font-size: 11px; // Adjusted
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex; // Changed from flex to inline-flex
+  align-items: center;
+  gap: 5px; // Adjusted
+
+  &::before { // Dot indicator
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor; // Uses the badge's text color
+  }
+
+  // Status color classes will be added via [ngClass] based on getStatusClass()
+  &.applied { background-color: var(--ion-color-primary-tint); color: var(--ion-color-primary-shade); }
+  &.interview { background-color: var(--ion-color-success-tint); color: var(--ion-color-success-shade); }
+  &.offer { background-color: var(--ion-color-warning-tint); color: var(--ion-color-warning-shade); }
+  &.accepted { background-color: var(--ion-color-secondary-tint); color: var(--ion-color-secondary-shade); } // Example, choose appropriate color
+  &.rejected { background-color: var(--ion-color-danger-tint); color: var(--ion-color-danger-shade); }
+  // Add more statuses as needed
+  &.default { background-color: var(--ion-color-medium-tint); color: var(--ion-color-medium-shade); }
+}
+
+.ai-insights {
+  display: flex;
+  align-items: center;
+  gap: 10px; // Adjusted
+  margin-bottom: 12px; // Adjusted
+  flex-wrap: wrap; // Allow wrapping if keywords are too many
+}
+
+.ai-score {
+  background: var(--ion-color-tertiary-tint, #F0F9FF); // Using tertiary or a light blue
+  border: 1px solid var(--ion-color-tertiary-shade, #0EA5E9);
+  border-radius: var(--border-radius-medium, 12px);
+  padding: 6px 10px; // Adjusted
+  font-size: 12px; // Adjusted
+  font-weight: 600;
+  color: var(--ion-color-tertiary-shade, #0C4A6E);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  .ai-icon-small {
+    width: 16px;
+    height: 16px;
+    background: var(--ion-color-tertiary); // Solid color for icon bg
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ion-color-tertiary-contrast);
+    font-size: 10px; // For ion-icon inside
+    ion-icon {
+      font-size: 12px; // Ensure icon fits
+    }
+  }
+}
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1; // Allow keywords to take remaining space
+}
+
+.keyword {
+  background: var(--ion-color-success-tint, #F0FDF4); // Using success tint
+  border: 1px solid var(--ion-color-success-shade, #BBF7D0);
+  color: var(--ion-color-success-shade, #166534);
+  padding: 3px 8px; // Adjusted
+  border-radius: var(--border-radius-small, 8px);
+  font-size: 10px; // Adjusted
+  font-weight: 500;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px; // Adjusted
+  padding-top: 12px; // Adjusted
+  border-top: 1px solid var(--ion-color-medium-tint, #F3F4F6);
+}
+
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1; // Allow meta to take space
+  min-width: 0; // For ellipsis if needed
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px; // Adjusted
+    color: var(--ion-color-medium-shade, #6B7280);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    ion-icon {
+      font-size: 14px; // Icon size in meta
+      flex-shrink: 0;
+    }
+  }
+
+  .meta-highlight { // For specific highlighted text within meta-item
+    color: var(--ion-color-primary); // Use primary color for highlights
+    font-weight: 600;
+  }
+}
+
+.card-actions {
+  display: flex;
+  gap: 6px; // Adjusted
+  opacity: 0; // Hidden by default, shown on card hover
+  transition: opacity var(--transition-speed, 0.3s) ease;
+
+  .application-card:hover & { // Show actions on card hover
+    opacity: 1;
+  }
+
+  .action-btn {
+    width: 30px; // Adjusted
+    height: 30px;
+    border: none;
+    border-radius: var(--border-radius-small, 8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-speed, 0.3s) ease;
+    font-size: 16px; // Icon size
+    padding: 0; // Remove default button padding
+
+    &.view {
+      background: var(--ion-color-primary-tint);
+      color: var(--ion-color-primary-shade);
+      &:hover { background: var(--ion-color-primary-shade); color: var(--ion-color-primary-contrast); }
+    }
+
+    &.edit {
+      background: var(--ion-color-secondary-tint);
+      color: var(--ion-color-secondary-shade);
+      &:hover { background: var(--ion-color-secondary-shade); color: var(--ion-color-secondary-contrast); }
+    }
+
+    &.delete { // Specific style for delete button
+      background: var(--ion-color-danger-tint);
+      color: var(--ion-color-danger-shade);
+      &:hover { background: var(--ion-color-danger-shade); color: var(--ion-color-danger-contrast); }
+    }
+  }
+}

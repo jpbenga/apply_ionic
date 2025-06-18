@@ -1,43 +1,117 @@
-// src/app/pages/auth/signup/signup.page.scss
-.signup-container {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 20px;
+// Consistent background with login page
+ion-content.signup-page-content {
+  --background: var(--ion-color-light, #F9FAFB);
+}
+
+.signup-form-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  max-width: 420px; // Max width for the form content area
+  margin: 0 auto;  // Center the form container
+  padding: 20px;  // Overall padding
+}
+
+.signup-header {
+  text-align: center;
+  margin-bottom: 32px;
+
+  // Optional: Logo styling if a logo is added to signup header
+  // .logo-container {
+  //   margin-bottom: 16px;
+  //   .logo-icon-large {
+  //     width: 60px;
+  //     height: 60px;
+  //     background: var(--ion-color-primary);
+  //     color: var(--ion-color-primary-contrast);
+  //     border-radius: 16px;
+  //     display: inline-flex;
+  //     align-items: center;
+  //     justify-content: center;
+  //     font-size: 32px;
+  //     font-weight: bold;
+  //   }
+  // }
+
+  h2 { // Replaces .login-title styling from login page
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ion-text-color, var(--ion-color-dark, #1F2937));
+    margin-bottom: 8px;
   }
-  
+
+  p { // Replaces .login-subtitle styling from login page
+    color: var(--ion-color-medium-shade, #6B7280);
+    font-size: 16px;
+  }
+}
+
+// Message Area styling (consistent with login page)
+.message-area {
+  padding: 10px 0;
+  margin-bottom: 16px; // Add margin below messages before form starts
+
+  .error-message, .success-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
   .error-message {
-    font-size: 0.8rem;
-    margin-left: 16px;
-    margin-top: 5px;
+    background: rgba(var(--ion-color-danger-rgb, 235, 68, 90), 0.1);
+    border: 1px solid rgba(var(--ion-color-danger-rgb, 235, 68, 90), 0.2);
+    color: var(--ion-color-danger-shade, #cf3c4f);
   }
-  
-  .error-container {
-    text-align: center;
-    padding: 10px;
-    margin-top: 20px;
-    border-radius: 5px;
-    background-color: rgba(var(--ion-color-danger-rgb), 0.1);
+
+  .success-message {
+    background: rgba(var(--ion-color-success-rgb, 45, 211, 111), 0.1);
+    border: 1px solid rgba(var(--ion-color-success-rgb, 45, 211, 111), 0.2);
+    color: var(--ion-color-success-shade, #28ba62);
+    text-align: center; // Center success message text
+    justify-content: center; // Center icon and text
   }
-  
-  .success-card {
-    text-align: center;
-    margin: 20px 0;
-    
-    ion-icon {
-      font-size: 48px;
-      margin-bottom: 10px;
-    }
-    
-    p {
-      margin: 5px 0;
-    }
+}
+
+app-styled-input {
+  margin-bottom: 20px; // Spacing between input fields
+  // Ensure it takes full width if not already default by the component
+  display: block;
+}
+
+app-styled-button[type="submit"] {
+  margin-top: 10px; // Add some space above the main submit button
+}
+
+.login-link-container {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+
+  p {
+    color: var(--ion-color-medium-shade, #6B7280);
+    margin-bottom: 12px;
   }
-  
-  ion-item {
-    margin-bottom: 10px;
-    --border-radius: 5px;
-  }
-  
-  .button-container {
-    margin-top: 20px;
-  }
+  // app-styled-button with fill="clear" will handle its own styling
+}
+
+// Spinner within button
+ion-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+// Ensure the header in signup.page.html is styled correctly if needed
+ion-header ion-toolbar {
+  // Example: make it consistent if login page has no header
+  // --background: var(--ion-color-light, #F9FAFB);
+  // --color: var(--ion-text-color, #1F2937);
+  // --border-width: 0px; // Remove bottom border if desired
+}
+
+ion-back-button {
+  // Custom styling for back button if needed
+}

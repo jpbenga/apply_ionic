@@ -4,21 +4,21 @@ import { FormsModule } from '@angular/forms';
 import { Observable, of, Subscription, BehaviorSubject } from 'rxjs';
 import { first, tap, catchError, finalize } from 'rxjs/operators';
 import {
-  IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput,
-  IonTextarea, IonButton, IonIcon, IonAvatar, IonSpinner, IonList,
+  IonContent, IonTextarea, IonButton, IonIcon, IonSpinner, // Keep IonButton for modal close
   IonFab, IonFabButton,
-  IonModal, IonButtons
+  IonModal, IonButtons // IonButtons for modal header
 } from '@ionic/angular/standalone';
-import { HeaderService } from '../../../shared/services/header/header.service'; // CORRECTED
+// Removed: IonHeader, IonToolbar, IonTitle, IonItem, IonLabel, IonInput, IonAvatar, IonList
+// import { HeaderService } from '../../../shared/services/header/header.service'; // No longer needed for title
 import { ProfileService } from '../services/profile.service';
 import { UserProfile } from '../models/user-profile.model';
-import { AuthService } from '../../auth/services/auth/auth.service'; // CORRECTED
+import { AuthService } from '../../auth/services/auth/auth.service';
 import { User } from '@angular/fire/auth';
-import { UserHeaderComponent } from '../../../shared/components/user-header/user-header.component'; // MODIFIED
-import { ToastController, ModalController } from '@ionic/angular/standalone';
-import { StorageService } from '../../../shared/services/storage/storage.service'; // MODIFIED
-// import { addIcons } from 'ionicons'; // SUPPRIMÉ
-// import { personCircleOutline, createOutline, saveOutline, close, personAddOutline } from 'ionicons/icons'; // SUPPRIMÉ
+// import { UserHeaderComponent } from '../../../shared/components/user-header/user-header.component'; // Removed
+import { ToastController, ModalController } from '@ionic/angular/standalone'; // ModalController might not be needed if using inline modal
+import { StorageService } from '../../../shared/services/storage/storage.service';
+import { StyledInputComponent } from '../../../components/shared/styled-input/styled-input.component'; // Added
+import { StyledButtonComponent } from '../../../components/shared/styled-button/styled-button.component'; // Added
 
 @Component({
   selector: 'app-profile',
@@ -27,11 +27,11 @@ import { StorageService } from '../../../shared/services/storage/storage.service
   standalone: true,
   imports: [
     CommonModule, FormsModule,
-    IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput,
-    IonTextarea, IonButton, IonIcon, IonAvatar, IonSpinner, IonList,
+    IonContent, IonTextarea, IonButton, IonIcon, IonSpinner,
     IonFab, IonFabButton,
     IonModal, IonButtons,
-    UserHeaderComponent
+    StyledInputComponent, // Added
+    StyledButtonComponent // Added
   ]
 })
 export class ProfilePage implements OnInit, OnDestroy {
@@ -49,19 +49,23 @@ export class ProfilePage implements OnInit, OnDestroy {
   editableProfileInModal: Partial<UserProfile> = {};
   selectedAvatarFile: File | null = null;
   isUploadingAvatar: boolean = false;
+
+  // Properties for section expansion
+  personalInfoOpen: boolean = true;
+  professionalInfoOpen: boolean = false;
+  addressInfoOpen: boolean = false;
   
   @ViewChild('avatarFileInput') avatarFileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
-    public headerService: HeaderService,
+    // public headerService: HeaderService, // Removed
     private profileService: ProfileService,
     private authService: AuthService,
     private toastController: ToastController,
-    private modalController: ModalController,
+    // private modalController: ModalController, // Not used for inline modal
     private storageService: StorageService
   ) {
     this.currentUserAuth$ = this.authService.user$;
-    // addIcons({ personCircleOutline, createOutline, saveOutline, close, personAddOutline }); // SUPPRIMÉ
   }
 
   ngOnInit() {
@@ -75,8 +79,8 @@ export class ProfilePage implements OnInit, OnDestroy {
   }
 
   ionViewWillEnter() {
-    this.headerService.updateTitle('Mon Profil');
-    this.headerService.setShowBackButton(true);
+    // this.headerService.updateTitle('Mon Profil'); // Handled by custom header in template
+    // this.headerService.setShowBackButton(true); // Handled by custom back button in template
     if (!this.isLoading) {
         this.loadProfileDataIntoEditableFromSubject();
     }
@@ -85,7 +89,7 @@ export class ProfilePage implements OnInit, OnDestroy {
   }
 
   ionViewWillLeave() {
-    this.headerService.setShowBackButton(false);
+    // this.headerService.setShowBackButton(false); // No longer needed
   }
   
   loadProfile() {
@@ -276,5 +280,22 @@ export class ProfilePage implements OnInit, OnDestroy {
       buttons: [{ text: 'OK', role: 'cancel'}]
     });
     toast.present();
+  }
+
+  // Method to toggle profile sections
+  toggleSection(section: 'personalInfoOpen' | 'professionalInfoOpen' | 'addressInfoOpen') {
+    this[section] = !this[section];
+  }
+
+  // Helper to get initials for avatar
+  getInitials(prenom?: string, nom?: string): string {
+    let initials = '';
+    if (prenom) {
+      initials += prenom.charAt(0).toUpperCase();
+    }
+    if (nom) {
+      initials += nom.charAt(0).toUpperCase();
+    }
+    return initials || '?';
   }
 }

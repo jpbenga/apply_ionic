@@ -1,0 +1,132 @@
+<ion-content>
+  <div class="onboarding-screen-container">
+
+    <!-- Slide 1: Value Proposition -->
+    <div class="onboarding-slide" [class.active]="currentSlide === 0" [class.prev]="currentSlide > 0">
+      <div class="logo-container">
+        <div class="logo"></div> <!-- Styled by SCSS -->
+        <span class="brand-name">Apply</span>
+      </div>
+
+      <div class="content-area">
+        <div class="illustration">
+          <ion-icon name="rocket-outline" class="illustration-icon"></ion-icon>
+        </div>
+
+        <h1 class="slide-title">Apply postule pour vous, intelligemment</h1>
+        <p class="slide-subtitle">Libérez-vous de la charge mentale de la recherche d'emploi et concentrez-vous sur la réussite de vos entretiens.</p>
+      </div>
+
+      <div class="navigation-area">
+        <div class="dots-indicator">
+          <div class="dot" [class.active]="currentSlide === 0" (click)="goToSlide(0)"></div>
+          <div class="dot" [class.active]="currentSlide === 1" (click)="goToSlide(1)"></div>
+          <div class="dot" [class.active]="currentSlide === 2" (click)="goToSlide(2)"></div>
+        </div>
+
+        <app-styled-button color="secondary" (click)="nextSlide()">
+          Commencer
+        </app-styled-button>
+        <app-styled-button fill="clear" (click)="skipOnboarding()">
+          Passer pour l'instant
+        </app-styled-button>
+      </div>
+    </div>
+
+    <!-- Slide 2: CV Import -->
+    <div class="onboarding-slide" [class.active]="currentSlide === 1" [class.prev]="currentSlide > 1">
+      <div class="logo-container">
+        <div class="logo"></div>
+        <span class="brand-name">Apply</span>
+      </div>
+
+      <div class="content-area">
+        <h1 class="slide-title">Importez votre CV principal</h1>
+        <p class="slide-subtitle">Laissez notre IA extraire vos informations pour gagner du temps.</p>
+
+        <div class="upload-options">
+          <div class="upload-option" (click)="uploadPDF()">
+            <ion-icon name="document-text-outline" class="upload-option-icon"></ion-icon>
+            <div class="upload-option-title">Importer depuis un PDF</div>
+            <div class="upload-option-desc">Glissez votre CV ou cliquez pour parcourir</div>
+          </div>
+
+          <div class="upload-option" (click)="importLinkedIn()">
+            <ion-icon name="logo-linkedin" class="upload-option-icon"></ion-icon>
+            <div class="upload-option-title">Importer depuis LinkedIn</div>
+            <div class="upload-option-desc">Connexion sécurisée à votre profil</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="navigation-area">
+        <div class="dots-indicator">
+          <div class="dot" [class.active]="currentSlide === 0" (click)="goToSlide(0)"></div>
+          <div class="dot" [class.active]="currentSlide === 1" (click)="goToSlide(1)"></div>
+          <div class="dot" [class.active]="currentSlide === 2" (click)="goToSlide(2)"></div>
+        </div>
+
+        <app-styled-button color="secondary" (click)="nextSlide()" [disabled]="!slide2ContinueEnabled">
+          <ion-icon *ngIf="slide2ContinueEnabled" name="checkmark-circle-outline" slot="start" class="success-checkmark"></ion-icon>
+          Continuer
+        </app-styled-button>
+        <app-styled-button fill="clear" (click)="skipStep()">
+          Passer cette étape
+        </app-styled-button>
+      </div>
+    </div>
+
+    <!-- Screen 3: Career Objectives -->
+    <div class="onboarding-slide" [class.active]="currentSlide === 2" [class.prev]="currentSlide > 2">
+      <div class="logo-container">
+        <div class="logo"></div>
+        <span class="brand-name">Apply</span>
+      </div>
+
+      <div class="content-area">
+        <h1 class="slide-title">Quels sont vos objectifs de carrière ?</h1>
+        <p class="slide-subtitle">Aidez-nous à personnaliser votre expérience et à trouver les meilleures opportunités.</p>
+
+        <form [formGroup]="objectivesForm" (ngSubmit)="completeOnboarding()">
+          <app-styled-input
+            label="Poste(s) Cible(s)"
+            formControlName="targetRoles"
+            placeholder="Ex: Product Manager, UX Designer"
+            [errorText]="getErrorMessage('targetRoles')">
+          </app-styled-input>
+          <div class="form-hint">Plusieurs postes possibles, séparés par des virgules</div>
+
+          <app-styled-input
+            label="Secteur(s) d'Activité"
+            formControlName="targetSectors"
+            placeholder="Ex: Tech, Finance, Santé"
+            [errorText]="getErrorMessage('targetSectors')">
+          </app-styled-input>
+
+          <app-styled-input
+            label="Localisation(s) Préférée(s)"
+            formControlName="targetLocations"
+            placeholder="Ex: Lyon, Paris, Télétravail"
+            [errorText]="getErrorMessage('targetLocations')">
+          </app-styled-input>
+        </form>
+      </div>
+
+      <div class="navigation-area">
+        <div class="dots-indicator">
+          <div class="dot" [class.active]="currentSlide === 0" (click)="goToSlide(0)"></div>
+          <div class="dot" [class.active]="currentSlide === 1" (click)="goToSlide(1)"></div>
+          <div class="dot" [class.active]="currentSlide === 2" (click)="goToSlide(2)"></div>
+        </div>
+
+        <app-styled-button color="secondary" (click)="completeOnboarding()" [disabled]="!objectivesForm.valid"> <!-- Changed disabled condition -->
+           {{ objectivesForm.valid ? 'Voir les offres' : 'Terminer l\'Onboarding' }}
+        </app-styled-button>
+        <app-styled-button fill="clear" (click)="skipStep()">
+          Définir plus tard
+        </app-styled-button>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

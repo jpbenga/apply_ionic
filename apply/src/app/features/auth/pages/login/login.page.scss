@@ -1,0 +1,221 @@
+// Ensure ion-content takes full height and provides a background
+ion-content {
+  --background: var(--ion-color-light, #F9FAFB); // Or var(--neutral-bg) from prototype if that's preferred
+}
+
+.login-page-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%; // Ensure it tries to fill the screen vertically
+  padding: 20px; // Default padding, can be overridden by ion-padding if needed
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .logo-container {
+    margin-bottom: 16px;
+    .logo-icon-large { // Simplified logo for now
+      width: 60px;
+      height: 60px;
+      background: var(--ion-color-primary);
+      color: var(--ion-color-primary-contrast);
+      border-radius: 16px;
+      display: inline-flex; // Changed from flex to inline-flex
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      font-weight: bold;
+      // Add the checkmark if desired, using ::after
+      position: relative;
+      &::after {
+        content: '✓';
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        background: var(--ion-color-secondary); // accent-yellow
+        color: var(--ion-text-color-rgb, #000000); // dark text on yellow
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        border: 2px solid var(--ion-color-light);
+      }
+    }
+  }
+
+  .login-title {
+    font-size: 28px; // Adjusted from 32px
+    font-weight: 700;
+    color: var(--ion-text-color, var(--ion-color-dark, #1F2937));
+    margin-bottom: 8px; // Adjusted
+  }
+
+  .login-subtitle {
+    color: var(--ion-color-medium-shade, #6B7280);
+    font-size: 16px;
+  }
+}
+
+.ai-status {
+  background: var(--ion-color-tertiary-tint, #E0F2FE); // Using a light blue, similar to prototype
+  border: 1px solid var(--ion-color-primary-shade, #0EA5E9); // Darker blue border
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px; // Adjusted
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .ai-avatar {
+    width: 40px; // Adjusted
+    height: 40px;
+    background: var(--ion-color-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ion-color-primary-contrast);
+    font-size: 20px; // For ion-icon
+    // animation: pulse 2s infinite; // Pulse animation can be added if desired
+  }
+
+  .ai-text {
+    flex: 1;
+  }
+
+  .ai-title {
+    font-weight: 600;
+    color: var(--ion-color-primary-shade, #0C4A6E); // Darker blue text
+    margin-bottom: 2px; // Adjusted
+  }
+
+  .ai-description {
+    font-size: 14px;
+    color: var(--ion-color-primary, #0369A1); // Primary blue text
+  }
+}
+
+.form-container {
+  width: 100%;
+  max-width: 400px; // Max width for form on larger screens
+  margin: 0 auto; // Center form
+}
+
+// Styling for app-styled-input will come from its own component and theme variables.
+// We might add margin or other layout adjustments if needed.
+app-styled-input {
+  margin-bottom: 20px;
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: -12px; // Pull it closer to the password input
+  margin-bottom: 24px;
+  app-styled-button { // Target the button specifically if needed
+    --padding-end: 0; // Reduce padding for a more link-like feel if using button
+    font-size: 14px; // Match prototype
+  }
+}
+
+// Styling for app-styled-button will come from its own component.
+// We can add margin here if needed.
+app-styled-button[type="submit"] {
+  // Customizations for the primary login button if app-styled-button defaults are not enough
+}
+
+app-styled-button[color="light"] { // For Google button
+  // Potentially add border similar to prototype:
+  // border: 2px solid var(--ion-color-medium-tint, #E5E7EB);
+  // --color: var(--ion-text-color, #1F2937); // Ensure text color is dark
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 24px 0; // Adjusted
+
+  span {
+    margin: 0 16px;
+    color: var(--ion-color-medium-shade, #6B7280);
+    font-size: 14px;
+  }
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--ion-color-medium-tint, #E5E7EB);
+  }
+}
+
+.signup-link-container {
+  text-align: center;
+  margin-top: 24px; // Adjusted
+  padding-top: 24px;
+  border-top: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+
+  p {
+    color: var(--ion-color-medium-shade, #6B7280);
+    margin-bottom: 12px;
+  }
+  // app-styled-button fill="outline" will handle its own styling
+}
+
+.message-area {
+  // Common styling for error and success messages
+  padding: 10px 0; // Add some vertical padding
+  .error-message, .success-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px; // Adjusted
+    border-radius: 8px; // Consistent border-radius
+    font-size: 14px;
+    margin-bottom: 16px; // Space below message
+  }
+
+  .error-message {
+    background: rgba(var(--ion-color-danger-rgb), 0.1);
+    border: 1px solid rgba(var(--ion-color-danger-rgb), 0.2);
+    color: var(--ion-color-danger-shade);
+  }
+
+  .success-message {
+    background: rgba(var(--ion-color-success-rgb), 0.1);
+    border: 1px solid rgba(var(--ion-color-success-rgb), 0.2);
+    color: var(--ion-color-success-shade);
+  }
+}
+
+// Spinner within button
+ion-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+// Responsive adjustments for larger screens (md and up) could be added here
+// to implement the two-column layout from the prototype.
+// For now, focusing on a single-column, mobile-first layout.
+// Example:
+// @media (min-width: 768px) {
+//   .login-page-container {
+//     flex-direction: row;
+//   }
+//   .welcome-section-mobile { // This would be the .welcome-side
+//      display: flex !important; // Show it
+//      flex: 1;
+//      // Add full styling for welcome-side here
+//   }
+//   .login-form-section {
+//      flex: 1;
+//      padding: 40px;
+//   }
+// }

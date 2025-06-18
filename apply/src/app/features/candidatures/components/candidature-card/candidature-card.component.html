@@ -1,65 +1,72 @@
-<ion-card (click)="onCardClick()" [style.cursor]="'pointer'" [style.border]="isSelected ? '2px solid var(--ion-color-primary)' : ''">
-  <ion-card-header>
-    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-      <div style="display: flex; align-items: flex-start; gap: 12px; flex: 1;">
-        <!-- Checkbox pour la sélection multiple -->
-        <div *ngIf="isSelectionMode" style="margin-top: 4px;">
-          <ion-icon 
-            [name]="isSelected ? 'checkmark-circle' : 'checkbox-outline'" 
-            [color]="isSelected ? 'primary' : 'medium'"
-            size="large">
-          </ion-icon>
-        </div>
-        
-        <div style="flex: 1;">
-          <ion-card-title>{{ candidature.entreprise }}</ion-card-title>
-          <p class="ion-text-wrap">{{ candidature.poste }}</p>
-        </div>
-      </div>
-      
-      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-        <ion-badge [color]="getStatusColor(candidature.statut)">
-          {{ candidature.statut | titlecase }}
-        </ion-badge>
-        
-        <!-- Bouton de suppression individuelle (caché en mode sélection) -->
-        <ion-button 
-          *ngIf="!isSelectionMode"
-          fill="clear" 
-          color="danger" 
-          size="small"
-          (click)="onDeleteCandidature($event)"
-          title="Supprimer cette candidature">
-          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-        </ion-button>
+<div
+  class="application-card"
+  [style.--status-color]="statusColor"
+  [class.is-in-selection-mode]="isSelectionMode"
+  [class.is-selected]="isSelected && isSelectionMode"
+  (click)="onCardClick()">
+
+  <!-- Optional: Visual indicator for selection state -->
+  <div *ngIf="isSelectionMode && isSelected" class="selection-checkmark">
+    <ion-icon name="checkmark-circle" color="primary"></ion-icon>
+  </div>
+  <div *ngIf="isSelectionMode && !isSelected" class="selection-checkbox-outline">
+    <ion-icon name="ellipse-outline" color="medium"></ion-icon> <!-- Or checkbox-outline -->
+  </div>
+
+  <div class="card-header">
+    <div class="company-logo" [style.background]="candidature?.companyLogoUrl ? 'url(' + candidature?.companyLogoUrl + ')' : defaultCompanyColor">
+      <span *ngIf="!candidature?.companyLogoUrl">{{ getCompanyInitials(candidature?.entreprise) }}</span>
+    </div>
+    <div class="card-info">
+      <div class="company-name">{{ candidature?.entreprise || 'N/A' }}</div>
+      <div class="job-title">{{ candidature?.poste || 'N/A' }}</div>
+    </div>
+    <div class="card-status" *ngIf="candidature?.statut">
+      <div class="status-badge" [ngClass]="getStatusClass(candidature?.statut)">
+        {{ getDisplayStatus(candidature?.statut) }}
       </div>
     </div>
-  </ion-card-header>
-  
-  <ion-card-content>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <div>
-        <p *ngIf="candidature.dateCandidature" class="ion-text-wrap">
-          <ion-text color="medium">
-            <small>Postulé le {{ candidature.dateCandidature.toDate() | date:'dd/MM/yyyy' }}</small>
-          </ion-text>
-        </p>
-        <p *ngIf="candidature.suivi && candidature.suivi.length > 0" class="ion-text-wrap">
-          <ion-text color="medium">
-            <small>{{ candidature.suivi.length }} suivi(s)</small>
-          </ion-text>
-        </p>
+  </div>
+
+  <div class="ai-insights" *ngIf="candidature?.aiScore">
+    <div class="ai-score">
+      <div class="ai-icon-small">
+        <ion-icon name="sparkles-outline"></ion-icon> <!-- Or 'flash-outline' -->
       </div>
-      
-      <!-- Bouton "Voir détails" (caché en mode sélection) -->
-      <ion-button 
-        *ngIf="!isSelectionMode"
-        fill="outline" 
-        size="small" 
-        (click)="onViewDetails()">
-        <ion-icon name="eye-outline" slot="start"></ion-icon>
-        Voir détails
-      </ion-button>
+      Match {{ candidature.aiScore }}%
     </div>
-  </ion-card-content>
-</ion-card>
+    <div class="keywords" *ngIf="candidature.keywordsArray && candidature.keywordsArray.length > 0">
+      <span *ngFor="let keyword of candidature.keywordsArray.slice(0, 3)" class="keyword">{{ keyword }}</span>
+      <!-- Limiting to 3 keywords for display -->
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <div class="card-meta">
+      <div class="meta-item" *ngIf="candidature?.dateSoumission || candidature?.dateCandidature">
+        <ion-icon name="calendar-outline"></ion-icon>
+        Soumis le {{ (candidature?.dateSoumission || candidature?.dateCandidature)?.toDate() | date:'dd/MM/yy' }}
+      </div>
+      <div class="meta-item" *ngIf="candidature?.source">
+        <ion-icon name="link-outline"></ion-icon>
+        Source: {{ candidature?.source }}
+      </div>
+      <!-- Example for a custom meta item, can be adapted -->
+      <!-- <div class="meta-item" *ngIf="candidature?.nextStep">
+        <ion-icon name="flag-outline"></ion-icon>
+        Prochaine étape: <span class="meta-highlight">{{ candidature?.nextStep }}</span>
+      </div> -->
+    </div>
+    <div class="card-actions">
+      <button class="action-btn view" title="Voir les détails" (click)="onViewDetails($event)">
+        <ion-icon name="eye-outline"></ion-icon>
+      </button>
+      <button class="action-btn edit" title="Modifier" (click)="onEditCandidature($event)"> <!-- TODO: Implement onEditCandidature -->
+        <ion-icon name="pencil-outline"></ion-icon>
+      </button>
+      <button class="action-btn delete" title="Supprimer" (click)="onDeleteCandidature($event)">
+         <ion-icon name="trash-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+</div>

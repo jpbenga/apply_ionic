@@ -1,21 +1,33 @@
-<ion-header>
-  <app-user-header></app-user-header>
-</ion-header>
+<!-- No separate ion-header, new header is part of ion-content -->
+<ion-content [fullscreen]="true" class="postuler-page-content"> <!-- Added specific class for page styling -->
+  <div class="container"> <!-- Main container from prototype -->
+    <!-- New Header from Prototype -->
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">A</div> <!-- To be styled with SCSS -->
+        <div class="logo-text">Apply</div>
+      </div>
+      <div class="ai-status-header">
+        <div class="ai-avatar">
+          <ion-icon name="sparkles-outline"></ion-icon> <!-- Or robot, or sparkles -->
+        </div>
+        <div class="ai-status-text">Copilote IA prêt</div> <!-- Static for now -->
+      </div>
+    </header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Postuler</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <!-- Existing content to be progressively refactored below this new header -->
+    <!-- The old <ion-header collapse="condense"> is removed as title is part of new header or page content -->
 
-  <div *ngIf="isGlobalLoading" class="global-loading-overlay">
-    <div class="global-loading-content">
-      <ion-spinner name="crescent" color="primary"></ion-spinner>
-      <h3>{{ globalSpinnerMessage }}</h3>
-      <p>Veuillez patienter, ne fermez pas cette page...</p>
+    <div *ngIf="isGlobalLoading" class="global-loading-overlay ai-processing-style"> <!-- Added class for new styling -->
+      <div class="global-loading-content">
+        <div class="processing-avatar"> <!-- From prototype .ai-processing .processing-avatar -->
+          <ion-icon name="cog-outline" class="animated-cog"></ion-icon> <!-- Example animated icon -->
+        </div>
+        <h3 class="processing-title">{{ globalSpinnerMessage }}</h3> <!-- processing-title class from proto -->
+        <p class="processing-description">Veuillez patienter, Apply travaille pour vous...</p> <!-- processing-description from proto -->
+        <!-- Optional: Could add .processing-steps here if globalSpinnerMessage becomes an array -->
+      </div>
     </div>
-  </div>
 
   <ion-card *ngIf="!hasStructuredCvData && !isLoadingCvData" color="warning">
     <ion-card-content>
@@ -41,48 +53,73 @@
     </ion-card-content>
   </ion-card>
 
-  <div *ngIf="hasStructuredCvData && !isLoadingCvData">
+  <div *ngIf="hasStructuredCvData && !isLoadingCvData" class="step-card active" id="step1-card"> <!-- Added step-card active classes -->
+    <div class="step-header"> <!-- Added step-header -->
+      <div class="step-number">1</div>
+      <div class="step-info">
+        <div class="step-title">Importez l'offre d'emploi</div>
+        <div class="step-description">Votre IA va analyser l'offre et optimiser votre candidature</div>
+      </div>
+    </div>
+    <div class="step-content"> <!-- Added step-content -->
+      <!-- Removed input-methods for simplicity, directly using textarea -->
+      <div class="job-input-area"> <!-- Class from prototype -->
+        <!-- The input-helper from prototype can be a simple div or ion-text if needed -->
+        <!-- <div class="input-helper">IA prête à analyser</div> -->
+        <ion-label position="stacked" class="form-label">Coller l'offre d'emploi ici</ion-label> <!-- Optional label if needed -->
+        <ion-textarea
+          class="job-textarea"
+          rows="10"
+          placeholder="Collez ici la description complète de l'offre d'emploi..."
+          aria-label="Offre d'emploi"
+          [(ngModel)]="jobOfferText"
+          [disabled]="isInteractionDisabled">
+        </ion-textarea>
+      </div>
 
-    <ion-item lines="full">
-      <ion-label position="stacked">Coller l'offre d'emploi ici</ion-label>
-      <ion-textarea
-        rows="8"
-        placeholder="Entrez ou collez la description complète de l'offre d'emploi..."
-        aria-label="Offre d'emploi"
-        [(ngModel)]="jobOfferText"
-        [disabled]="isInteractionDisabled">
-      </ion-textarea>
-    </ion-item>
+      <app-styled-button
+        expand="block"
+        color="secondary"
+        class="ion-margin-top"
+        (click)="generateApplication()"
+        [disabled]="!jobOfferText || isInteractionDisabled || atsAnalysisResult">
+        <ion-spinner *ngIf="isGeneratingAIContent" name="crescent" slot="start"></ion-spinner>
+        <ion-icon *ngIf="!isGeneratingAIContent && !atsAnalysisResult" slot="start" name="sparkles-outline"></ion-icon>
+        <ion-icon *ngIf="!isGeneratingAIContent && atsAnalysisResult" slot="start" name="checkmark-circle-outline"></ion-icon>
+        {{ isGeneratingAIContent ? 'Analyse IA en cours...' : (atsAnalysisResult ? 'Analyse IA terminée ✓' : 'Lancer l\'analyse IA') }}
+      </app-styled-button>
+    </div> <!-- End step-content -->
 
-    <ion-button 
-      expand="block" 
-      class="ion-margin-top" 
-      (click)="generateApplication()" 
-      [disabled]="!jobOfferText || isInteractionDisabled || atsAnalysisResult">
-      <ion-spinner *ngIf="isGeneratingAIContent" name="crescent" slot="start"></ion-spinner>
-      <ion-icon *ngIf="!isGeneratingAIContent && !atsAnalysisResult" slot="start" name="sparkles-outline"></ion-icon>
-      <ion-icon *ngIf="!isGeneratingAIContent && atsAnalysisResult" slot="start" name="checkmark-circle-outline"></ion-icon>
-      {{ isGeneratingAIContent ? 'Génération IA en cours...' : (atsAnalysisResult ? 'Analyse terminée ✓' : 'Analyser avec l\'IA') }}
-    </ion-button>
-
-    <div *ngIf="aiError" class="ion-padding ion-text-center" style="color: var(--ion-color-danger);">
+    <div *ngIf="aiError" class="ion-padding ion-text-center error-message-standalone"> <!-- Added class for styling -->
       <p>{{ aiError }}</p>
     </div>
 
-    <div *ngIf="atsAnalysisResult && !isGeneratingAIContent && !isSavingCandidature" class="ion-margin-top">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Analyse ATS</ion-card-title>
-          <p *ngIf="atsAnalysisResult.jobTitle"><strong>Poste :</strong> {{ atsAnalysisResult.jobTitle }}</p>
-          <p *ngIf="atsAnalysisResult.company"><strong>Entreprise :</strong> {{ atsAnalysisResult.company }}</p>
-        </ion-card-header>
-        <ion-card-content>
-          <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ atsAnalysisResult.analysisText }}</pre>
-        </ion-card-content>
-      </ion-card>
+    <!-- ATS Analysis Result Card -->
+    <div *ngIf="atsAnalysisResult && !isGeneratingAIContent && !isSavingCandidature" class="result-card fade-in-up ion-margin-top">
+      <div class="result-header">
+        <div class="result-icon analysis">
+          <ion-icon name="document-text-outline"></ion-icon> <!-- Or 'analytics-outline' -->
+        </div>
+        <div class="result-title-group">
+          <h3 class="result-title">Analyse ATS de l'Offre</h3>
+          <p class="result-subtitle" *ngIf="atsAnalysisResult.jobTitle || atsAnalysisResult.company">
+            <span *ngIf="atsAnalysisResult.jobTitle"><strong>Poste :</strong> {{ atsAnalysisResult.jobTitle }}</span>
+            <span *ngIf="atsAnalysisResult.jobTitle && atsAnalysisResult.company"> • </span>
+            <span *ngIf="atsAnalysisResult.company"><strong>Entreprise :</strong> {{ atsAnalysisResult.company }}</span>
+          </p>
+        </div>
+      </div>
+      <div class="result-content">
+        <!-- Placeholder for Compatibility Showcase like in prototype -->
+        <!-- <div class="compatibility-showcase"> ... </div> -->
+        <!-- Placeholder for Insights Grid -->
+        <!-- <div class="insights-grid"> ... </div> -->
+        <h4>Détails de l'analyse :</h4>
+        <pre class="analysis-text-content">{{ atsAnalysisResult.analysisText }}</pre>
+      </div>
     </div>
 
-    <ion-button 
+    <app-styled-button
       expand="block" 
       fill="outline" 
       class="ion-margin-top"
@@ -92,17 +129,16 @@
       <ion-spinner *ngIf="isImprovingCv" name="crescent" slot="start"></ion-spinner>
       <ion-icon *ngIf="!isImprovingCv" slot="start" name="construct-outline"></ion-icon>
       {{ isImprovingCv ? 'Analyse du CV en cours...' : 'Améliorer le CV avec l\'IA' }}
-    </ion-button>
+    </app-styled-button>
 
-    <div *ngIf="structuredCvImprovements && !isImprovingCv && !improvementsApplied" class="ion-margin-top">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon name="construct-outline" color="primary"></ion-icon>
-            Améliorations suggérées pour votre CV
-            <span class="cv-type-badge structured">CV Structuré</span>
-          </ion-card-title>
-          <ion-card-subtitle>
+    <div *ngIf="structuredCvImprovements && !isImprovingCv && !improvementsApplied" class="result-card fade-in-up ion-margin-top">
+      <div class="result-header">
+        <div class="result-icon optimization">
+          <ion-icon name="construct-outline"></ion-icon>
+        </div>
+        <div class="result-title-group">
+          <h3 class="result-title">Améliorations suggérées pour votre CV <span class="cv-type-badge structured">CV Structuré</span></h3>
+          <p class="result-subtitle">
             {{ structuredCvImprovements.summary.totalSuggestions }} suggestion(s) • 
             <span *ngIf="structuredCvImprovements.summary.criticalIssues > 0" class="critical-issues">
               {{ structuredCvImprovements.summary.criticalIssues }} critique(s)
@@ -113,10 +149,11 @@
             <span *ngIf="structuredCvImprovements.summary.newCompetencesSuggested > 0" class="new-competences">
               + {{ structuredCvImprovements.summary.newCompetencesSuggested }} nouvelle(s) compétence(s)
             </span>
-          </ion-card-subtitle>
-        </ion-card-header>
+          </p>
+        </div>
+      </div>
         
-        <ion-card-content>
+      <div class="result-content">
           
           <div *ngIf="structuredCvImprovements.improvements.suggestedCompetences.length > 0" class="suggested-competences-section">
             <h4>✨ Nouvelles compétences suggérées</h4>
@@ -130,7 +167,7 @@
                   <div class="competence-info">
                     <span class="competence-name">{{ competence.nom }}</span>
                     <span class="competence-category">{{ competence.categorie }}</span>
-                    <span class="competence-impact" [class]="competence.impact">{{ getImpactLabel(competence.impact) }}</span>
+                    <span class="competence-impact" [ngClass]="competence.impact">{{ getImpactLabel(competence.impact) }}</span>
                   </div>
                   <ion-checkbox 
                     [(ngModel)]="competence.accepted"
@@ -163,11 +200,11 @@
                 
                 <div class="improvement-header">
                   <div class="improvement-meta">
-                    <span class="improvement-type" [class]="improvement.type">
+                    <span class="improvement-type" [ngClass]="improvement.type">
                       {{ getImprovementTypeLabel(improvement.type) }}
                     </span>
                     <span class="improvement-field">{{ improvement.field }}</span>
-                    <span class="improvement-impact" [class]="improvement.impact">
+                    <span class="improvement-impact" [ngClass]="improvement.impact">
                       {{ getImpactLabel(improvement.impact) }}
                     </span>
                   </div>
@@ -201,133 +238,91 @@
 
           <div *ngIf="structuredCvImprovements.improvements.formations.length > 0" class="section-improvements">
             <h4>🎓 Formations</h4>
-            <div 
+            <!-- Similar structure as experiences -->
+             <div
               *ngFor="let sectionImprovement of structuredCvImprovements.improvements.formations" 
               class="section-item">
-              
               <h5 class="section-title">{{ sectionImprovement.itemTitle }}</h5>
-              
               <div 
                 *ngFor="let improvement of sectionImprovement.improvements" 
                 class="field-improvement"
                 [class.accepted]="improvement.accepted"
                 [class.critical]="improvement.impact === 'fort'">
-                
                 <div class="improvement-header">
                   <div class="improvement-meta">
-                    <span class="improvement-type" [class]="improvement.type">
-                      {{ getImprovementTypeLabel(improvement.type) }}
-                    </span>
+                    <span class="improvement-type" [ngClass]="improvement.type">{{ getImprovementTypeLabel(improvement.type) }}</span>
                     <span class="improvement-field">{{ improvement.field }}</span>
-                    <span class="improvement-impact" [class]="improvement.impact">
-                      {{ getImpactLabel(improvement.impact) }}
-                    </span>
+                    <span class="improvement-impact" [ngClass]="improvement.impact">{{ getImpactLabel(improvement.impact) }}</span>
                   </div>
-                  <ion-checkbox 
-                    [(ngModel)]="improvement.accepted"
-                    (ionChange)="onImprovementToggle()"
-                    [disabled]="isInteractionDisabled">
-                  </ion-checkbox>
+                  <ion-checkbox [(ngModel)]="improvement.accepted" (ionChange)="onImprovementToggle()" [disabled]="isInteractionDisabled"></ion-checkbox>
                 </div>
-
                 <h6>{{ improvement.titre }}</h6>
-                
                 <div class="field-comparison">
-                  <div class="original-value">
-                    <label>{{ improvement.field }} actuel :</label>
-                    <p>{{ improvement.originalValue }}</p>
-                  </div>
-                  <div class="improved-value">
-                    <label>{{ improvement.field }} amélioré :</label>
-                    <p>{{ improvement.improvedValue }}</p>
-                  </div>
+                  <div class="original-value"><label>{{ improvement.field }} actuel :</label><p>{{ improvement.originalValue }}</p></div>
+                  <div class="improved-value"><label>{{ improvement.field }} amélioré :</label><p>{{ improvement.improvedValue }}</p></div>
                 </div>
-                
-                <p class="explanation">
-                  <ion-icon name="information-circle-outline"></ion-icon>
-                  {{ improvement.explication }}
-                </p>
+                <p class="explanation"><ion-icon name="information-circle-outline"></ion-icon> {{ improvement.explication }}</p>
               </div>
             </div>
           </div>
 
           <div *ngIf="structuredCvImprovements.improvements.competences.length > 0" class="section-improvements">
             <h4>🛠️ Compétences</h4>
+            <!-- Similar structure as experiences -->
             <div 
               *ngFor="let sectionImprovement of structuredCvImprovements.improvements.competences" 
               class="section-item">
-              
               <h5 class="section-title">{{ sectionImprovement.itemTitle }}</h5>
-              
               <div 
                 *ngFor="let improvement of sectionImprovement.improvements" 
                 class="field-improvement"
                 [class.accepted]="improvement.accepted"
                 [class.critical]="improvement.impact === 'fort'">
-                
                 <div class="improvement-header">
                   <div class="improvement-meta">
-                    <span class="improvement-type" [class]="improvement.type">
-                      {{ getImprovementTypeLabel(improvement.type) }}
-                    </span>
+                    <span class="improvement-type" [ngClass]="improvement.type">{{ getImprovementTypeLabel(improvement.type) }}</span>
                     <span class="improvement-field">{{ improvement.field }}</span>
-                    <span class="improvement-impact" [class]="improvement.impact">
-                      {{ getImpactLabel(improvement.impact) }}
-                    </span>
+                    <span class="improvement-impact" [ngClass]="improvement.impact">{{ getImpactLabel(improvement.impact) }}</span>
                   </div>
-                  <ion-checkbox 
-                    [(ngModel)]="improvement.accepted"
-                    (ionChange)="onImprovementToggle()"
-                    [disabled]="isInteractionDisabled">
-                  </ion-checkbox>
+                  <ion-checkbox [(ngModel)]="improvement.accepted" (ionChange)="onImprovementToggle()" [disabled]="isInteractionDisabled"></ion-checkbox>
                 </div>
-
                 <h6>{{ improvement.titre }}</h6>
-                
                 <div class="field-comparison">
-                  <div class="original-value">
-                    <label>{{ improvement.field }} actuel :</label>
-                    <p>{{ improvement.originalValue }}</p>
-                  </div>
-                  <div class="improved-value">
-                    <label>{{ improvement.field }} amélioré :</label>
-                    <p>{{ improvement.improvedValue }}</p>
-                  </div>
+                  <div class="original-value"><label>{{ improvement.field }} actuel :</label><p>{{ improvement.originalValue }}</p></div>
+                  <div class="improved-value"><label>{{ improvement.field }} amélioré :</label><p>{{ improvement.improvedValue }}</p></div>
                 </div>
-                
-                <p class="explanation">
-                  <ion-icon name="information-circle-outline"></ion-icon>
-                  {{ improvement.explication }}
-                </p>
+                <p class="explanation"><ion-icon name="information-circle-outline"></ion-icon> {{ improvement.explication }}</p>
               </div>
             </div>
           </div>
 
           <div class="improvement-actions ion-margin-top">
-            <ion-button 
-              fill="clear" 
+            <app-styled-button
+              fill="clear"
+              size="small"
               (click)="selectAllImprovements(true)"
               [disabled]="isInteractionDisabled">
               Tout sélectionner
-            </ion-button>
-            <ion-button 
-              fill="clear" 
+            </app-styled-button>
+            <app-styled-button
+              fill="clear"
+              size="small"
               (click)="selectAllImprovements(false)"
               [disabled]="isInteractionDisabled">
               Tout désélectionner
-            </ion-button>
+            </app-styled-button>
             
             <div class="main-action-buttons ion-margin-top">
-              <ion-button 
+              <app-styled-button
                 expand="block" 
                 color="primary"
                 (click)="applySelectedImprovements()"
                 [disabled]="!hasAcceptedImprovements() || isInteractionDisabled">
                 <ion-icon slot="start" name="checkmark-outline"></ion-icon>
                 Appliquer les modifications ({{ getAcceptedCount() }})
-              </ion-button>
+              </app-styled-button>
               
-              <ion-button 
+              <app-styled-button
                 expand="block" 
                 fill="outline"
                 color="medium"
@@ -336,104 +331,59 @@
                 [disabled]="isInteractionDisabled">
                 <ion-icon slot="start" name="close-outline"></ion-icon>
                 Ne rien changer
-              </ion-button>
+              </app-styled-button>
             </div>
           </div>
-        </ion-card-content>
-      </ion-card>
+      </div> <!-- End .result-content -->
     </div>
 
-    <div *ngIf="improvedCvData && originalCvData && improvementsApplied" class="cv-comparison-section ion-margin-top">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon name="git-compare-outline" color="success"></ion-icon>
-            Comparaison avant/après
-          </ion-card-title>
-          <ion-card-subtitle>Visualisez les améliorations de votre CV</ion-card-subtitle>
-        </ion-card-header>
-        <ion-card-content>
-          
+    <!-- CV Comparison Card -->
+    <div *ngIf="improvedCvData && originalCvData && improvementsApplied" class="result-card cv-comparison-section ion-margin-top">
+      <div class="result-header">
+        <div class="result-icon optimization"> <!-- Using optimization icon, can be changed -->
+          <ion-icon name="git-compare-outline"></ion-icon>
+        </div>
+        <div class="result-title-group">
+          <h3 class="result-title">Comparaison avant/après</h3>
+          <p class="result-subtitle">Visualisez les améliorations de votre CV</p>
+        </div>
+      </div>
+      <div class="result-content">
           <ion-segment 
             [(ngModel)]="comparisonView" 
             class="ion-margin-bottom"
             [disabled]="isInteractionDisabled">
-            <ion-segment-button value="original">
-              <ion-label>Original</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="split">
-              <ion-label>Comparaison</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="improved">
-              <ion-label>Amélioré</ion-label>
-            </ion-segment-button>
+            <ion-segment-button value="original"><ion-label>Original</ion-label></ion-segment-button>
+            <ion-segment-button value="split"><ion-label>Comparaison</ion-label></ion-segment-button>
+            <ion-segment-button value="improved"><ion-label>Amélioré</ion-label></ion-segment-button>
           </ion-segment>
 
           <div class="modifications-summary ion-margin-bottom">
             <ion-badge color="success">{{ getTotalChangesCount() }} modification(s) appliquée(s)</ion-badge>
             <div class="changes-details">
-              <span *ngIf="getChangesCount('experiences') > 0">
-                • {{ getChangesCount('experiences') }} expérience(s)
-              </span>
-              <span *ngIf="getChangesCount('formations') > 0">
-                • {{ getChangesCount('formations') }} formation(s)
-              </span>
-              <span *ngIf="getChangesCount('competences') > 0">
-                • {{ getChangesCount('competences') }} compétence(s)
-              </span>
+              <span *ngIf="getChangesCount('experiences') > 0">• {{ getChangesCount('experiences') }} expérience(s)</span>
+              <span *ngIf="getChangesCount('formations') > 0">• {{ getChangesCount('formations') }} formation(s)</span>
+              <span *ngIf="getChangesCount('competences') > 0">• {{ getChangesCount('competences') }} compétence(s)</span>
             </div>
           </div>
 
           <div *ngIf="comparisonView === 'split'" class="comparison-slider-container">
-            <div class="cv-comparison-wrapper">
-              <div class="cv-original">
-                <div class="cv-section-title">CV Original</div>
-                <div class="cv-content-display">
-                  {{ generateDisplayTextFromCvData(originalCvData) }}
-                </div>
-              </div>
-              <div class="cv-improved" [style.clip-path]="'polygon(' + sliderPosition + '% 0%, 100% 0%, 100% 100%, ' + sliderPosition + '% 100%)'">
-                <div class="cv-section-title">CV Amélioré</div>
-                <div class="cv-content-display">
-                  {{ generateDisplayTextFromCvData(improvedCvData) }}
-                </div>
-              </div>
-              
-              <div class="slider-overlay" [style.left.%]="sliderPosition">
-                <div class="slider-handle">
-                  <ion-icon name="resize-outline"></ion-icon>
-                </div>
-              </div>
+            <!-- ... existing slider structure ... -->
+             <div class="cv-comparison-wrapper">
+              <div class="cv-original"><div class="cv-section-title">CV Original</div><div class="cv-content-display">{{ generateDisplayTextFromCvData(originalCvData) }}</div></div>
+              <div class="cv-improved" [style.clip-path]="'polygon(' + sliderPosition + '% 0%, 100% 0%, 100% 100%, ' + sliderPosition + '% 100%)'"><div class="cv-section-title">CV Amélioré</div><div class="cv-content-display">{{ generateDisplayTextFromCvData(improvedCvData) }}</div></div>
+              <div class="slider-overlay" [style.left.%]="sliderPosition"><div class="slider-handle"><ion-icon name="resize-outline"></ion-icon></div></div>
             </div>
-            
-            <ion-range 
-              [(ngModel)]="sliderPosition" 
-              min="0" 
-              max="100" 
-              step="1"
-              class="comparison-range"
-              [disabled]="isInteractionDisabled">
-              <ion-label slot="start">Original</ion-label>
-              <ion-label slot="end">Amélioré</ion-label>
+            <ion-range [(ngModel)]="sliderPosition" min="0" max="100" step="1" class="comparison-range" [disabled]="isInteractionDisabled">
+              <ion-label slot="start">Original</ion-label><ion-label slot="end">Amélioré</ion-label>
             </ion-range>
           </div>
 
-          <div *ngIf="comparisonView === 'original'" class="single-cv-view">
-            <h4>CV Original</h4>
-            <div class="cv-content-display">
-              {{ generateDisplayTextFromCvData(originalCvData) }}
-            </div>
-          </div>
-
-          <div *ngIf="comparisonView === 'improved'" class="single-cv-view">
-            <h4>CV Amélioré</h4>
-            <div class="cv-content-display">
-              {{ generateDisplayTextFromCvData(improvedCvData) }}
-            </div>
-          </div>
+          <div *ngIf="comparisonView === 'original'" class="single-cv-view"><h4>CV Original</h4><div class="cv-content-display">{{ generateDisplayTextFromCvData(originalCvData) }}</div></div>
+          <div *ngIf="comparisonView === 'improved'" class="single-cv-view"><h4>CV Amélioré</h4><div class="cv-content-display">{{ generateDisplayTextFromCvData(improvedCvData) }}</div></div>
 
           <div class="comparison-actions ion-margin-top">
-            <ion-button 
+            <app-styled-button
               expand="block" 
               color="success"
               (click)="saveImprovements()"
@@ -442,49 +392,34 @@
               <ion-icon *ngIf="!isSavingImprovements && !cvImprovementsValidated" slot="start" name="save-outline"></ion-icon>
               <ion-icon *ngIf="!isSavingImprovements && cvImprovementsValidated" slot="start" name="checkmark-circle-outline"></ion-icon>
               {{ isSavingImprovements ? 'Sauvegarde en cours...' : (cvImprovementsValidated ? 'Améliorations validées ✓' : 'Valider et sauvegarder les améliorations') }}
-            </ion-button>
+            </app-styled-button>
           </div>
-        </ion-card-content>
-      </ion-card>
+      </div> <!-- End .result-content -->
     </div>
 
-    <div *ngIf="cvImprovementsValidated" class="ion-margin-top">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon name="brush-outline" color="primary"></ion-icon>
-            Personnaliser votre CV
-          </ion-card-title>
-          <ion-card-subtitle>Choisissez le template et le thème pour votre candidature</ion-card-subtitle>
-        </ion-card-header>
-        <ion-card-content>
-          
-          <div *ngIf="isLoadingTemplates" class="text-center ion-padding">
-            <ion-spinner name="crescent"></ion-spinner>
-            <p>Chargement des templates...</p>
-          </div>
+    <!-- Template and Theme Selection Card -->
+    <div *ngIf="cvImprovementsValidated" class="result-card template-theme-selection-card ion-margin-top">
+      <div class="result-header">
+        <div class="result-icon personalization"> <!-- Using personalization icon -->
+           <ion-icon name="color-palette-outline"></ion-icon> <!-- Or brush-outline -->
+        </div>
+        <div class="result-title-group">
+          <h3 class="result-title">Personnaliser votre CV</h3>
+          <p class="result-subtitle">Choisissez le template et le thème pour votre candidature</p>
+        </div>
+      </div>
+      <div class="result-content">
+          <div *ngIf="isLoadingTemplates" class="text-center ion-padding"><ion-spinner name="crescent"></ion-spinner><p>Chargement des templates...</p></div>
 
           <div *ngIf="!isLoadingTemplates" class="template-selection">
             <h4>Template</h4>
             <ion-grid>
               <ion-row>
                 <ion-col size="6" size-md="4" size-lg="3" *ngFor="let template of availableTemplates">
-                  <div 
-                    class="template-card" 
-                    [class.selected]="selectedTemplate?.id === template.id"
-                    [class.disabled]="isInteractionDisabled"
-                    (click)="onTemplateChange(template)">
+                  <div class="template-card" [class.selected]="selectedTemplate?.id === template.id" [class.disabled]="isInteractionDisabled" (click)="onTemplateChange(template)">
                     <img [src]="template.imageUrl" [alt]="template.name" />
-                    <div class="template-info">
-                      <h5>{{ template.name }}</h5>
-                      <p><small>{{ template.description }}</small></p>
-                    </div>
-                    <ion-badge 
-                      *ngIf="selectedTemplate?.id === template.id" 
-                      color="primary"
-                      class="selected-badge">
-                      ✓
-                    </ion-badge>
+                    <div class="template-info"><h5>{{ template.name }}</h5><p><small>{{ template.description }}</small></p></div>
+                    <ion-badge *ngIf="selectedTemplate?.id === template.id" color="primary" class="selected-badge">✓</ion-badge>
                   </div>
                 </ion-col>
               </ion-row>
@@ -494,34 +429,18 @@
           <div class="theme-selection ion-margin-top">
             <h4>Couleur principale</h4>
             <div class="color-picker">
-              <div 
-                *ngFor="let theme of availableThemes"
-                class="color-option"
-                [class.selected]="selectedTheme.primaryColor === theme.primaryColor"
-                [class.disabled]="isInteractionDisabled"
-                [style.background-color]="theme.primaryColor"
-                (click)="onThemeChange(theme)">
-                <ion-icon 
-                  *ngIf="selectedTheme.primaryColor === theme.primaryColor" 
-                  name="checkmark" 
-                  color="light">
-                </ion-icon>
+              <div *ngFor="let theme of availableThemes" class="color-option" [class.selected]="selectedTheme.primaryColor === theme.primaryColor" [class.disabled]="isInteractionDisabled" [style.background-color]="theme.primaryColor" (click)="onThemeChange(theme)">
+                <ion-icon *ngIf="selectedTheme.primaryColor === theme.primaryColor" name="checkmark" color="light"></ion-icon>
               </div>
             </div>
           </div>
 
           <div class="cv-preview-section ion-margin-top" *ngIf="selectedTemplate">
             <h4>Aperçu final</h4>
-            <div class="cv-preview-container">
-              <app-cv-preview 
-                [template]="selectedTemplate"
-                [theme]="selectedTheme.primaryColor"
-                previewMode="normal">
-              </app-cv-preview>
-            </div>
+            <div class="cv-preview-container"><app-cv-preview [template]="selectedTemplate" [theme]="selectedTheme.primaryColor" previewMode="normal"></app-cv-preview></div>
           </div>
 
-          <ion-button 
+          <app-styled-button
             expand="block" 
             color="secondary"
             class="ion-margin-top"
@@ -531,34 +450,37 @@
             <ion-icon *ngIf="!isGeneratingCoverLetter && !generatedCoverLetter" slot="start" name="document-text-outline"></ion-icon>
             <ion-icon *ngIf="!isGeneratingCoverLetter && generatedCoverLetter" slot="start" name="checkmark-circle-outline"></ion-icon>
             {{ isGeneratingCoverLetter ? 'Génération en cours...' : (generatedCoverLetter ? 'Lettre générée ✓' : 'Générer la lettre de motivation') }}
-          </ion-button>
-        </ion-card-content>
-      </ion-card>
+          </app-styled-button>
+      </div> <!-- End .result-content -->
     </div>
 
-    <div *ngIf="generatedCoverLetter && cvImprovementsValidated" class="ion-margin-top">
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Lettre de Motivation Générée</ion-card-title>
-          <ion-card-subtitle>Basée sur votre CV amélioré</ion-card-subtitle>
-        </ion-card-header>
-        <ion-card-content>
-          <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ generatedCoverLetter }}</pre>
-        </ion-card-content>
-      </ion-card>
+    <!-- Generated Cover Letter Card -->
+    <div *ngIf="generatedCoverLetter && cvImprovementsValidated" class="result-card ion-margin-top">
+       <div class="result-header">
+        <div class="result-icon personalization"> <!-- Using personalization icon -->
+           <ion-icon name="mail-open-outline"></ion-icon>
+        </div>
+        <div class="result-title-group">
+          <h3 class="result-title">Lettre de Motivation Générée</h3>
+          <p class="result-subtitle">Basée sur votre CV amélioré et l'offre d'emploi</p>
+        </div>
+      </div>
+      <div class="result-content">
+        <pre class="analysis-text-content">{{ generatedCoverLetter }}</pre> <!-- Reusing analysis-text-content style for pre -->
+      </div>
     </div>
 
-    <ion-button 
+    <app-styled-button
       *ngIf="generatedCoverLetter && cvImprovementsValidated"
       expand="block" 
       color="success" 
-      class="ion-margin-top"
+      class="ion-margin-top main-save-button"
       (click)="saveCandidature()"
       [disabled]="!atsAnalysisResult || !generatedCoverLetter || isInteractionDisabled">
       <ion-spinner *ngIf="isSavingCandidature" name="crescent" slot="start"></ion-spinner>
       <ion-icon *ngIf="!isSavingCandidature" name="save-outline" slot="start"></ion-icon>
-      {{ isSavingCandidature ? 'Sauvegarde en cours...' : 'Sauvegarder la Candidature' }}
-    </ion-button>
+      {{ isSavingCandidature ? 'Sauvegarde en cours...' : 'Sauvegarder la Candidature Complète' }}
+    </app-styled-button>
 
-  </div>
+  </div> <!-- End .container -->
 </ion-content>

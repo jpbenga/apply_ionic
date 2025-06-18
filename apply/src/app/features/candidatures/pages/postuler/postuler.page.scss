@@ -1,52 +1,449 @@
+// Page specific content class for consistent background and container
+ion-content.postuler-page-content {
+  --background: var(--ion-color-light-tint, #F9FAFB);
+}
+
+.container { // Main container from prototype, for padding
+  padding: 0 16px 20px 16px; // Adjusted padding
+  @media (min-width: 1200px) { // Match prototype .container max-width
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* New Header Styles from Prototype */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0; // Adjusted from prototype's 20px 0; main padding on .container
+  border-bottom: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  margin-bottom: 24px; // Adjusted from 40px
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .logo-icon {
+      width: 36px; height: 36px; // Adjusted
+      background: var(--ion-color-primary);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ion-color-primary-contrast);
+      font-weight: bold; font-size: 18px; position: relative;
+
+      &::after { // Checkmark
+        content: '✓'; position: absolute; bottom: -2px; right: -2px;
+        background: var(--ion-color-secondary); width: 14px; height: 14px;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 9px; color: var(--ion-text-color, #1F2937);
+        border: 1px solid var(--ion-color-light);
+      }
+    }
+    .logo-text { font-size: 22px; font-weight: 700; color: var(--ion-text-color, #1F2937); }
+  }
+
+  .ai-status-header {
+    display: flex; align-items: center; gap: 10px; // Adjusted
+    background: var(--ion-color-white);
+    padding: 8px 16px; // Adjusted
+    border-radius: 20px;
+    box-shadow: var(--card-shadow-soft, 0 2px 8px rgba(0,0,0,0.06));
+    border: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+
+    .ai-avatar {
+      width: 32px; height: 32px; // Adjusted
+      background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-tertiary-shade));
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: var(--ion-color-primary-contrast); font-size: 18px; // For ion-icon
+      // animation: pulse 2s infinite; // Optional pulse from prototype
+    }
+    .ai-status-text { font-weight: 600; font-size: 14px; color: var(--ion-text-color); }
+  }
+}
+
+/* Styles for Step Cards (general structure) */
+.step-card {
+  background: var(--ion-color-white, #ffffff);
+  border-radius: var(--border-radius-xl, 20px); // from prototype
+  border: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  overflow: hidden;
+  box-shadow: var(--card-shadow-medium, 0 4px 20px rgba(0,0,0,0.08));
+  margin-bottom: var(--spacing-lg, 24px); // Space between cards
+  transition: all 0.3s ease;
+
+  &.active { // Style for the currently active step card
+    border-color: var(--ion-color-primary);
+    box-shadow: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.2);
+  }
+
+  // &.completed { // Style for completed step cards (if needed later)
+  //   border-color: var(--ion-color-success);
+  //   background: linear-gradient(135deg, var(--ion-color-success-contrast), var(--ion-color-white));
+  // }
+
+  .step-header {
+    padding: 20px 24px; // Adjusted from prototype
+    border-bottom: 1px solid var(--ion-color-light-shade, #F3F4F6);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .step-number {
+      width: 40px; // Adjusted
+      height: 40px;
+      border-radius: 50%;
+      background: var(--ion-color-light, #F3F4F6);
+      color: var(--ion-color-medium-shade, #6B7280);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px; // Adjusted
+      transition: all 0.3s ease;
+    }
+    &.active .step-number, .step-card.active .step-number { // Ensure active step number is highlighted
+      background: var(--ion-color-primary);
+      color: var(--ion-color-primary-contrast);
+    }
+    // &.completed .step-number { background: var(--ion-color-success); color: var(--ion-color-success-contrast); }
+
+
+    .step-info {
+      flex: 1;
+      .step-title {
+        font-size: 18px; // Adjusted
+        font-weight: 700;
+        color: var(--ion-text-color, #1F2937);
+        margin-bottom: 2px; // Adjusted
+      }
+      .step-description {
+        color: var(--ion-color-medium-shade, #6B7280);
+        font-size: 14px;
+      }
+    }
+  }
+
+  .step-content {
+    padding: 24px; // Adjusted
+  }
+}
+
+/* Job Offer Input Area Styles */
+.job-input-area {
+  position: relative;
+  margin-bottom: 16px; // Space before the button
+
+  .form-label { // Optional label above textarea
+    display: block;
+    font-size: 14px;
+    font-weight: 500; // Medium weight
+    color: var(--ion-color-dark-shade, #374151);
+    margin-bottom: 8px;
+  }
+
+  ion-textarea.job-textarea {
+    width: 100%;
+    min-height: 160px; // From prototype
+    --border-color: var(--ion-color-medium-tint, #E5E7EB);
+    --border-radius: var(--border-radius-large, 16px); // From prototype
+    --padding-start: 16px; // Adjusted from 20px
+    --padding-end: 16px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    font-size: 15px; // Adjusted
+    background: var(--ion-color-white); // From prototype
+    border: 2px solid var(--border-color); // Ensure border is visible
+    transition: all 0.3s ease;
+
+    &:focus-within, &.has-focus, &.ion-focused { // Targeting focus states
+      --border-color: var(--ion-color-primary);
+      box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.1);
+    }
+  }
+}
+
+// Standalone error message (e.g., for AI errors)
+.error-message-standalone {
+  // Using similar style to message-area in login/signup
+  background: rgba(var(--ion-color-danger-rgb), 0.1);
+  border: 1px solid rgba(var(--ion-color-danger-rgb), 0.2);
+  color: var(--ion-color-danger-shade);
+  padding: 12px;
+  border-radius: var(--border-radius-medium, 8px);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 16px;
+}
+
+/* Result Card Styles (for ATS, CV Improvements, Cover Letter etc.) */
+.result-card {
+  background: var(--ion-color-white, #ffffff);
+  border-radius: var(--border-radius-lg, 16px); // Consistent large radius
+  padding: 20px 24px; // Adjusted padding
+  box-shadow: var(--card-shadow-soft, 0 2px 12px rgba(0,0,0,0.06));
+  border: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  margin-bottom: var(--spacing-lg, 24px);
+  animation: fadeInUp 0.5s ease-out; // From prototype
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 12px; // Adjusted
+    margin-bottom: 16px; // Adjusted
+
+    .result-icon {
+      width: 36px; // Adjusted
+      height: 36px;
+      border-radius: var(--border-radius-medium, 10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ion-color-primary-contrast, #ffffff);
+      font-size: 18px; // Adjusted
+
+      // Specific icon background colors
+      &.analysis { background: linear-gradient(135deg, var(--ion-color-primary-shade), var(--ion-color-primary)); }
+      &.optimization { background: linear-gradient(135deg, var(--ion-color-success-shade), var(--ion-color-success)); }
+      &.personalization { background: linear-gradient(135deg, var(--ion-color-tertiary-shade), var(--ion-color-tertiary)); }
+    }
+    .result-title-group {
+      flex: 1;
+      .result-title { // h3 in new HTML
+        font-size: 17px; // Adjusted
+        font-weight: 700;
+        color: var(--ion-text-color, #1F2937);
+        margin: 0 0 2px 0; // Compact margin
+      }
+      .result-subtitle { // p tag in new HTML
+        font-size: 13px; // Adjusted
+        color: var(--ion-color-medium-shade);
+        margin: 0;
+        line-height: 1.3;
+      }
+    }
+  }
+
+  .result-content {
+    h4 { // For subheadings within content like "Détails de l'analyse :"
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ion-text-color-medium, #374151);
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+    pre.analysis-text-content { // Style for the <pre> tag
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      background-color: var(--ion-color-light-tint, #f8f9fa);
+      padding: 12px;
+      border-radius: var(--border-radius-medium, 8px);
+      font-size: 14px;
+      color: var(--ion-text-color-soft, #495057); // Softer text for pre
+      max-height: 300px; // Prevent very long text from dominating
+      overflow-y: auto;
+      border: 1px solid var(--ion-color-light-shade);
+    }
+  }
+}
+
+@keyframes fadeInUp { // From prototype
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Styles for CV Improvement Card Content */
+.result-card { // Extending .result-card for specific content
+  .cv-type-badge { // Style for the "CV Structuré" badge
+    display: inline-block;
+    padding: 4px 10px; // Adjusted
+    border-radius: var(--border-radius-medium, 12px);
+    font-size: 10px; // Adjusted
+    font-weight: 600; // Adjusted
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.structured {
+      background: var(--ion-color-success-tint); // Lighter green
+      color: var(--ion-color-success-shade); // Darker green text
+    }
+  }
+
+  .critical-issues, .new-competences { // Spans in subtitle
+    font-weight: 500; // Adjusted
+  }
+  .critical-issues { color: var(--ion-color-danger-shade); }
+  .new-competences { color: var(--ion-color-success-shade); }
+
+  .suggested-competences-section, .section-improvements {
+    margin-bottom: 20px; // Adjusted
+    h4 { // Section titles like "✨ Nouvelles compétences suggérées"
+      color: var(--ion-color-primary);
+      margin-bottom: 12px; // Adjusted
+      font-weight: 600;
+      font-size: 16px; // Adjusted
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      ion-icon { font-size: 18px; } // If icons are added to h4
+    }
+  }
+
+  .suggested-competences-list .suggested-competence-item,
+  .section-improvements .field-improvement {
+    border: 1px solid var(--ion-color-light-shade, #eeeeee);
+    border-radius: var(--border-radius-medium, 8px);
+    padding: 12px; // Adjusted
+    margin-bottom: 10px; // Adjusted
+    transition: all 0.3s ease;
+    background: var(--ion-color-white);
+
+    &.accepted {
+      background: var(--ion-color-success-contrast); // Very light green
+      border-left: 4px solid var(--ion-color-success);
+    }
+    &.critical { // For field-improvement
+      border-left: 4px solid var(--ion-color-danger);
+      // background: rgba(var(--ion-color-danger-rgb), 0.02); // Already in existing
+    }
+
+    .competence-header, .improvement-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px; // Adjusted
+    }
+
+    .competence-info, .improvement-meta { /* Styles for text parts */ }
+    .competence-name { font-weight: 600; color: var(--ion-text-color); display: block; margin-bottom: 4px; font-size: 14px; }
+    .competence-category, .improvement-type, .improvement-field, .competence-impact, .improvement-impact {
+      padding: 3px 7px; // Adjusted
+      border-radius: var(--border-radius-small, 6px);
+      font-size: 10px; // Adjusted
+      font-weight: 500; // Adjusted
+      margin-right: 6px;
+      display: inline-block;
+      margin-bottom: 4px; // For wrapping
+    }
+    // Specific colors for types/impacts (can reuse existing SCSS if they are global enough)
+    .competence-impact, .improvement-impact {
+      font-weight: 700; text-transform: uppercase;
+      &.faible { background: var(--ion-color-light-shade); color: var(--ion-color-medium-shade); }
+      &.moyen { background: var(--ion-color-warning-tint); color: var(--ion-color-warning-shade); }
+      &.fort { background: var(--ion-color-danger-tint); color: var(--ion-color-danger-shade); animation: pulse-light 2s infinite; }
+    }
+     @keyframes pulse-light { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+
+    .competence-reason, .explanation {
+      margin: 8px 0 0 0; // Adjusted
+      color: var(--ion-color-medium-shade);
+      font-size: 12px; // Adjusted
+      display: flex; align-items: flex-start; gap: 6px; line-height: 1.4;
+      ion-icon { margin-top: 1px; flex-shrink: 0; color: var(--ion-color-primary); font-size: 14px; }
+    }
+
+    h6 { /* Sub-title for improvements */
+      margin: 0 0 10px 0; font-size: 13px; font-weight: 600; color: var(--ion-text-color-medium);
+    }
+    .field-comparison { /* Styles from existing SCSS seem fine */ }
+  }
+
+  .improvement-actions {
+    border-top: 1px solid var(--ion-color-light-shade);
+    padding-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; // Space out select/deselect from main actions
+    align-items: center;
+    gap: 8px;
+
+    .select-toggles { // Wrapper for select/deselect
+        display: flex;
+        gap: 8px;
+    }
+
+    app-styled-button[fill="clear"] { // For select/deselect
+      --button-color: var(--ion-color-primary); // Make them more prominent
+      font-size: 13px;
+    }
+
+    .main-action-buttons {
+      margin-top: 0; // Remove margin if wrapped by improvement-actions
+      width: 100%; // Make buttons take full width if they stack
+      display: flex;
+      flex-direction: column; // Stack primary and secondary action
+      gap: 10px; // Space between stacked buttons
+      @media (min-width: 400px) { // Side by side on slightly larger screens
+        flex-direction: row;
+        app-styled-button { flex: 1; }
+      }
+    }
+  }
+}
+
+
 // ===========================================
-// STYLES POUR LA PAGE POSTULER AVEC SPINNER GLOBAL
+// STYLES POUR LA PAGE POSTULER AVEC SPINNER GLOBAL (Existing styles below)
 // ===========================================
 
-// ===== OVERLAY DE CHARGEMENT GLOBAL =====
-.global-loading-overlay {
+// ===== OVERLAY DE CHARGEMENT GLOBAL (AI Processing Style) =====
+.global-loading-overlay.ai-processing-style {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(var(--ion-color-dark-rgb, 0, 0, 0), 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 10000;
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(5px);
   animation: fadeInOverlay 0.3s ease-out;
 
   .global-loading-content {
-    background: white;
-    border-radius: 16px;
-    padding: 2.5rem;
+    background: var(--ion-color-white, #ffffff);
+    border-radius: var(--border-radius-xl, 20px);
+    padding: 32px 24px;
     text-align: center;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-    max-width: 320px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    max-width: 380px;
     width: 90%;
     animation: scaleIn 0.4s ease-out;
 
-    ion-spinner {
-      margin-bottom: 1.5rem;
-      --color: var(--ion-color-primary);
-      transform: scale(1.8);
+    .processing-avatar {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-tertiary-shade));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      color: var(--ion-color-primary-contrast);
+      font-size: 36px;
+
+      .animated-cog {
+        animation: spin 2s linear infinite;
+      }
     }
 
-    h3 {
+    .processing-title {
       color: var(--ion-color-primary);
-      margin-bottom: 0.75rem;
-      font-size: 1.2rem;
-      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 1.3rem;
+      font-weight: 700;
       line-height: 1.3;
     }
 
-    p {
-      color: var(--ion-color-medium);
-      font-size: 0.9rem;
+    .processing-description {
+      color: var(--ion-color-medium-shade, #6B7280);
+      font-size: 0.95rem;
       margin: 0;
-      line-height: 1.4;
-      opacity: 0.8;
+      line-height: 1.5;
     }
   }
 }
@@ -66,6 +463,82 @@
     transform: scale(1) translateY(0);
   }
 }
+
+/* CV Comparison Card Specifics (within .result-card) */
+.cv-comparison-section {
+  .modifications-summary {
+    text-align: center;
+    padding: 12px; // Adjusted
+    background: var(--ion-color-success-contrast); // Lighter green
+    border-radius: var(--border-radius-medium);
+    border: 1px solid var(--ion-color-success-tint);
+    margin-bottom: 16px; // Adjusted
+
+    ion-badge { // Already styled globally, but can override
+      font-size: 13px; // Adjusted
+      padding: 6px 12px;
+    }
+
+    .changes-details {
+      margin-top: 8px; // Adjusted
+      font-size: 12px; // Adjusted
+      color: var(--ion-color-success-shade);
+      font-weight: 500;
+      span { margin-right: 12px; display: inline-block; }
+    }
+  }
+  // Styles for .comparison-slider-container, .cv-comparison-wrapper, etc.
+  // are mostly kept from existing, but ensure they work within .result-card > .result-content
+  .comparison-slider-container {
+    .cv-comparison-wrapper {
+      border-radius: var(--border-radius-medium);
+      .cv-original, .cv-improved { padding: 16px; }
+      .cv-section-title { font-size: 14px; padding: 8px 0; margin-bottom: 10px;}
+      .cv-content-display { font-size: 13px; }
+      .slider-overlay .slider-handle { width: 40px; height: 40px; ion-icon { font-size: 18px;} }
+    }
+    .comparison-range { margin-top: 16px; }
+  }
+  .single-cv-view {
+    h4 { font-size: 15px; margin-bottom: 10px; }
+    .cv-content-display { padding: 16px; font-size: 13px; border-radius: var(--border-radius-medium); }
+  }
+  .comparison-actions app-styled-button { /* Main action button already full width by default */ }
+}
+
+/* Template/Theme Selection Card Specifics (within .result-card) */
+.template-theme-selection-card {
+  .template-selection, .theme-selection, .cv-preview-section {
+    h4 { // Shared title style for these sub-sections
+      margin-bottom: 12px;
+      font-size: 15px; // Adjusted
+      font-weight: 600;
+      color: var(--ion-text-color-medium);
+    }
+  }
+  // Existing .template-card, .color-picker styles should mostly work.
+  // Ensure they are scoped or adjusted if they were too global.
+  // For example, if .template-card relied on being a direct child of .template-selection:
+  .template-selection .template-card {
+    // height: 180px; // Example adjustment if needed
+  }
+  .cv-preview-container { // Ensure this is styled if not already
+    border: 1px solid var(--ion-color-medium-tint);
+    border-radius: var(--border-radius-medium);
+    overflow: hidden; // If app-cv-preview overflows
+    min-height: 200px; // Example min-height
+    background: var(--ion-color-light-shade);
+  }
+}
+
+/* Main Save Button at the end of the page */
+app-styled-button.main-save-button {
+  margin-top: var(--spacing-lg, 24px);
+  margin-bottom: var(--spacing-md, 16px); // Space at the very bottom
+  // It will take color="success" and expand="block" from HTML.
+  // Add any further specific styling if needed, e.g. font-size for the text.
+}
+
 
 // ===== UTILITAIRES =====
 .text-center {

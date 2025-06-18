@@ -1,6 +1,565 @@
-// Variables de design
+// Styles for the new Dashboard UI, inspired by dashboard_screen.html
+
+// Ensure ion-content allows for full-screen feel and provides a container for padding
+ion-content.dashboard-content {
+  // --background: linear-gradient(135deg, var(--ion-color-light, #F9FAFB) 0%, var(--ion-color-white, #FFFFFF) 100%);
+  --background: var(--ion-color-light-tint); // A slightly off-white background
+}
+
+.dashboard-container {
+  padding: 20px; // Main padding for the entire dashboard content
+  // For larger screens, you might want more padding:
+  // @media (min-width: 768px) {
+  //   padding: 32px;
+  // }
+}
+
+/* New Header Styles */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0; // Reduced padding, main padding is on .dashboard-container
+  border-bottom: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  margin-bottom: 24px; // Space below header, adjusted from 40px
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .logo-icon {
+      width: 40px; // Adjusted from 48px
+      height: 40px;
+      background: var(--ion-color-primary);
+      border-radius: 10px; // Adjusted
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ion-color-primary-contrast);
+      font-weight: bold;
+      font-size: 20px; // Adjusted
+      position: relative;
+
+      &::after { // Checkmark
+        content: '✓';
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        background: var(--ion-color-secondary); // accent-yellow
+        width: 16px; // Adjusted
+        height: 16px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px; // Adjusted
+        color: var(--ion-text-color, #1F2937); // Dark text on yellow
+        border: 1px solid var(--ion-color-light);
+      }
+    }
+
+    .logo-text {
+      font-size: 24px; // Adjusted
+      font-weight: 800;
+      color: var(--ion-text-color, #1F2937);
+    }
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px; // Adjusted
+    background: var(--ion-color-light); // Use light background, or white
+    padding: 6px 12px; // Adjusted
+    border-radius: 20px; // Adjusted
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08); // Softer shadow
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .user-avatar {
+      width: 32px; // Adjusted
+      height: 32px;
+      background: var(--ion-color-tertiary); // Use a tertiary color or gradient
+      color: var(--ion-color-tertiary-contrast);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px; // For initials
+    }
+    span {
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--ion-text-color);
+    }
+  }
+}
+
+/* Hero Section Styles */
+.hero-section {
+  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-tertiary-shade, #6a6bcf) 100%); // Example gradient using Ionic vars
+  border-radius: var(--border-radius, 16px); // Use existing var or prototype's 24px
+  padding: 32px; // Adjusted from 40px
+  color: var(--ion-color-primary-contrast, #ffffff);
+  margin-bottom: 24px; // Adjusted from 40px
+  position: relative;
+  overflow: hidden;
+
+  &::before { // Background pattern from prototype
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.05"><circle cx="30" cy="30" r="2"/></g></svg>') repeat;
+    animation: float 20s linear infinite; // Keep float animation
+  }
+
+  @keyframes float { // Keep float animation
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-60px, -60px); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr; // Stack on mobile by default
+    gap: 24px; // Adjusted
+    align-items: center;
+
+    @media (min-width: 992px) { // Adjust breakpoint as needed (prototype was 968px)
+      grid-template-columns: 1fr auto; // Side-by-side on larger screens
+      gap: 32px; // Adjusted
+    }
+  }
+
+  .hero-text {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; // Adjusted
+    text-align: center; // Center text on mobile
+    @media (min-width: 992px) {
+      text-align: left;
+    }
+  }
+
+  .hero-greeting {
+    font-size: 16px;
+    opacity: 0.9;
+  }
+
+  .hero-title {
+    font-size: 32px; // Adjusted
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+    opacity: 0.9;
+    margin-bottom: 12px; // Added margin
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 20px; // Adjusted
+    justify-content: center; // Center stats on mobile
+    @media (min-width: 992px) {
+      justify-content: flex-start;
+    }
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 28px; // Adjusted
+    font-weight: 800;
+    color: var(--ion-color-secondary); // Use accent-yellow
+    margin-bottom: 2px; // Adjusted
+  }
+
+  .stat-label {
+    font-size: 13px; // Adjusted
+    opacity: 0.8;
+  }
+}
+
+/* AI Assistant Styles (within Hero) */
+.ai-assistant {
+  background: rgba(255,255,255,0.1); // This style is for AI assistant within Hero
+  border-radius: var(--border-radius, 16px);
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  text-align: center;
+  min-width: 260px;
+
+  .ai-avatar-large {
+    width: 64px;
+    height: 64px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 28px;
+    color: var(--ion-color-primary-contrast);
+  }
+
+  .ai-message {
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 15px;
+  }
+
+  .ai-description {
+    font-size: 13px;
+    opacity: 0.8;
+    margin-bottom: 16px;
+  }
+
+  app-styled-button {
+    --button-background: var(--ion-color-secondary);
+    --button-color: var(--ion-text-color-rgb);
+    font-weight: 600;
+  }
+}
+
+/* Metrics Dashboard Styles */
+.metrics-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md, 16px);
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background: var(--ion-color-white, #ffffff);
+  border-radius: var(--border-radius, 16px);
+  padding: 20px;
+  box-shadow: var(--card-shadow, 0 4px 20px rgba(0,0,0,0.08));
+  border: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  transition: all var(--transition-speed, 0.3s) ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  .metric-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .metric-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ion-color-primary-contrast, #ffffff);
+    font-size: 20px;
+
+    &.applications { background: linear-gradient(135deg, var(--ion-color-primary-shade), var(--ion-color-primary)); }
+    &.interviews { background: linear-gradient(135deg, var(--ion-color-success-shade), var(--ion-color-success)); }
+    &.success { background: linear-gradient(135deg, var(--ion-color-warning-shade), var(--ion-color-warning)); }
+    &.pipeline { background: linear-gradient(135deg, var(--ion-color-tertiary-shade), var(--ion-color-tertiary)); }
+  }
+
+  .metric-title {
+    font-weight: 600;
+    color: var(--ion-text-color, #1F2937);
+    font-size: 15px;
+  }
+
+  .metric-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--ion-text-color, #1F2937);
+    margin-bottom: 8px;
+  }
+
+  .metric-change {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+
+    &.positive { color: var(--ion-color-success); }
+    &.neutral { color: var(--ion-color-medium-shade); }
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+
+  .metric-trend {
+    margin-top: 12px;
+    height: 36px;
+    background: var(--ion-color-light-tint, #F0F9FF);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ion-color-primary-shade, #0369A1);
+    font-size: 12px;
+    font-weight: 500;
+  }
+}
+
+/* Smart Filters Styles */
+.smart-filters {
+  background: var(--ion-color-white, #ffffff);
+  border-radius: var(--border-radius, 16px);
+  padding: 20px;
+  box-shadow: var(--card-shadow, 0 4px 20px rgba(0,0,0,0.08));
+  border: 1px solid var(--ion-color-medium-tint, #E5E7EB);
+  margin-bottom: 24px;
+}
+
+.filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  .filters-title {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--ion-text-color, #1F2937);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-icon {
+      font-size: 20px;
+    }
+    .total-count {
+      color: var(--ion-color-medium-shade);
+      font-weight: 400;
+      font-size: 0.9em;
+    }
+  }
+
+  .sort-button {
+    // Using app-styled-button, so specific styling might not be needed if defaults are okay
+    // Example: ensure it doesn't take full width if other elements are in filters-header
+    flex-shrink: 0;
+    --padding-start: 8px; // Make it a bit more compact
+    --padding-end: 8px;
+    font-size: 13px; // Match filter chip font size
+    ion-icon {
+      font-size: 18px; // Icon size for sort button
+    }
+  }
+}
+
+.search-bar {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+  max-width: 400px;
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ion-color-medium-shade);
+    font-size: 20px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    border: 2px solid var(--ion-color-medium-tint, #E5E7EB);
+    border-radius: var(--border-radius, 12px);
+    font-size: 15px;
+    transition: all var(--transition-speed, 0.3s) ease;
+    background: var(--ion-color-light-tint);
+
+    &:focus {
+      outline: none;
+      border-color: var(--ion-color-primary);
+      background: var(--ion-color-white);
+      box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.1);
+    }
+  }
+}
+
+.quick-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; // Adjusted
+  margin-bottom: 8px; // Adjusted from 20px, as padding is on parent
+}
+
+.filter-chip {
+  background: var(--ion-color-light, #F3F4F6);
+  color: var(--ion-text-color-medium, #374151);
+  padding: 8px 12px; // Adjusted
+  border-radius: var(--border-radius, 20px); // Use main border-radius
+  border: 1px solid transparent; // Adjusted for consistency
+  cursor: pointer;
+  transition: all var(--transition-speed, 0.3s) ease;
+  font-size: 13px; // Adjusted
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  ion-icon {
+    font-size: 16px; // Icon size in chip
+    color: var(--ion-color-medium-shade); // Default icon color
+  }
+
+  &:hover {
+    background: var(--ion-color-light-shade, #E5E7EB);
+    border-color: var(--ion-color-medium-tint);
+  }
+
+  &.active {
+    background: var(--ion-color-primary-tint, #F0F9FF);
+    border-color: var(--ion-color-primary);
+    color: var(--ion-color-primary-shade); // Darker text for active chip
+
+    ion-icon {
+      color: var(--ion-color-primary); // Active icon color
+    }
+
+    .count {
+      background: rgba(var(--ion-color-primary-rgb), 0.1);
+      color: var(--ion-color-primary-shade);
+    }
+  }
+
+  .count {
+    background: rgba(var(--ion-color-medium-rgb), 0.1);
+    color: var(--ion-color-medium-shade);
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 11px; // Adjusted
+    margin-left: 4px;
+    font-weight: 600;
+  }
+}
+
+/* Applications Section & Grid Styles */
+.applications-section {
+  margin-bottom: 24px; // Adjusted from 40px
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px; // Adjusted from 24px
+
+  .section-title {
+    font-size: 20px; // Adjusted
+    font-weight: 700;
+    color: var(--ion-text-color, #1F2937);
+  }
+
+  .view-toggle { // Optional: if view toggle buttons are added later
+    display: flex;
+    background: var(--ion-color-light, #F3F4F6);
+    border-radius: var(--border-radius, 12px);
+    padding: 4px;
+
+    .view-btn {
+      padding: 6px 12px; // Adjusted
+      border: none;
+      background: transparent;
+      border-radius: 8px; // Adjusted
+      cursor: pointer;
+      transition: all var(--transition-speed, 0.3s) ease;
+      color: var(--ion-color-medium-shade, #6B7280);
+      font-size: 14px;
+
+      &.active {
+        background: var(--ion-color-white, #ffffff);
+        color: var(--ion-color-primary);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+    }
+  }
+}
+
+.applications-grid {
+  display: grid;
+  // grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); // From prototype, adjust minmax as needed
+  // For now, let app-candidature-card control its width or stack them if cards are full width by default.
+  // If a multi-column grid is strictly needed, uncomment and adjust.
+  // The current app-candidature-card might be full width.
+  gap: var(--spacing-md, 16px);
+}
+
+
+// Variables de design (existing ones, can be merged or adjusted)
 :host {
-  --dashboard-bg: var(--ion-background-color);
+  --dashboard-bg: var(--ion-background-color); // This is now handled by ion-content rule
+  border-radius: var(--border-radius, 16px);
+  padding: 20px; // Adjusted
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  text-align: center;
+  min-width: 260px; // Adjusted
+
+  .ai-avatar-large {
+    width: 64px; // Adjusted
+    height: 64px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px; // Adjusted
+    font-size: 28px; // For ion-icon
+    color: var(--ion-color-primary-contrast);
+    // animation: pulse 2s infinite; // Keep pulse from prototype if desired
+  }
+
+  .ai-message {
+    font-weight: 600;
+    margin-bottom: 6px; // Adjusted
+    font-size: 15px; // Added
+  }
+
+  .ai-description {
+    font-size: 13px; // Adjusted
+    opacity: 0.8;
+    margin-bottom: 16px; // Adjusted
+  }
+
+  app-styled-button { // Targeting the styled button
+    --button-background: var(--ion-color-secondary); // Ensure it uses accent-yellow
+    --button-color: var(--ion-text-color-rgb); // Dark text
+    font-weight: 600; // Match prototype .ai-action
+    // Add other properties if size="small" is not enough
+  }
+}
+
+
+// Variables de design (existing ones, can be merged or adjusted)
+:host {
+  --dashboard-bg: var(--ion-background-color); // This is now handled by ion-content rule
   --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   --transition-speed: 0.3s;
   --border-radius: 12px;
@@ -253,18 +812,26 @@
   }
 }
 
-// Bouton flottant d'ajout (amélioré)
-.add-fab {
-  ion-fab-button {
-    --background: var(--ion-color-primary);
-    --color: var(--ion-color-primary-contrast);
-    --box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.4);
+// Bouton flottant d'ajout (styles from prototype)
+.add-fab { // This class is on ion-fab
+  ion-fab-button { // Targeting the button itself
+    --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-tertiary-shade)); // Gradient from prototype
+    --background-activated: linear-gradient(135deg, var(--ion-color-primary-shade), var(--ion-color-tertiary)); // Darker on activate
+    --background-hover: linear-gradient(135deg, var(--ion-color-primary-tint), var(--ion-color-tertiary-tint)); // Lighter on hover
+
+    --color: var(--ion-color-primary-contrast); // Icon color
+
     --border-radius: 50%;
-    transition: all var(--transition-speed) ease;
+    --box-shadow: 0 8px 24px rgba(var(--ion-color-primary-rgb), 0.4); // Shadow from prototype
+
+    width: 64px; // Size from prototype
+    height: 64px;
+
+    transition: all var(--transition-speed, 0.3s) ease;
 
     &:hover {
       transform: scale(1.1);
-      --box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.5);
+      --box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.5); // Enhanced shadow on hover
     }
 
     &:active {
@@ -272,8 +839,8 @@
     }
 
     ion-icon {
-      font-size: 28px;
-      font-weight: bold;
+      font-size: 28px; // Keep existing icon size or adjust if prototype is different
+      font-weight: bold; // Ensure icon is bold if needed
     }
   }
 }

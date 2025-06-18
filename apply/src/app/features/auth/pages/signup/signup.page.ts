@@ -5,13 +5,11 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, 
-  IonItem, IonLabel, IonInput, IonButton, 
-  IonText, IonSpinner, IonBackButton, IonButtons,
-  IonCard, IonCardContent, IonIcon
-} from '@ionic/angular/standalone';
-import { AuthService } from '../../services/auth/auth.service'; // MODIFIED
-// import { addIcons } from 'ionicons'; // SUPPRIMÉ
-// import { checkmarkCircleOutline } from 'ionicons/icons'; // SUPPRIMÉ
+  IonSpinner, IonBackButton, IonButtons, IonIcon
+} from '@ionic/angular/standalone'; // Removed IonItem, IonLabel, IonInput, IonButton, IonText, IonCard, IonCardContent
+import { AuthService } from '../../services/auth/auth.service';
+import { StyledInputComponent } from '../../../../components/shared/styled-input/styled-input.component';
+import { StyledButtonComponent } from '../../../../components/shared/styled-button/styled-button.component';
 
 @Component({
   selector: 'app-signup',
@@ -26,17 +24,12 @@ import { AuthService } from '../../services/auth/auth.service'; // MODIFIED
     IonToolbar, 
     IonTitle, 
     IonContent,
-    IonItem, 
-    IonLabel, 
-    IonInput, 
-    IonButton, 
-    IonText,
     IonSpinner,
     IonBackButton,
     IonButtons,
-    IonCard,
-    IonCardContent,
-    IonIcon
+    IonIcon,
+    StyledInputComponent, // Added
+    StyledButtonComponent // Added
   ]
 })
 export class SignupPage implements OnInit {
@@ -49,9 +42,7 @@ export class SignupPage implements OnInit {
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private router: Router
-  ) {
-    // addIcons({ checkmarkCircleOutline }); // SUPPRIMÉ
-  }
+  ) {}
 
   ngOnInit() {
     this.signupForm = this.formBuilder.group({
@@ -69,41 +60,59 @@ export class SignupPage implements OnInit {
   }
 
   async onSubmit() {
-    if (this.signupForm.valid) {
-      this.isLoading = true;
-      this.errorMessage = '';
-      
-      try {
-        const { email, password, displayName } = this.signupForm.value;
-        await this.authService.signUp(email, password, displayName);
-        
-        // Afficher message de succès
-        this.successMessage = 'Votre compte a été créé avec succès !';
-        
-        // Attendre un court instant pour que l'utilisateur voie le message de succès
-        setTimeout(() => {
-          // Rediriger vers le dashboard
-          this.router.navigateByUrl('/tabs/dashboard');
-        }, 2000);
-        
-      } catch (error: any) {
-        // Gérer les erreurs spécifiques
-        if (error.code === 'auth/email-already-in-use') {
-          this.errorMessage = 'Cette adresse email est déjà utilisée.';
-        } else if (error.code === 'auth/weak-password') {
-          this.errorMessage = 'Le mot de passe est trop faible.';
-        } else {
-          this.errorMessage = error.message || 'Une erreur est survenue lors de l\'inscription';
-        }
-        
-        this.isLoading = false;
-      }
-    } else {
-      // Marque tous les champs comme touchés pour afficher les erreurs
-      Object.keys(this.signupForm.controls).forEach(key => {
-        const control = this.signupForm.get(key);
-        control?.markAsTouched();
-      });
+    if (!this.signupForm.valid) { // Ensure this is checked first
+      this.signupForm.markAllAsTouched(); // Mark all fields as touched
+      return;
     }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    // this.successMessage = ''; // Keep success message until redirection or if error occurs
+      
+    try {
+      const { email, password, displayName } = this.signupForm.value;
+      await this.authService.signUp(email, password, displayName);
+        
+      this.successMessage = 'Votre compte a été créé avec succès !';
+      this.errorMessage = ''; // Clear any previous error
+        
+      setTimeout(() => {
+        this.router.navigateByUrl('/onboarding');
+      }, 2000);
+        
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
+        this.errorMessage = 'Cette adresse email est déjà utilisée.';
+      } else if (error.code === 'auth/weak-password') {
+        this.errorMessage = 'Le mot de passe est trop faible.';
+      } else {
+        this.errorMessage = error.message || 'Une erreur est survenue lors de l\'inscription.';
+      }
+      this.successMessage = ''; // Clear success message on error
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.signupForm.get(controlName);
+    if (!control || !control.touched) { // Only show error if touched
+      return '';
+    }
+    if (control.hasError('required')) {
+      return 'Ce champ est requis.';
+    }
+    if (control.hasError('email')) {
+      return 'Veuillez saisir une adresse email valide.';
+    }
+    if (control.hasError('minlength')) {
+      const requiredLength = control.errors?.minlength.requiredLength;
+      return `Doit contenir au moins ${requiredLength} caractères.`;
+    }
+    // For confirmPassword, check overall form error if control itself is valid but mismatch exists
+    if (controlName === 'confirmPassword' && !control.hasError('required') && this.signupForm.hasError('mismatch')) {
+      return 'Les mots de passe ne correspondent pas.';
+    }
+    return '';
   }
 }

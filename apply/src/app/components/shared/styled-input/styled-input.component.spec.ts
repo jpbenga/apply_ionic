@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { FilterPanelComponent } from './filter-panel.component';
+import { StyledInputComponent } from './styled-input.component';
 
-describe('FilterPanelComponent', () => {
-  let component: FilterPanelComponent;
-  let fixture: ComponentFixture<FilterPanelComponent>;
+describe('StyledInputComponent', () => {
+  let component: StyledInputComponent;
+  let fixture: ComponentFixture<StyledInputComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      imports: [FilterPanelComponent],
+      imports: [StyledInputComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(FilterPanelComponent);
+    fixture = TestBed.createComponent(StyledInputComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

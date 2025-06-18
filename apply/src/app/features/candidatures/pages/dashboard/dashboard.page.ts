@@ -5,19 +5,21 @@ import { FormsModule } from '@angular/forms';
 import { Observable, of, Subscription, combineLatest } from 'rxjs';
 import { catchError, finalize, map, switchMap } from 'rxjs/operators';
 import {
-  IonHeader, IonContent, IonSpinner, IonIcon,
+  IonContent, IonSpinner, IonIcon,
   IonButton, IonRefresher, IonRefresherContent,
-  IonItem, IonLabel, IonSelect, IonSelectOption, IonFab, IonFabButton, IonText
+  IonFab, IonFabButton, IonText,
+  IonPopover, IonList, IonItem, IonLabel // Added for Sort Popover
 } from '@ionic/angular/standalone';
 import { HeaderService } from 'src/app/shared/services/header/header.service';
 import { CandidatureService, GetCandidaturesOptions } from 'src/app/shared/services/candidature/candidature.service';
 import { FilterService } from 'src/app/shared/services/filter/filter.service';
 import { Candidature } from 'src/app/features/candidatures/models/candidature.model';
-import { FilterOptions } from 'src/app/features/candidatures/models/filter.model';
+import { FilterOptions } from 'src/app/features/candidatures/models/filter.model'; // Keep this
 import { CandidatureCardComponent } from '../../components/candidature-card/candidature-card.component';
-import { FilterPanelComponent } from 'src/app/components/filter-panel/filter-panel.component';
-import { UserHeaderComponent } from 'src/app/shared/components/user-header/user-header.component';
+// import { FilterPanelComponent } from 'src/app/components/filter-panel/filter-panel.component'; // Replaced
+// import { UserHeaderComponent } from 'src/app/shared/components/user-header/user-header.component'; // Replaced
 import { ToastController, AlertController } from '@ionic/angular/standalone';
+import { StyledButtonComponent } from '../../../../components/shared/styled-button/styled-button.component'; // Added
 
 @Component({
   selector: 'app-dashboard',
@@ -28,12 +30,12 @@ import { ToastController, AlertController } from '@ionic/angular/standalone';
     CommonModule,
     RouterModule,
     FormsModule,
-    IonHeader, IonContent, IonSpinner, IonIcon, IonButton,
-    IonRefresher, IonRefresherContent, IonItem, IonLabel, IonSelect, IonSelectOption,
+    IonContent, IonSpinner, IonIcon, IonButton,
+    IonRefresher, IonRefresherContent,
     IonFab, IonFabButton, IonText,
-    UserHeaderComponent,
+    IonPopover, IonList, IonItem, IonLabel, // Added
     CandidatureCardComponent,
-    FilterPanelComponent
+    StyledButtonComponent
   ]
 })
 export class DashboardPage implements OnInit, OnDestroy {
@@ -44,27 +46,26 @@ export class DashboardPage implements OnInit, OnDestroy {
   public errorLoading: string | null = null;
   private candidaturesSubscription?: Subscription;
 
-  public sortByDate: 'asc' | 'desc' = 'desc';
+  // User data for new header
+  public userName: string = 'John Doe'; // Static for now
+  public userInitials: string = 'JD';   // Static for now
   
   // États pour la sélection multiple
   public isSelectionMode: boolean = false;
   public selectedCandidatures: Set<string> = new Set();
   public isDeletingSelected: boolean = false;
 
-  // Options de tri
-  public optionsDeTri: { value: 'asc' | 'desc', label: string }[] = [
-    { value: 'desc', label: 'Plus récentes d\'abord' },
-    { value: 'asc', label: 'Plus anciennes d\'abord' }
-  ];
-
   // Gestion des filtres
-  public filterOptions: FilterOptions = {
+  public filterOptions: FilterOptions = { // This will be synced with FilterService
     selectedStatuts: [],
-    sortByDate: 'desc'
+    sortByDate: 'desc', // Default sort
+    searchText: ''
   };
+  public searchText: string = ''; // For [(ngModel)] binding with new search input
+  public activeFilterChip: string = 'all'; // To manage active state of filter chips
 
   constructor(
-    private headerService: HeaderService,
+    private headerService: HeaderService, // To be reviewed if still needed for title setting
     private candidatureService: CandidatureService,
     private filterService: FilterService,
     private router: Router,
@@ -83,8 +84,8 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   ionViewWillEnter() {
-    this.headerService.updateTitle('Tableau de Bord');
-    this.headerService.setShowBackButton(false);
+    // this.headerService.updateTitle('Tableau de Bord'); // Title is now part of the page
+    // this.headerService.setShowBackButton(false); // No global back button here
     
     // Force l'arrêt de l'ancienne souscription
     if (this.candidaturesSubscription) {
@@ -104,42 +105,77 @@ export class DashboardPage implements OnInit, OnDestroy {
    * Initialiser la gestion des filtres
    */
   private initializeFilters(): void {
-    // Synchroniser le tri initial avec le FilterService
-    this.filterService.setSortByDate(this.sortByDate);
+    // Subscribe to filter changes to keep component's state (like searchText, activeFilterChip) in sync
+    // This subscription should ideally be managed and unsubscribed in ngOnDestroy
+    // For simplicity here, if it's only for initial setup, can unsubscribe after first emission.
+    const initialFilterSub = this.filterService.filterOptions$.subscribe(options => {
+      this.searchText = options.searchText || '';
+      this.filterOptions = { ...options }; // Update local copy
+
+      // Update activeFilterChip based on current filters
+      if (options.selectedStatuts && options.selectedStatuts.length > 0) {
+        // This is a simplified logic. If multiple statuses can be selected,
+        // or if chips map to complex filter states, this needs refinement.
+        // For now, assume the first selected status (if any) determines the active chip.
+        this.activeFilterChip = options.selectedStatuts[0].toLowerCase();
+      } else if (options.searchText) {
+        // If search text is active, no specific chip might be "active" unless 'all' is default
+        this.activeFilterChip = ''; // Or some other state indicating search is active
+      }
+      else {
+        this.activeFilterChip = 'all';
+      }
+    });
+    // Consider unsubscribing if this is truly only for initialization, e.g., initialFilterSub.unsubscribe();
+    // Or add to a list of subscriptions to be cleaned up in ngOnDestroy.
+
+    // Ensure the FilterService has the initial default sort order from the component's filterOptions
+    this.filterService.setSortByDate(this.filterOptions.sortByDate);
+    this.filterService.setSearchText(this.filterOptions.searchText); // Init searchText in service
+    this.filterService.setSelectedStatuts(this.filterOptions.selectedStatuts); // Init statuses in service
   }
 
   /**
    * Charger les candidatures avec les filtres appliqués
    */
   loadCandidaturesWithFilters(event?: any): void {
-    // Arrête l'ancienne souscription s'il y en a une
     if (this.candidaturesSubscription) {
       this.candidaturesSubscription.unsubscribe();
     }
 
     this.isLoading = true;
     this.errorLoading = null;
-    this.candidatures = [];
-    this.filteredCandidatures = [];
+    // Keep existing this.candidatures and this.filteredCandidatures as is until new data arrives or clear them if desired
+    // this.candidatures = [];
+    // this.filteredCandidatures = [];
 
-    // Combiner les options de filtrage avec les candidatures
     this.candidaturesSubscription = combineLatest([
-      this.filterService.filterOptions$,
+      this.filterService.filterOptions$, // Source of truth for filter options
       this.filterService.filterOptions$.pipe(
-        switchMap(filterOptions => {
+        switchMap(currentFilterOptions => { // Use currentFilterOptions from the service
           const options: GetCandidaturesOptions = {
-            sortByDate: filterOptions.sortByDate,
-            statuts: filterOptions.selectedStatuts.length > 0 ? filterOptions.selectedStatuts : undefined,
-            searchText: filterOptions.searchText
+            sortByDate: currentFilterOptions.sortByDate,
+            statuts: currentFilterOptions.selectedStatuts.length > 0 ? currentFilterOptions.selectedStatuts : undefined,
+            searchText: currentFilterOptions.searchText
           };
           return this.candidatureService.getCandidatures(options);
         })
       )
     ]).pipe(
-      map(([filterOptions, candidatures]) => ({
-        filterOptions,
-        candidatures
-      })),
+      map(([currentFilterOptions, candidaturesFromService]) => {
+        // Augment candidatures with mock data for new card fields
+        const augmentedCandidatures = candidaturesFromService.map((cand, index) => ({
+          ...cand,
+          // Use existing data if available, otherwise provide mock data
+          companyLogoUrl: cand.companyLogoUrl || `https://picsum.photos/seed/${cand.id || index}/48/48`, // Mock logo
+          aiScore: cand.aiScore || (70 + (parseInt(cand.id || `${index}`, 16) % 30)), // Mock AI score
+          keywordsArray: cand.keywordsArray || ['Mot-clé ' + (index % 3 + 1), 'Tech ' + (index % 2 + 1)], // Mock keywords
+        }));
+        return {
+          filterOptions: currentFilterOptions, // Use options from service
+          candidatures: augmentedCandidatures
+        };
+      }),
       catchError(error => {
         this.errorLoading = 'Impossible de charger les candidatures.';
         console.error('Erreur chargement candidatures:', error);
@@ -153,24 +189,28 @@ export class DashboardPage implements OnInit, OnDestroy {
     ).subscribe({
       next: (result) => {
         this.isLoading = false;
-        this.candidatures = result.candidatures;
-        this.filteredCandidatures = result.candidatures;
-        this.filterOptions = result.filterOptions;
+        this.candidatures = result.candidatures; // This is now augmented
+        this.filteredCandidatures = result.candidatures; // This is now augmented
+        this.filterOptions = result.filterOptions; // Sync local filterOptions with what was used
         this.candidatures$ = of(result.candidatures);
+        // Update searchText based on filterOptions from service to ensure UI consistency
+        this.searchText = result.filterOptions.searchText || '';
       },
-      error: () => {
+      error: (err) => { // Added error parameter
         this.isLoading = false;
+        this.errorLoading = `Erreur lors du chargement: ${err.message || 'Vérifiez votre connexion.'}`;
+        console.error("Subscription error:", err);
       }
     });
   }
 
   /**
-   * Changement du tri par date
+   * Changement du tri par date - Commented out as UI for this is removed.
+   * FilterService now manages sort order, potentially via a future UI element or default.
    */
-  onSortChange(): void {
-    this.filterService.setSortByDate(this.sortByDate);
-    // La réactivité du système se charge automatiquement du rechargement
-  }
+  // onSortChange(): void {
+  //   this.filterService.setSortByDate(this.sortByDate);
+  // }
 
   /**
    * Gestion du refresh
@@ -378,5 +418,53 @@ export class DashboardPage implements OnInit, OnDestroy {
    */
   trackByCandidatureId(index: number, candidature: Candidature): string {
     return candidature.id || index.toString();
+  }
+
+  // ==================== New Methods for Header and Filters ====================
+  navigateToProfile(): void {
+    console.log('Navigate to profile clicked');
+    this.router.navigate(['/profile']); // Example navigation
+  }
+
+  showOpportunities(): void {
+    console.log('Show new opportunities clicked');
+    // TODO: Implement logic to show AI opportunities, perhaps a modal or new page
+    this.presentToast('Fonctionnalité "Voir les opportunités" à implémenter.', 'primary');
+  }
+
+  onSearchTextChanged(): void {
+    this.filterService.setSearchText(this.searchText);
+  }
+
+  applyFilter(statusFilter: string): void {
+    this.activeFilterChip = statusFilter;
+    console.log('Applying filter:', statusFilter);
+    // This is a simplified filter application.
+    // In a real scenario, you'd map statusFilter to actual StatutCandidature values
+    // and potentially handle multiple selections or more complex logic.
+    if (statusFilter === 'all') {
+      this.filterService.setSelectedStatuts([]);
+    } else {
+      // Assuming statusFilter directly maps to a StatutCandidature value for simplicity.
+      // This might need adjustment based on how StatutCandidature enum/type is defined.
+      // For example, if StatutCandidature.ENTRETIEN_PLANIFIE is 'entretien_planifie'
+      this.filterService.setSelectedStatuts([statusFilter.toUpperCase() as Candidature['statut']]);
+    }
+    // No need to call loadCandidaturesWithFilters() if using reactive FilterService pattern
+  }
+
+  setSortByDate(sortOrder: 'asc' | 'desc'): void {
+    // Update local component state if needed, though filterOptions should be the source of truth via service
+    this.filterOptions.sortByDate = sortOrder;
+    this.filterService.setSortByDate(sortOrder);
+    // The existing subscription to filterService.filterOptions$ in loadCandidaturesWithFilters
+    // should automatically trigger a reload with the new sort order.
+  }
+
+  editCandidature(candidatureId: string): void {
+    console.log('Edit candidature requested:', candidatureId);
+    // TODO: Implement navigation to an edit page or modal, similar to viewCandidatureDetail
+    // For example: this.router.navigate(['/candidature', candidatureId, 'edit']);
+    this.presentToast(`Fonctionnalité d'édition pour ${candidatureId} à implémenter.`, 'primary');
   }
 }

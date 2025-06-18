@@ -1,0 +1,11 @@
+<ion-button
+  [color]="color"
+  [fill]="fill"
+  [size]="size"
+  [expand]="expand"
+  [disabled]="disabled"
+  [type]="type">
+  <ion-icon *ngIf="iconName && iconSlot !== 'end'" [name]="iconName!" [slot]="iconSlot === 'icon-only' ? 'icon-only' : 'start'"></ion-icon>
+  <ng-content *ngIf="iconSlot !== 'icon-only'"></ng-content>
+  <ion-icon *ngIf="iconName && iconSlot === 'end'" [name]="iconName!" slot="end"></ion-icon>
+</ion-button>

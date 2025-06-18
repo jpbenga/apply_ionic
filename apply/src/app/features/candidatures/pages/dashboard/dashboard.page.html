@@ -1,135 +1,282 @@
-<ion-header>
-  <app-user-header></app-user-header>
-</ion-header>
+<!-- No ion-header, the new header is part of ion-content to match prototype full-page feel -->
+<ion-content [fullscreen]="true" class="dashboard-content">
+  <div class="dashboard-container"> <!-- Main wrapper for padding and layout -->
+    <!-- New Header from Prototype -->
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">A</div> <!-- To be styled with SCSS for the checkmark -->
+        <div class="logo-text">Apply</div>
+      </div>
+      <div class="user-profile" (click)="navigateToProfile()"> <!-- TODO: Implement navigateToProfile -->
+        <div class="user-avatar">{{ userInitials }}</div> <!-- TODO: Bind userInitials -->
+        <span>{{ userName }}</span> <!-- TODO: Bind userName -->
+      </div>
+    </header>
 
-<ion-content class="ion-padding">
-  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
+    <!-- Hero Section -->
+    <section class="hero-section fade-in">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="hero-greeting">👋 Salut {{ userName }} !</div> <!-- TODO: Bind userName -->
+          <h1 class="hero-title">Votre carrière décolle</h1>
+          <p class="hero-subtitle">Votre copilote IA a travaillé pour vous cette semaine</p>
 
-  <!-- Section de tri (simplifiée) -->
-  <ion-item lines="full" class="sort-section">
-    <ion-label position="stacked">Trier par date</ion-label>
-    <ion-select [(ngModel)]="sortByDate" (ionChange)="onSortChange()" interface="popover">
-      <ion-select-option *ngFor="let sortOpt of optionsDeTri" [value]="sortOpt.value">
-        {{ sortOpt.label }}
-      </ion-select-option>
-    </ion-select>
-  </ion-item>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="stat-value">0</div> <!-- TODO: Bind to actual data -->
+              <div class="stat-label">Candidatures envoyées</div>
+            </div>
+            <div class="hero-stat">
+              <div class="stat-value">0</div> <!-- TODO: Bind to actual data -->
+              <div class="stat-label">Entretiens programmés</div>
+            </div>
+            <div class="hero-stat">
+              <div class="stat-value">0</div> <!-- TODO: Bind to actual data -->
+              <div class="stat-label">Offres reçues</div>
+            </div>
+          </div>
+        </div>
 
-  <!-- Composant de filtrage style Spotify -->
-  <app-filter-panel 
-    [resultsCount]="resultsCount"
-    class="filter-panel-container">
-  </app-filter-panel>
+        <div class="ai-assistant">
+          <div class="ai-avatar-large">
+            <ion-icon name="sparkles-outline"></ion-icon> <!-- Using Ionic icon -->
+          </div>
+          <div class="ai-message">Nouvelles opportunités détectées</div> <!-- Static for now -->
+          <div class="ai-description">Votre IA a trouvé des postes adaptés à votre profil.</div>
+          <app-styled-button color="secondary" size="small" (click)="showOpportunities()">
+             Voir les opportunités
+          </app-styled-button> <!-- TODO: Implement showOpportunities() -->
+        </div>
+      </div>
+    </section>
 
-  <!-- Contrôles de sélection multiple -->
-  <div *ngIf="filteredCandidatures.length && !isLoading && !errorLoading" class="selection-controls ion-padding-horizontal">
-    <div class="selection-controls-container">
-      <ion-button 
-        fill="outline" 
-        size="small" 
-        (click)="toggleSelectionMode()"
-        [color]="isSelectionMode ? 'primary' : 'medium'"
-        class="selection-toggle-btn">
-        <ion-icon [name]="isSelectionMode ? 'checkmark-circle-outline' : 'checkbox-outline'" slot="start"></ion-icon>
-        {{ isSelectionMode ? 'Annuler sélection' : 'Sélectionner' }}
-      </ion-button>
+    <!-- Metrics Dashboard -->
+    <section class="metrics-dashboard fade-in">
+      <div class="metric-card">
+        <div class="metric-header">
+          <div class="metric-icon applications">
+            <ion-icon name="file-tray-stacked-outline"></ion-icon>
+          </div>
+          <div class="metric-title">Candidatures actives</div>
+        </div>
+        <div class="metric-value">0</div> <!-- TODO: Bind to actual data -->
+        <div class="metric-change positive">
+          <ion-icon name="trending-up-outline"></ion-icon> +0 cette semaine
+        </div>
+        <div class="metric-trend">Tendance stable</div> <!-- Static -->
+      </div>
 
-      <div *ngIf="isSelectionMode" class="selection-actions">
-        <span *ngIf="selectedCount > 0" class="selection-count">
-          {{ selectedCount }} sélectionnée(s)
-        </span>
-        
+      <div class="metric-card">
+        <div class="metric-header">
+          <div class="metric-icon interviews">
+            <ion-icon name="chatbubbles-outline"></ion-icon>
+          </div>
+          <div class="metric-title">Taux de réponse</div>
+        </div>
+        <div class="metric-value">0%</div> <!-- TODO: Bind to actual data -->
+        <div class="metric-change positive">
+          <ion-icon name="trending-up-outline"></ion-icon> +0% vs mois dernier
+        </div>
+        <div class="metric-trend">À surveiller</div> <!-- Static -->
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <div class="metric-icon success">
+            <ion-icon name="ribbon-outline"></ion-icon>
+          </div>
+          <div class="metric-title">Entretiens convertis</div>
+        </div>
+        <div class="metric-value">0%</div> <!-- TODO: Bind to actual data -->
+        <div class="metric-change positive">
+          <ion-icon name="trending-up-outline"></ion-icon> Excellent taux
+        </div>
+        <div class="metric-trend">Performance top</div> <!-- Static -->
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <div class="metric-icon pipeline">
+            <ion-icon name="funnel-outline"></ion-icon>
+          </div>
+          <div class="metric-title">Pipeline IA</div>
+        </div>
+        <div class="metric-value">0</div> <!-- TODO: Bind to actual data -->
+        <div class="metric-change neutral">
+          <ion-icon name="sync-outline"></ion-icon> En cours d'analyse
+        </div>
+        <div class="metric-trend">Nouvelles offres en vue</div> <!-- Static -->
+      </div>
+    </section>
+
+    <!-- Smart Filters -->
+    <section class="smart-filters fade-in">
+      <div class="filters-header">
+        <div class="filters-title">
+          <ion-icon name="options-outline"></ion-icon> Vos candidatures
+          <span class="total-count">({{ filteredCandidatures.length }} total)</span> <!-- TODO: Bind to actual count -->
+        </div>
+        <div class="search-bar">
+          <ion-icon name="search-outline" class="search-icon"></ion-icon>
+          <input type="text" class="search-input" placeholder="Rechercher par entreprise, poste..."
+                 [(ngModel)]="searchText" (ngModelChange)="onSearchTextChanged()">
+        </div>
+        <!-- Sort Button and Popover -->
+        <app-styled-button id="sort-popover-trigger" fill="clear" color="medium" class="sort-button">
+          <ion-icon name="swap-vertical-outline" slot="start"></ion-icon>
+          Trier : {{ (filterOptions.sortByDate === 'desc' ? 'Plus récentes' : 'Plus anciennes') }}
+        </app-styled-button>
+        <ion-popover trigger="sort-popover-trigger" triggerAction="click" [dismissOnSelect]="true" side="bottom" alignment="end">
+          <ng-template>
+            <ion-list>
+              <ion-item button (click)="setSortByDate('desc')" detail="false">
+                <ion-label>Plus récentes d'abord</ion-label>
+                <ion-icon name="arrow-down-outline" slot="end" *ngIf="filterOptions.sortByDate === 'desc'"></ion-icon>
+              </ion-item>
+              <ion-item button (click)="setSortByDate('asc')" detail="false">
+                <ion-label>Plus anciennes d'abord</ion-label>
+                <ion-icon name="arrow-up-outline" slot="end" *ngIf="filterOptions.sortByDate === 'asc'"></ion-icon>
+              </ion-item>
+            </ion-list>
+          </ng-template>
+        </ion-popover>
+      </div>
+
+      <div class="quick-filters">
+        <!-- TODO: Make these dynamic and connect to filter logic -->
+        <div class="filter-chip active" (click)="applyFilter('all')"> <!-- TODO: Implement applyFilter() -->
+          Toutes <span class="count">{{ filteredCandidatures.length }}</span>
+        </div>
+        <div class="filter-chip" (click)="applyFilter('interview')">
+          <ion-icon name="chatbubbles-outline"></ion-icon> Entretiens <span class="count">0</span>
+        </div>
+        <div class="filter-chip" (click)="applyFilter('offer')">
+          <ion-icon name="gift-outline"></ion-icon> Offres reçues <span class="count">0</span>
+        </div>
+        <div class="filter-chip" (click)="applyFilter('applied')">
+          <ion-icon name="mail-unread-outline"></ion-icon> En attente <span class="count">0</span>
+        </div>
+        <div class="filter-chip" (click)="applyFilter('ai-generated')">
+          <ion-icon name="sparkles-outline"></ion-icon> Générées par IA <span class="count">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- The rest of the dashboard content will be added here in subsequent steps -->
+    <!-- For now, keep existing content structure but it will be replaced -->
+    <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <!-- Contrôles de sélection multiple -->
+    <div *ngIf="filteredCandidatures.length && !isLoading && !errorLoading" class="selection-controls ion-padding-horizontal">
+      <div class="selection-controls-container">
         <ion-button 
           fill="outline" 
           size="small" 
-          (click)="selectAllCandidatures()"
-          [disabled]="isAllSelected"
-          class="select-all-btn">
-          {{ isAllSelected ? 'Tout sélectionné' : 'Tout sélectionner' }}
+          (click)="toggleSelectionMode()"
+          [color]="isSelectionMode ? 'primary' : 'medium'"
+          class="selection-toggle-btn">
+          <ion-icon [name]="isSelectionMode ? 'checkmark-circle-outline' : 'checkbox-outline'" slot="start"></ion-icon>
+          {{ isSelectionMode ? 'Annuler sélection' : 'Sélectionner' }}
         </ion-button>
-        
-        <ion-button 
-          fill="solid" 
-          color="danger" 
-          size="small" 
-          (click)="deleteSelectedCandidatures()"
-          [disabled]="selectedCount === 0 || isDeletingSelected"
-          class="delete-selected-btn">
-          <ion-icon name="trash-outline" slot="start"></ion-icon>
-          {{ isDeletingSelected ? 'Suppression...' : `Supprimer (${selectedCount})` }}
+
+        <div *ngIf="isSelectionMode" class="selection-actions">
+          <span *ngIf="selectedCount > 0" class="selection-count">
+            {{ selectedCount }} sélectionnée(s)
+          </span>
+
+          <ion-button
+            fill="outline"
+            size="small"
+            (click)="selectAllCandidatures()"
+            [disabled]="isAllSelected"
+            class="select-all-btn">
+            {{ isAllSelected ? 'Tout sélectionné' : 'Tout sélectionner' }}
+          </ion-button>
+
+          <ion-button
+            fill="solid"
+            color="danger"
+            size="small"
+            (click)="deleteSelectedCandidatures()"
+            [disabled]="selectedCount === 0 || isDeletingSelected"
+            class="delete-selected-btn">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            {{ isDeletingSelected ? 'Suppression...' : `Supprimer (${selectedCount})` }}
+          </ion-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- États de chargement et d'erreur -->
+    <div *ngIf="isLoading" class="state-container loading-state">
+      <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+      <p class="state-message">Chargement des candidatures...</p>
+    </div>
+
+    <div *ngIf="errorLoading && !isLoading" class="state-container error-state">
+      <ion-icon name="cloud-offline-outline" size="large" color="danger" class="state-icon"></ion-icon>
+      <p class="state-message error-message">{{ errorLoading }}</p>
+      <ion-button fill="outline" (click)="loadCandidaturesWithFilters()" class="retry-btn">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <!-- État vide (aucune candidature) -->
+    <div *ngIf="!filteredCandidatures.length && !isLoading && !errorLoading" class="state-container empty-state">
+      <ion-icon name="file-tray-outline" size="large" color="medium" class="state-icon"></ion-icon>
+      <div class="empty-content">
+        <h3 class="empty-title">
+          {{ filterOptions.selectedStatuts.length > 0 || filterOptions.searchText ? 'Aucun résultat' : 'Aucune candidature' }}
+        </h3>
+        <p class="empty-description">
+          {{ filterOptions.selectedStatuts.length > 0 || filterOptions.searchText
+             ? 'Essayez de modifier vos filtres pour voir plus de résultats.'
+             : 'Commencez par créer votre première candidature.' }}
+        </p>
+        <ion-button
+          *ngIf="!filterOptions.selectedStatuts.length && !filterOptions.searchText"
+          fill="outline"
+          (click)="goToPostulerPage()"
+          class="create-btn">
+          <ion-icon name="add-outline" slot="start"></ion-icon>
+          Créer une candidature
         </ion-button>
       </div>
     </div>
-  </div>
 
-  <!-- États de chargement et d'erreur -->
-  <div *ngIf="isLoading" class="state-container loading-state">
-    <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
-    <p class="state-message">Chargement des candidatures...</p>
-  </div>
+    <!-- Liste des candidatures -->
+    <div *ngIf="filteredCandidatures.length && !isLoading && !errorLoading" class="candidatures-container">
+      <!-- En-tête des résultats -->
+      <div class="results-header" *ngIf="filterOptions.selectedStatuts.length > 0 || filterOptions.searchText">
+        <ion-text color="medium">
+          <h6>{{ resultsCount }} candidature(s) trouvée(s)</h6>
+        </ion-text>
+      </div>
 
-  <div *ngIf="errorLoading && !isLoading" class="state-container error-state">
-    <ion-icon name="cloud-offline-outline" size="large" color="danger" class="state-icon"></ion-icon>
-    <p class="state-message error-message">{{ errorLoading }}</p>
-    <ion-button fill="outline" (click)="loadCandidaturesWithFilters()" class="retry-btn">
-      <ion-icon name="refresh-outline" slot="start"></ion-icon>
-      Réessayer
-    </ion-button>
-  </div>
-
-  <!-- État vide (aucune candidature) -->
-  <div *ngIf="!filteredCandidatures.length && !isLoading && !errorLoading" class="state-container empty-state">
-    <ion-icon name="file-tray-outline" size="large" color="medium" class="state-icon"></ion-icon>
-    <div class="empty-content">
-      <h3 class="empty-title">
-        {{ filterOptions.selectedStatuts.length > 0 || filterOptions.searchText ? 'Aucun résultat' : 'Aucune candidature' }}
-      </h3>
-      <p class="empty-description">
-        {{ filterOptions.selectedStatuts.length > 0 || filterOptions.searchText 
-           ? 'Essayez de modifier vos filtres pour voir plus de résultats.' 
-           : 'Commencez par créer votre première candidature.' }}
-      </p>
-      <ion-button 
-        *ngIf="!filterOptions.selectedStatuts.length && !filterOptions.searchText"
-        fill="outline" 
-        (click)="goToPostulerPage()"
-        class="create-btn">
-        <ion-icon name="add-outline" slot="start"></ion-icon>
-        Créer une candidature
-      </ion-button>
-    </div>
-  </div>
-
-  <!-- Liste des candidatures -->
-  <div *ngIf="filteredCandidatures.length && !isLoading && !errorLoading" class="candidatures-container">
-    <!-- En-tête des résultats -->
-    <div class="results-header" *ngIf="filterOptions.selectedStatuts.length > 0 || filterOptions.searchText">
-      <ion-text color="medium">
-        <h6>{{ resultsCount }} candidature(s) trouvée(s)</h6>
-      </ion-text>
+      <!-- Cartes des candidatures -->
+      <div class="applications-grid">
+        <app-candidature-card
+          *ngFor="let candidature of filteredCandidatures; trackBy: trackByCandidatureId"
+          [candidature]="candidature"
+          [isSelectionMode]="isSelectionMode"
+          [isSelected]="selectedCandidatures.has(candidature.id!)"
+          (viewDetails)="viewCandidatureDetail($event)"
+          (deleteCandidature)="deleteCandidature($event)"
+          (selectionChanged)="toggleCandidatureSelection($event)"
+          (editCandidature)="editCandidature($event)"
+          class="candidature-card-item">
+        </app-candidature-card>
+      </div>
     </div>
 
-    <!-- Cartes des candidatures -->
-    <div class="candidatures-list">
-      <app-candidature-card
-        *ngFor="let candidature of filteredCandidatures; trackBy: trackByCandidatureId"
-        [candidature]="candidature"
-        [isSelectionMode]="isSelectionMode"
-        [isSelected]="selectedCandidatures.has(candidature.id || '')"
-        (viewDetails)="viewCandidatureDetail($event)"
-        (deleteCandidature)="deleteCandidature($event)"
-        (selectionChanged)="toggleCandidatureSelection($event)"
-        class="candidature-card-item">
-      </app-candidature-card>
-    </div>
-  </div>
-
-  <!-- Bouton flottant d'ajout -->
-  <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="add-fab">
-    <ion-fab-button (click)="goToPostulerPage()" color="primary">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+    <!-- Bouton flottant d'ajout -->
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="add-fab">
+      <ion-fab-button (click)="goToPostulerPage()"> <!-- Removed color="primary" to rely on SCSS -->
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </div> <!-- End .dashboard-container -->
 </ion-content>

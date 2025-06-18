@@ -2,13 +2,13 @@ import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
+  IonContent, IonFab, IonFabButton, IonFabList, IonIcon,
   IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
-  IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
+  IonItemOptions, IonItemOption, IonCard, IonCardHeader, // Removed IonButton
   IonCardTitle, IonCardSubtitle, IonCardContent
-} from '@ionic/angular/standalone';
-import { UserHeaderComponent } from '../../shared/components/user-header/user-header.component';
-import { HeaderService } from '../../shared/services/header/header.service';
+} from '@ionic/angular/standalone'; // Removed IonHeader
+// import { UserHeaderComponent } from '../../shared/components/user-header/user-header.component'; // Removed
+import { HeaderService } from '../../shared/services/header/header.service'; // Will be removed from constructor later
 import { ModalController, ToastController, AlertController, LoadingController } from '@ionic/angular/standalone';
 import { ExperienceModalComponent } from 'src/app/components/experience-modal/experience-modal.component';
 import { FormationModalComponent } from 'src/app/components/formation-modal/formation-modal.component';
@@ -29,6 +29,7 @@ import { CvGenerationService } from 'src/app/services/cv-generation/cv-generatio
 import { CvUploadComponent, CvUploadResult } from 'src/app/components/cv-upload/cv-upload.component';
 import { CvParsingService } from 'src/app/services/cv-parsing/cv-parsing.service';
 import { CvDataValidationModalComponent } from 'src/app/components/cv-data-validation-modal/cv-data-validation-modal.component';
+import { StyledButtonComponent } from '../../components/shared/styled-button/styled-button.component'; // Added
 
 @Component({
   selector: 'app-my-cv',
@@ -37,12 +38,13 @@ import { CvDataValidationModalComponent } from 'src/app/components/cv-data-valid
   standalone: true,
   imports: [
     CommonModule, FormsModule, DatePipe,
-  IonContent, IonHeader, IonFab, IonFabButton, IonFabList, IonIcon,
+  IonContent, IonFab, IonFabButton, IonFabList, IonIcon, // Removed IonHeader
   IonList, IonItem, IonLabel, IonSpinner, IonListHeader, IonItemSliding,
-  IonItemOptions, IonItemOption, IonButton, IonCard, IonCardHeader,
+  IonItemOptions, IonItemOption, IonCard, IonCardHeader, // Removed IonButton
   IonCardTitle, IonCardSubtitle, IonCardContent,
-  UserHeaderComponent, CvPreviewComponent, 
-  CvUploadComponent
+  CvPreviewComponent,
+  CvUploadComponent,
+  StyledButtonComponent // Added
   ],
 })
 export class MyCvPage implements OnInit, OnDestroy {
@@ -75,7 +77,7 @@ export class MyCvPage implements OnInit, OnDestroy {
   private loadingElement: HTMLIonLoadingElement | null = null;
 
   constructor(
-    private headerService: HeaderService,
+    // private headerService: HeaderService, // Removed
     private modalCtrl: ModalController,
     private authService: AuthService,
     private cvDataService: CvDataService,
@@ -92,8 +94,8 @@ export class MyCvPage implements OnInit, OnDestroy {
   }
 
   ionViewWillEnter() {
-    this.headerService.updateTitle('Mon CV Structuré');
-    this.headerService.setShowBackButton(true);
+    // this.headerService.updateTitle('Mon CV Structuré'); // Removed
+    // this.headerService.setShowBackButton(true); // Removed
     this.loadAllCvData();
     this.loadExistingCv();
   }
@@ -102,7 +104,7 @@ export class MyCvPage implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     if (this.loadingElement) {
-      this.loadingElement.dismiss();
+      this.loadingElement.dismiss().catch(() => {}); // Added catch for safety
     }
   }
 

@@ -1,42 +1,81 @@
-<!-- src/app/pages/login/login.page.html -->
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Connexion</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content>
-  <div class="ion-padding">
+  <div class="login-page-container ion-padding"> <!-- Add ion-padding for spacing -->
+
+    <div class="login-header ion-text-center"> <!-- Centered header text -->
+      <div class="logo-container"> <!-- Placeholder for logo, to be styled in SCSS -->
+         <div class="logo-icon-large">A</div>
+      </div>
+      <h2 class="login-title">Bon retour !</h2>
+      <p class="login-subtitle">Connectez-vous pour retrouver votre tableau de bord.</p>
+    </div>
+
+    <!-- AI Status (Simplified) -->
+    <div class="ai-status" *ngIf="!isLoading && !successMessage && !errorMessage">
+      <ion-icon name="sparkles-outline" class="ai-avatar"></ion-icon>
+      <div class="ai-text">
+        <div class="ai-title">Votre IA est prête</div>
+      </div>
+    </div>
+
+    <!-- Message Area for errors/success -->
+    <div class="message-area ion-padding" *ngIf="errorMessage || successMessage">
+      <div class="error-message" *ngIf="errorMessage">
+        <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+        {{ errorMessage }}
+      </div>
+      <div class="success-message" *ngIf="successMessage">
+        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+        {{ successMessage }}
+      </div>
+    </div>
+
     @if (loginForm) {
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <ion-item>
-          <ion-label position="floating">Email</ion-label>
-          <ion-input type="email" formControlName="email"></ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-label position="floating">Mot de passe</ion-label>
-          <ion-input type="password" formControlName="password"></ion-input>
-        </ion-item>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-container">
+        <app-styled-input
+          label="Adresse email"
+          formControlName="email"
+          type="email"
+          placeholder="votre@email.com"
+          name="email"
+          [errorText]="getErrorMessage('email')">
+        </app-styled-input>
+
+        <app-styled-input
+          label="Mot de passe"
+          formControlName="password"
+          type="password"
+          placeholder="••••••••"
+          name="password"
+          [errorText]="getErrorMessage('password')">
+        </app-styled-input>
+
+        <div class="forgot-password ion-text-end"> <!-- Aligned to the end -->
+          <app-styled-button fill="clear" size="small" (click)="forgotPassword()">
+            Mot de passe oublié ?
+          </app-styled-button>
+        </div>
         
-        <ion-button expand="block" type="submit" [disabled]="!loginForm.valid" class="ion-margin-top">
-          Se connecter
-        </ion-button>
+        <app-styled-button expand="block" type="submit" [disabled]="!loginForm.valid || isLoading" class="ion-margin-top">
+          <ion-spinner *ngIf="isLoading" name="crescent" slot="start"></ion-spinner>
+          {{ isLoading ? 'Connexion...' : 'Accéder à mon tableau de bord' }}
+        </app-styled-button>
       </form>
     }
     
-    <ion-button expand="block" (click)="signInWithGoogle()" color="danger" class="ion-margin-top">
+    <div class="divider ion-margin-top ion-margin-bottom">
+      <span>ou</span>
+    </div>
+
+    <app-styled-button expand="block" color="light" (click)="signInWithGoogle()" [disabled]="isLoading" class="ion-margin-top">
       <ion-icon name="logo-google" slot="start"></ion-icon>
-      Se connecter avec Google
-    </ion-button>
+      Continuer avec Google
+    </app-styled-button>
     
-    @if (errorMessage) {
-      <ion-text color="danger" class="ion-text-center ion-padding">
-        {{ errorMessage }}
-      </ion-text>
-    }
-    
-    <div class="ion-text-center ion-margin-top">
-      <ion-button routerLink="/signup" fill="clear">Créer un compte</ion-button>
+    <div class="signup-link-container ion-text-center ion-margin-top">
+      <p>Pas encore de compte ?</p>
+      <app-styled-button routerLink="/signup" fill="outline" expand="block">
+        Rejoindre Apply gratuitement
+      </app-styled-button>
     </div>
   </div>
 </ion-content>

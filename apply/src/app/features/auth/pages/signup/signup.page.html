@@ -8,83 +8,71 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <div class="signup-container">
-    <h2 class="ion-text-center">Rejoignez Apply</h2>
-    <p class="ion-text-center">Créez un compte pour gérer vos candidatures</p>
+<ion-content class="ion-padding signup-page-content">
+  <div class="signup-form-container">
+    <div class="signup-header ion-text-center">
+      <!-- Optional: Logo can be added here if desired, similar to login -->
+      <!-- <div class="logo-container"><div class="logo-icon-large">A</div></div> -->
+      <h2>Créez votre copilote de carrière</h2>
+      <p>Rejoignez Apply pour automatiser votre recherche d'emploi.</p>
+    </div>
 
-    <!-- Message de succès -->
-    <ion-card *ngIf="successMessage" color="success" class="success-card">
-      <ion-card-content>
-        <ion-icon name="checkmark-circle-outline" size="large"></ion-icon>
-        <p>{{ successMessage }}</p>
-        <p>Redirection en cours...</p>
-      </ion-card-content>
-    </ion-card>
+    <!-- Message Area for errors/success -->
+    <div class="message-area" *ngIf="successMessage || errorMessage">
+      <div class="success-message" *ngIf="successMessage">
+        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+        {{ successMessage }} (Redirection en cours...)
+      </div>
+      <div class="error-message" *ngIf="errorMessage && !successMessage">
+        <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+        {{ errorMessage }}
+      </div>
+    </div>
 
-    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" *ngIf="!successMessage">
-      <!-- Champs du formulaire... -->
-      <ion-item>
-        <ion-label position="floating">Nom complet</ion-label>
-        <ion-input type="text" formControlName="displayName"></ion-input>
-      </ion-item>
-      <div *ngIf="signupForm.get('displayName')?.invalid && signupForm.get('displayName')?.touched" class="error-message">
-        <ion-text color="danger">
-          Veuillez saisir votre nom (3 caractères minimum)
-        </ion-text>
-      </div>
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" *ngIf="!successMessage && signupForm">
+      <app-styled-input
+        label="Nom complet"
+        formControlName="displayName"
+        type="text"
+        placeholder="Ex: Jeanne Dupont"
+        [errorText]="getErrorMessage('displayName')">
+      </app-styled-input>
+
+      <app-styled-input
+        label="Adresse email"
+        formControlName="email"
+        type="email"
+        placeholder="jeanne.dupont@email.com"
+        [errorText]="getErrorMessage('email')">
+      </app-styled-input>
+
+      <app-styled-input
+        label="Mot de passe"
+        formControlName="password"
+        type="password"
+        placeholder="Minimum 6 caractères"
+        [errorText]="getErrorMessage('password')">
+      </app-styled-input>
+
+      <app-styled-input
+        label="Confirmer le mot de passe"
+        formControlName="confirmPassword"
+        type="password"
+        placeholder="Retapez votre mot de passe"
+        [errorText]="getErrorMessage('confirmPassword')">
+      </app-styled-input>
       
-      <ion-item>
-        <ion-label position="floating">Email</ion-label>
-        <ion-input type="email" formControlName="email"></ion-input>
-      </ion-item>
-      <div *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched" class="error-message">
-        <ion-text color="danger">
-          Veuillez saisir un email valide
-        </ion-text>
-      </div>
-      
-      <ion-item>
-        <ion-label position="floating">Mot de passe</ion-label>
-        <ion-input type="password" formControlName="password"></ion-input>
-      </ion-item>
-      <div *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched" class="error-message">
-        <ion-text color="danger">
-          Le mot de passe doit contenir au moins 6 caractères
-        </ion-text>
-      </div>
-      
-      <ion-item>
-        <ion-label position="floating">Confirmer le mot de passe</ion-label>
-        <ion-input type="password" formControlName="confirmPassword"></ion-input>
-      </ion-item>
-      <div *ngIf="signupForm.hasError('mismatch') && signupForm.get('confirmPassword')?.touched" class="error-message">
-        <ion-text color="danger">
-          Les mots de passe ne correspondent pas
-        </ion-text>
-      </div>
-      
-      <div class="button-container">
-        <ion-button expand="block" type="submit" [disabled]="!signupForm.valid || isLoading" class="ion-margin-top">
-          <ion-spinner *ngIf="isLoading" name="dots"></ion-spinner>
-          <span *ngIf="!isLoading">Créer mon compte</span>
-        </ion-button>
-        
-        <ion-button expand="block" fill="outline" routerLink="/login" [disabled]="isLoading" class="ion-margin-top">
-          Annuler
-        </ion-button>
-      </div>
+      <app-styled-button class="ion-margin-top" type="submit" expand="block" [disabled]="!signupForm.valid || isLoading">
+        <ion-spinner *ngIf="isLoading" name="dots" slot="start"></ion-spinner>
+        {{ isLoading ? 'Création en cours...' : 'S\'inscrire gratuitement' }}
+      </app-styled-button>
     </form>
     
-    <div *ngIf="errorMessage" class="error-container">
-      <ion-text color="danger">
-        {{ errorMessage }}
-      </ion-text>
-    </div>
-    
-    <div class="ion-text-center ion-margin-top" *ngIf="!successMessage">
-      <p>Vous avez déjà un compte ?</p>
-      <ion-button routerLink="/login" fill="clear">Se connecter</ion-button>
+    <div class="login-link-container ion-text-center ion-margin-top" *ngIf="!successMessage">
+      <p>Déjà un compte ?</p>
+      <app-styled-button routerLink="/login" fill="clear" [disabled]="isLoading">
+        Se connecter
+      </app-styled-button>
     </div>
   </div>
 </ion-content>
