@@ -1,0 +1,64 @@
+:host {
+  display: contents; // Allows the button to be styled as a block or inline-block by its parent
+}
+
+ion-button {
+  // Common styles for all app-button instances
+  --border-radius: 12px; // From prototype .btn
+  font-weight: 600;    // From prototype .btn
+  font-size: 16px;     // From prototype .btn
+  text-transform: none; // Prototypes don't use uppercase buttons
+
+  // Adjust padding using Ionic CSS variables to achieve visual of padding: 16px 32px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --padding-start: 32px;
+  --padding-end: 32px;
+
+  // Default button styling (if not overridden by specific types)
+  // Ionic default is fine, this class is more for explicit targeting if needed.
+  &.button-default {
+    // Add specific default overrides here if Ionic's default is not desired.
+  }
+
+  &.button-full-width {
+    width: 100%; // Can also use ion-button[expand="block"] but class gives more control
+  }
+}
+
+.button-primary {
+  --background: var(--ion-color-primary-blue);
+  --color: var(--ion-color-primary-blue-contrast);
+  --background-hover: var(--ion-color-primary-blue-shade);
+  --background-activated: var(--ion-color-primary-blue-shade);
+  --background-focused: var(--ion-color-primary-blue-shade);
+}
+
+.button-secondary {
+  --background: var(--ion-color-accent-yellow);
+  --color: var(--ion-color-accent-yellow-contrast);
+  --background-hover: var(--ion-color-accent-yellow-shade);
+  --background-activated: var(--ion-color-accent-yellow-shade);
+  --background-focused: var(--ion-color-accent-yellow-shade);
+}
+
+.button-outline {
+  --background: transparent;
+  --border-color: var(--ion-color-neutral-background-shade); // #e0e0e0, close to prototype #E5E7EB
+  --color: var(--ion-color-text-dark); // #1F2937, prototype asked for #6B7280. Consider --ion-color-text-dark-tint if too dark.
+  --border-width: 2px;
+  --border-style: solid;
+
+  // Hover/Activated/Focused states for outline button
+  --background-hover: rgba(var(--ion-color-primary-blue-rgb), 0.05); // Slight blue background on hover
+  --color-hover: var(--ion-color-primary-blue);
+  --border-color-hover: var(--ion-color-primary-blue);
+
+  --background-activated: rgba(var(--ion-color-primary-blue-rgb), 0.1); // Slightly darker blue background on activate
+  --color-activated: var(--ion-color-primary-blue);
+  --border-color-activated: var(--ion-color-primary-blue);
+
+  --background-focused: rgba(var(--ion-color-primary-blue-rgb), 0.05);
+  --color-focused: var(--ion-color-primary-blue);
+  --border-color-focused: var(--ion-color-primary-blue);
+}

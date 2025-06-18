@@ -1,0 +1,24 @@
+<ion-content>
+  <div [ngSwitch]="currentStep" class="onboarding-container">
+    <app-onboarding-step-one *ngSwitchCase="1"
+      (nextClicked)="goToNextStep()"
+      (skipClicked)="skipOnboarding()">
+    </app-onboarding-step-one>
+
+    <app-onboarding-step-two *ngSwitchCase="2"
+      (nextClicked)="goToNextStep()"
+      (skipClicked)="skipOnboarding()">
+    </app-onboarding-step-two>
+
+    <app-onboarding-step-three *ngSwitchCase="3"
+      (completeOnboardingClicked)="handleOnboardingComplete($event)"
+      (skipClicked)="skipOnboarding()">
+    </app-onboarding-step-three>
+
+    <!-- Optional: Fallback or completion message if currentStep goes out of bounds -->
+    <div *ngSwitchDefault>
+      <p>Loading onboarding step...</p>
+      <!-- Or you could redirect if currentStep is invalid -->
+    </div>
+  </div>
+</ion-content>

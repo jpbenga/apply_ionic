@@ -1,0 +1,72 @@
+:host {
+  display: block;
+  width: 100%; // Inputs are full width by default
+}
+
+// Style for the label when it's outside the ion-item
+ion-label.input-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ion-color-text-dark-shade, #374151); // from .form-label
+  margin-bottom: 8px;
+  display: block; // Ensure it takes its own line
+}
+
+ion-item {
+  --border-color: transparent; // Remove default item border color
+  --inner-border-width: 0;    // Remove default inner border
+  --padding-start: 0;         // Remove default item padding
+  --padding-end: 0;
+  --inner-padding-start: 0;   // Let ion-input handle its padding
+  --inner-padding-end: 0;
+  --inner-padding-top: 0;
+  --inner-padding-bottom: 0;
+  --min-height: auto;         // Adjust to fit content
+  --background: var(--ion-color-neutral-background, #FFFFFF); // Ensure background is solid
+
+  border: 2px solid var(--ion-color-neutral-light-shade, #E5E7EB); // Custom border
+  border-radius: 12px;        // Custom border-radius
+  margin-bottom: 8px;         // Default spacing below the input item
+
+  &.item-interactive-disabled {
+    opacity: 0.5; // Standard disabled opacity
+    // Potentially change border color or background for disabled state too
+    // border-color: var(--ion-color-medium-tint, #f0f0f0); // Example
+  }
+
+  // Styling for error state, errorText input drives class .ion-invalid
+  &.ion-invalid.ion-touched,
+  &.ion-invalid { // Ensure it applies even if not touched, if errorText is present
+    border-color: var(--ion-color-danger, #eb445a) !important; // Use important to override other states if error
+  }
+
+  // Custom focus state
+  &.item-has-focus {
+    border-color: var(--ion-color-primary-blue, #4F46E5) !important; // Use important to override other states
+    // Optional: add a box-shadow for focus, similar to some design systems
+    // box-shadow: 0 0 0 1px var(--ion-color-primary-blue, #4F46E5);
+  }
+}
+
+ion-input {
+  font-size: 16px;            // Text size inside the input
+  --padding-start: 16px;      // Internal padding for the input text
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  width: 100%;                // Ensure ion-input takes full width of ion-item
+}
+
+.helper-text {
+  font-size: 12px;
+  color: var(--ion-color-text-dark-tint, #6B7280); // Using text-dark-tint as a medium gray
+  margin-top: 4px;
+  padding-left: 2px; // Slight indent to align with input box edge if needed
+}
+
+.error-text {
+  font-size: 12px;
+  color: var(--ion-color-danger-shade, #cf3c4f); // Use a shade for text for better contrast
+  margin-top: 4px;
+  padding-left: 2px; // Slight indent
+}

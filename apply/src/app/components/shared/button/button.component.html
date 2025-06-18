@@ -1,0 +1,12 @@
+<ion-button
+  [disabled]="disabled"
+  [class.button-full-width]="fullWidth"
+  [class.button-primary]="styleType === 'primary'"
+  [class.button-secondary]="styleType === 'secondary'"
+  [class.button-outline]="styleType === 'outline'"
+  [class.button-default]="styleType === 'default' || !styleType"
+  (click)="onClick()"
+>
+  <ion-icon *ngIf="iconName" [name]="iconName" slot="start"></ion-icon>
+  {{ text }}
+</ion-button>

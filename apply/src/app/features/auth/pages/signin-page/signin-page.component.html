@@ -1,0 +1,123 @@
+<ion-content>
+  <div class="signin-container"> <!-- Corresponds to prototype's .container -->
+    <!-- Left Side - Welcome Back -->
+    <div class="welcome-side">
+      <div class="logo-container"> <!-- Using a simple container for app-logo -->
+        <app-logo size="large"></app-logo>
+      </div>
+
+      <div class="welcome-content">
+        <h1 class="welcome-title">Votre copilote vous attend</h1>
+        <p class="welcome-subtitle">Reconnectez-vous pour reprendre votre recherche d'emploi là où vous l'avez laissée</p>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">23</div>
+            <div class="stat-label">Candidatures générées</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">7</div>
+            <div class="stat-label">Entretiens programmés</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">89%</div>
+            <div class="stat-label">Précision IA actuelle</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">+2</div>
+            <div class="stat-label">Nouvelles opportunités</div>
+          </div>
+        </div>
+
+        <div class="recent-activity">
+          <div class="activity-title">
+            <ion-icon name="star-outline"></ion-icon> <!-- Replaced SVG with ion-icon -->
+            Activité récente de votre IA
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon">
+              <ion-icon name="mail-outline"></ion-icon>
+            </div>
+            <div class="activity-text">
+              <div>Candidature envoyée - Product Manager chez TechCorp</div>
+              <div class="activity-time">Il y a 2 heures</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+            <div class="activity-text">
+              <div>2 nouvelles offres analysées et compatibles</div>
+              <div class="activity-time">Il y a 4 heures</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon">
+              <ion-icon name="time-outline"></ion-icon>
+            </div>
+            <div class="activity-text">
+              <div>Entretien confirmé - StartupCo demain 14h</div>
+              <div class="activity-time">Il y a 6 heures</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side - Login Form -->
+    <div class="login-side">
+      <div class="login-header">
+        <h2 class="login-title">Bon retour !</h2>
+        <p class="login-subtitle">Connectez-vous pour retrouver votre tableau de bord</p>
+      </div>
+
+      <div class="ai-status">
+        <div class="ai-avatar">
+          <ion-icon name="sparkles-outline"></ion-icon> <!-- Replaced SVG with ion-icon -->
+        </div>
+        <div class="ai-text">
+          <div class="ai-title">Votre IA est prête</div>
+          <div class="ai-description">2 nouvelles opportunités vous attendent</div>
+        </div>
+      </div>
+
+      <div class="form-container">
+        <div *ngIf="successMessage" class="message-box success-message">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="message-box error-message">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ errorMessage }}
+        </div>
+
+        <form (ngSubmit)="handleLogin()">
+          <app-input type="email" label="Adresse email" placeholder="votre@email.com" (valueChanged)="formValues.email = $event"></app-input>
+          <app-input type="password" label="Mot de passe" placeholder="••••••••" (valueChanged)="formValues.password = $event"></app-input>
+
+          <div class="forgot-password">
+            <a (click)="showForgotPassword()">Mot de passe oublié ?</a>
+          </div>
+
+          <app-button type="submit" text="Accéder à mon tableau de bord" styleType="primary" [disabled]="isLoading" fullWidth="true">
+            <div *ngIf="isLoading" class="loading-spinner" slot="icon-only"></div>
+          </app-button>
+        </form>
+
+        <div class="divider">
+          <span>ou</span>
+        </div>
+
+        <app-button text="Continuer avec Google" styleType="outline" (buttonClick)="signInWithGoogle()" fullWidth="true">
+          <ion-icon name="logo-google" slot="start"></ion-icon>
+        </app-button>
+
+        <div class="signup-link-container"> <!-- Renamed from signup-link to avoid conflict with <a> styling -->
+          <p>Pas encore de compte ?</p>
+          <a (click)="goToSignup()">Rejoindre Apply gratuitement</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

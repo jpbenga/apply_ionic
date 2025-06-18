@@ -1,0 +1,23 @@
+<ion-label *ngIf="label" class="textarea-label">{{ label }}</ion-label>
+<ion-item
+  lines="none"
+  [class.item-has-focus]="isFocused"
+  [class.item-interactive-disabled]="disabled"
+  [class.ion-invalid]="!!errorText"
+  [class.ion-touched]="true"
+>
+  <ion-textarea
+    [placeholder]="placeholder"
+    [(ngModel)]="_currentValue"
+    (ngModelChange)="handleModelChange($event)"
+    (ionFocus)="isFocused = true"
+    (ionBlur)="isFocused = false"
+    [disabled]="disabled"
+    [readonly]="readonly"
+    [rows]="rows"
+    [autoGrow]="autoGrow"
+  >
+  </ion-textarea>
+</ion-item>
+<div *ngIf="helperText && !errorText" class="helper-text">{{ helperText }}</div>
+<div *ngIf="errorText" class="error-text">{{ errorText }}</div>

@@ -1,0 +1,52 @@
+<ion-content>
+  <div class="onboarding-screen-wrapper">
+    <div class="logo-container">
+      <app-logo size="medium"></app-logo>
+    </div>
+
+    <div class="content-area">
+      <h1 class="slide-title">Quels sont vos objectifs de carrière ?</h1>
+      <p class="slide-subtitle">Aidez-nous à personnaliser votre expérience et à trouver les meilleures opportunités.</p>
+
+      <div class="form-fields-wrapper">
+        <app-input
+          label="Poste(s) Cible(s)"
+          placeholder="Ex: Product Manager, UX Designer"
+          helperText="Plusieurs postes possibles, séparés par des virgules"
+          (valueChanged)="onInputValueChange('poste', $event)">
+        </app-input>
+        <app-input
+          label="Secteur(s) d'Activité"
+          placeholder="Ex: Tech, Finance, Santé"
+          (valueChanged)="onInputValueChange('secteur', $event)">
+        </app-input>
+        <app-input
+          label="Localisation(s) Préférée(s)"
+          placeholder="Ex: Lyon, Paris, Télétravail"
+          (valueChanged)="onInputValueChange('localisation', $event)">
+        </app-input>
+      </div>
+    </div>
+
+    <div class="navigation-area">
+      <div class="dots-indicator">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot active"></div>
+      </div>
+      <app-button
+        [text]="completeButtonText"
+        styleType="secondary"
+        (buttonClick)="complete()"
+        [disabled]="!formIsValid"
+        fullWidth="true">
+      </app-button>
+      <app-button
+        text="Définir plus tard"
+        styleType="outline"
+        (buttonClick)="skip()"
+        fullWidth="true">
+      </app-button>
+    </div>
+  </div>
+</ion-content>

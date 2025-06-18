@@ -1,0 +1,85 @@
+:host {
+  display: flex; // To align icon and text
+  align-items: center;
+  gap: 12px; // Default gap from .logo prototype
+  text-decoration: none; // If the logo is ever wrapped in an <a>
+  color: inherit; // Inherit color by default
+}
+
+.logo-icon-wrapper {
+  position: relative;
+  // Default (medium) size
+  width: 40px;
+  height: 40px;
+  background: var(--ion-color-primary-blue, #4F46E5);
+  border-radius: 12px; // From .logo-icon prototype
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ion-color-primary-blue-contrast, #FFFFFF); // Color for the 'A'
+  font-weight: bold; // For the 'A'
+  font-size: 20px; // Corresponds to 40px container
+
+  &.size-small {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 16px; // Adjust font size for smaller icon
+    .checkmark { // Adjust checkmark for small size
+      width: 12px;
+      height: 12px;
+      font-size: 8px;
+      bottom: -1px;
+      right: -1px;
+    }
+  }
+
+  &.size-large { // Example large size from dashboard_screen.html
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 24px; // Corresponds to 48px container
+    .checkmark { // Adjust checkmark for large size
+      width: 18px;
+      height: 18px;
+      font-size: 12px;
+      bottom: -2px;
+      right: -2px;
+    }
+  }
+}
+
+.logo-icon-letter {
+  // The letter 'A' itself, styled by parent .logo-icon-wrapper's color and font-weight
+}
+
+.checkmark {
+  position: absolute;
+  bottom: -2px; // Default for medium size
+  right: -2px;  // Default for medium size
+  background: var(--ion-color-accent-yellow, #FBBF24);
+  width: 16px;  // Default for medium size
+  height: 16px; // Default for medium size
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px; // Default for medium size, for the checkmark symbol
+  color: var(--ion-color-text-dark, #1F2937); // Color for the checkmark symbol
+  font-weight: normal; // Checkmark is not bold
+}
+
+.logo-text-wrapper {
+  font-weight: 700; // From .logo-text prototype
+  color: var(--ion-color-text-dark, #1F2937);
+  font-size: 24px; // Default (medium) size
+
+  &.size-small {
+    font-size: 20px; // Adjust font size
+  }
+
+  &.size-large { // Example from dashboard_screen.html
+    font-size: 28px;
+    font-weight: 800; // Dashboard prototype uses heavier weight for large logo text
+  }
+}
