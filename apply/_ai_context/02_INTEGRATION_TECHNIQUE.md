@@ -25,7 +25,39 @@ Ce sont tes règles d'or, adaptées à la réalité du projet.
     * Toute logique métier ou appel à Firebase ne doit **JAMAIS** se trouver dans un composant. Extrais cette logique dans un **Service Angular (`@Injectable({ providedIn: 'root' })`)**.
     * Tout élément d'UI répétitif (bouton, carte, input custom) doit être un **composant réutilisable**, probablement placé dans un `SharedModule` ou un dossier `src/app/components/shared`.
 
-3.  **Centralisation du Style via le Theming Ionic (LE PLUS IMPORTANT) :**
+3.  ### Phase 3 : Remplacement Chirurgical & Refactoring Actif
+
+**ATTENTION : CETTE PHASE EST LA PLUS CRITIQUE DE TA MISSION. TON MANDAT IMPÉRATIF ET NON-NÉGOCIABLE N'EST PAS D'AJOUTER DU CODE À CÔTÉ DE L'ANCIEN. TON BUT EST DE LE **REMPLACER**. LES PROTOTYPES NE SONT PAS UNE "INSPIRATION", ILS SONT LE **PLAN D'EXÉCUTION** DE LA NOUVELLE INTERFACE QUI DOIT ÉRADIQUER L'ANCIENNE.**
+
+Pour chaque écran ou composant existant qui doit être mis à jour par un prototype, tu dois suivre rigoureusement le protocole de **transplantation chirurgicale** suivant :
+
+**Protocole de Transplantation (à répéter pour chaque fonctionnalité) :**
+
+1.  **Étape 1 : Identification de la Cible et Analyse des Connexions**
+    * Identifie précisément le ou les composants existants à remplacer (la "zone à opérer"). Par exemple : `OldLoginPageComponent`.
+    * **Avant toute modification**, analyse toutes ses connexions externes. C'est une étape d'audit.
+        * Quels `@Input()` reçoit-il et d'où ?
+        * Quels `@Output()` émet-il et quels composants parents les écoutent ?
+        * Quels Services Angular injecte-t-il dans son constructeur ?
+        * Dans quels autres fichiers le sélecteur du composant (ex: `<app-old-login-page>`) est-il utilisé ?
+
+2.  **Étape 2 : Préparation du Greffon (Le Prototype)**
+    * Prends le code du prototype correspondant.
+    * Refactore-le pour qu'il respecte à 100% les **Principes Directeurs** (utilisation des Design Tokens de `variables.scss`, des composants partagés, etc.).
+    * Assure-toi que ce nouveau composant "greffon" est capable de gérer toutes les connexions identifiées à l'étape 1. Ajoute les `@Input()`, `@Output()` et injections de Services nécessaires pour qu'il puisse prendre la place de l'ancien.
+
+3.  **Étape 3 : L'Opération (La Substitution)**
+    * Va dans le fichier template où le composant cible est utilisé (ex: `app.component.html`).
+    * Commente la ligne de l'ancien composant : ``
+    * Juste en dessous, insère le sélecteur du nouveau composant : `<app-new-login-page></app-new-login-page>`.
+    * **Re-câble toutes les connexions :** Lie les propriétés (`[input]`) et les événements (`(output)`) aux mêmes variables et fonctions du composant parent que celles utilisées par l'ancien composant. Le nouveau composant doit devenir un "remplacement direct" (drop-in replacement).
+
+4.  **Étape 4 : Vérification et Nettoyage Final**
+    * Une fois que tu as validé (conceptuellement) que le nouveau composant est correctement branché et fonctionnel à la place de l'ancien...
+    * **... TU DOIS ÉRADIQUER DÉFINITIVEMENT les fichiers de l'ancien composant.** Supprime le dossier complet (`/old-login-page`) ou les fichiers (`.ts`, `.html`, `.scss`, `.spec.ts`).
+    * Il ne doit rester **AUCUN code zombie**. La codebase doit être plus propre après ton passage.
+
+---
     * La source **unique** de vérité pour les couleurs est le fichier `src/theme/variables.scss`. N'ajoute AUCUNE couleur en dur dans les fichiers `.scss` des composants.
     * Utilise les **variables (CSS Custom Properties) Ionic** partout : `color: var(--ion-color-primary);`, `background: var(--ion-color-step-50);`.
     * Si de nouvelles couleurs sont nécessaires, ajoute-les d'abord dans `variables.scss` en respectant la syntaxe Ionic.
