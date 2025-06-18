@@ -1,0 +1,36 @@
+<ion-content>
+  <div class="onboarding-screen-wrapper">
+    <div class="logo-container">
+      <app-logo size="medium"></app-logo>
+    </div>
+
+    <div class="content-area">
+      <h1 class="slide-title">Importez votre CV principal</h1>
+      <p class="slide-subtitle">Laissez notre IA extraire vos informations pour gagner du temps.</p>
+
+      <div class="upload-options">
+        <div class="upload-option" (click)="uploadPDF()">
+          <div class="upload-option-icon">📄</div>
+          <div class="upload-option-title">Importer depuis un PDF</div>
+          <div class="upload-option-desc">Glissez votre CV ou cliquez pour parcourir</div>
+        </div>
+
+        <div class="upload-option" (click)="importLinkedIn()">
+          <div class="upload-option-icon">💼</div>
+          <div class="upload-option-title">Importer depuis LinkedIn</div>
+          <div class="upload-option-desc">Connexion sécurisée à votre profil</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation-area">
+      <div class="dots-indicator">
+        <div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+      </div>
+      <app-button [text]="continueButtonText" styleType="secondary" (buttonClick)="next()" [disabled]="!cvUploaded" fullWidth="true"></app-button>
+      <app-button text="Passer cette étape" styleType="outline" (buttonClick)="skip()" fullWidth="true"></app-button>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,130 @@
+// Adapting styles from onboarding_screen.html for screen1
+
+// These variables are now globally available from variables.scss,
+// but shown here for reference from the prototype:
+// --primary-blue: #4F46E5; -> var(--ion-color-primary-blue)
+// --accent-yellow: #FBBF24; -> var(--ion-color-accent-yellow)
+// --text-dark: #1F2937; -> var(--ion-color-text-dark)
+// --text-medium: #6B7280; -> var(--ion-color-text-dark-tint) or a new medium variable
+// --neutral-bg: #FFFFFF; -> var(--ion-color-neutral-background)
+// --neutral-light: #F9FAFB; -> var(--ion-color-neutral-light)
+
+// The component's host will be inside an ion-page or similar structure.
+// .onboarding-screen-wrapper will act as the main container for this specific screen's content.
+.onboarding-screen-wrapper {
+  height: 100%; // Fill ion-content
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  background: var(--ion-color-neutral-background, #FFFFFF); // Ensure background for safety
+}
+
+// Styles for the logo container, if app-logo needs specific placement
+.logo-container {
+  // app-logo itself uses display:flex, align-items:center.
+  // The prototype had margin-bottom: 48px;
+  // This can be added here or the parent page can space out sections.
+  // For now, let's assume app-logo itself is sufficient or parent handles spacing.
+  // If specific alignment or spacing for the logo on this screen is needed:
+  display: flex; // if app-logo host is not flex or needs override
+  justify-content: flex-start; // Or center, as per design
+  margin-bottom: 32px; // Adjusted from 48px, can be tweaked
+}
+
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.illustration {
+  width: 200px;
+  height: 160px;
+  margin: 0 auto 32px; // Adjusted from 40px
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Using a simpler background for now, linear-gradient can be added if needed
+  background-color: rgba(var(--ion-color-primary-blue-rgb, 79,70,229), 0.1); // Lighter primary blue
+  position: relative;
+  overflow: hidden;
+
+  // Pulse animation from prototype
+  &::before {
+    content: '';
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, var(--ion-color-accent-yellow, #FBBF24) 20%, transparent 70%);
+    animation: pulse 3s ease-in-out infinite;
+  }
+}
+
+.illustration-icon {
+  font-size: 80px;
+  z-index: 2;
+  position: relative;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.1); opacity: 0.3; }
+}
+
+.slide-title {
+  font-size: 28px; // Adjusted from 32px for potentially smaller screens / consistency
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 16px;
+  color: var(--ion-color-text-dark, #1F2937);
+}
+
+.slide-subtitle {
+  font-size: 16px; // Adjusted from 18px
+  line-height: 1.6;
+  color: var(--ion-color-text-dark-tint, #6B7280); // Assuming text-dark-tint is like text-medium
+  margin-bottom: 32px; // Adjusted from 48px
+}
+
+.navigation-area {
+  margin-top: auto; // Pushes to the bottom in flex column
+  padding-top: 16px; // Space above dots/buttons
+}
+
+.dots-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px; // Adjusted from 32px
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ion-color-neutral-light-shade, #E5E7EB); // Using neutral-light-shade
+  transition: all 0.3s ease;
+  // cursor: pointer; // No click action for now
+}
+
+.dot.active {
+  background: var(--ion-color-primary-blue, #4F46E5);
+  transform: scale(1.2);
+}
+
+// Spacing for app-button instances if needed
+// app-button is fullWidth=true, so they stack. Add margin if needed.
+// Example:
+app-button {
+  &:last-child {
+    margin-top: 16px; // Space between the two buttons
+  }
+}
+
+// Ensure ion-content background is transparent if .onboarding-screen-wrapper handles background
+ion-content {
+  --background: transparent; // Or var(--ion-color-neutral-background) if wrapper doesn't set it
+}

@@ -1,0 +1,88 @@
+// Base styles adapted from previous onboarding steps for consistency
+.onboarding-screen-wrapper {
+  height: 100%;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  background: var(--ion-color-neutral-background, #FFFFFF);
+}
+
+.logo-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 32px;
+}
+
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  // For this screen, content is more top-aligned before form fields
+  text-align: center;
+}
+
+.slide-title {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 16px;
+  color: var(--ion-color-text-dark, #1F2937);
+}
+
+.slide-subtitle {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ion-color-text-dark-tint, #6B7280);
+  margin-bottom: 24px; // Space before form fields
+}
+
+.navigation-area {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.dots-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ion-color-neutral-light-shade, #E5E7EB);
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  background: var(--ion-color-primary-blue, #4F46E5);
+  transform: scale(1.2);
+}
+
+app-button {
+  &:last-child {
+    margin-top: 16px;
+  }
+}
+
+// Screen 3 specific styles for form layout
+.form-fields-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; // Space between app-input components
+  text-align: left; // Labels within app-input are left-aligned by default
+  margin-bottom: 24px; // Space after the form fields
+}
+
+// app-input component handles its own label, input, and helperText styling.
+// If .form-group, .form-label, .form-input, .form-hint styles from the prototype
+// were needed for elements *not* part of app-input, they would go here.
+// Since app-input encapsulates these, specific overrides are likely not needed,
+// unless we need to adjust app-input's default margins or something specific
+// for this screen. The gap in .form-fields-wrapper should handle spacing.
+
+ion-content {
+  --background: transparent;
+}

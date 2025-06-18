@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  background: var(--ion-color-neutral-background, #FFFFFF); // Default to white if var not found
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--ion-color-neutral-light-shade, #E5E7EB); // Fallback to #E5E7EB
+  margin-bottom: 24px; // As per prompt, consider if parent should handle this
+}

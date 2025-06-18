@@ -1,0 +1,28 @@
+<ion-content>
+  <div class="onboarding-screen-wrapper">
+    <div class="logo-container">
+      <app-logo size="medium"></app-logo> <!-- Replaced static logo -->
+    </div>
+
+    <div class="content-area">
+      <div class="illustration">
+        <div class="illustration-icon">🚀</div>
+      </div>
+
+      <h1 class="slide-title">Apply postule pour vous, intelligemment</h1>
+      <p class="slide-subtitle">Libérez-vous de la charge mentale de la recherche d'emploi et concentrez-vous sur la réussite de vos entretiens.</p>
+    </div>
+
+    <div class="navigation-area">
+      <div class="dots-indicator">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <!-- Replaced static buttons -->
+      <app-button text="Commencer" styleType="secondary" (buttonClick)="next()" fullWidth="true"></app-button>
+      <app-button text="Passer pour l'instant" styleType="outline" (buttonClick)="skip()" fullWidth="true"></app-button>
+    </div>
+  </div>
+</ion-content>

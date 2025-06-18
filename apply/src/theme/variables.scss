@@ -1,2 +1,47 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
+
+:root {
+  // New color palette
+  --ion-color-primary-blue: #4F46E5;
+  --ion-color-primary-blue-rgb: 79,70,229;
+  --ion-color-primary-blue-contrast: #ffffff;
+  --ion-color-primary-blue-contrast-rgb: 255,255,255;
+  --ion-color-primary-blue-shade: #453ddf;
+  --ion-color-primary-blue-tint: #6059fd;
+
+  --ion-color-accent-yellow: #FBBF24;
+  --ion-color-accent-yellow-rgb: 251,191,36;
+  --ion-color-accent-yellow-contrast: #000000;
+  --ion-color-accent-yellow-contrast-rgb: 0,0,0;
+  --ion-color-accent-yellow-shade: #dea920;
+  --ion-color-accent-yellow-tint: #fcc63a;
+
+  --ion-color-text-dark: #1F2937;
+  --ion-color-text-dark-rgb: 31,41,55;
+  --ion-color-text-dark-contrast: #ffffff;
+  --ion-color-text-dark-contrast-rgb: 255,255,255;
+  --ion-color-text-dark-shade: #1b2430;
+  --ion-color-text-dark-tint: #353e4b;
+
+  --ion-color-neutral-background: #FFFFFF;
+  --ion-color-neutral-background-rgb: 255,255,255;
+  --ion-color-neutral-background-contrast: #000000;
+  --ion-color-neutral-background-contrast-rgb: 0,0,0;
+  --ion-color-neutral-background-shade: #e0e0e0;
+  --ion-color-neutral-background-tint: #ffffff;
+
+  --ion-color-neutral-light: #F9FAFB;
+  --ion-color-neutral-light-rgb: 249,250,251;
+  --ion-color-neutral-light-contrast: #000000;
+  --ion-color-neutral-light-contrast-rgb: 0,0,0;
+  --ion-color-neutral-light-shade: #dcdedf;
+  --ion-color-neutral-light-tint: #fbfcfd;
+
+  --ion-color-success-green: #10B981;
+  --ion-color-success-green-rgb: 16,185,129;
+  --ion-color-success-green-contrast: #ffffff;
+  --ion-color-success-green-contrast-rgb: 255,255,255;
+  --ion-color-success-green-shade: #0ea371;
+  --ion-color-success-green-tint: #28c08e;
+}

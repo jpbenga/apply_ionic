@@ -1,0 +1,22 @@
+<ion-label *ngIf="label" class="input-label">{{ label }}</ion-label>
+<ion-item
+  lines="none"
+  [class.item-has-focus]="isFocused"
+  [class.item-interactive-disabled]="disabled"
+  [class.ion-invalid]="!!errorText"
+  [class.ion-touched]="true"
+> <!-- ion-touched is often needed for ion-invalid to take effect visually with default Ionic styling -->
+  <ion-input
+    [type]="type"
+    [placeholder]="placeholder"
+    [(ngModel)]="_currentValue"
+    (ngModelChange)="handleModelChange($event)"
+    (ionFocus)="isFocused = true"
+    (ionBlur)="isFocused = false"
+    [disabled]="disabled"
+    [readonly]="readonly"
+  >
+  </ion-input>
+</ion-item>
+<div *ngIf="helperText && !errorText" class="helper-text">{{ helperText }}</div>
+<div *ngIf="errorText" class="error-text">{{ errorText }}</div>

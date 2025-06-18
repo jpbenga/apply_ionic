@@ -1,0 +1,124 @@
+// Base styles adapted from onboarding_step_one.component.scss for consistency
+.onboarding-screen-wrapper {
+  height: 100%;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  background: var(--ion-color-neutral-background, #FFFFFF);
+}
+
+.logo-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 32px;
+}
+
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  // For this screen, content is more top-aligned before upload options
+  // justify-content: center; // Keep or remove based on desired vertical alignment of title block
+  text-align: center;
+}
+
+.slide-title {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 16px;
+  color: var(--ion-color-text-dark, #1F2937);
+}
+
+.slide-subtitle {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ion-color-text-dark-tint, #6B7280);
+  margin-bottom: 24px; // Space before upload options
+}
+
+.navigation-area {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.dots-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ion-color-neutral-light-shade, #E5E7EB);
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  background: var(--ion-color-primary-blue, #4F46E5);
+  transform: scale(1.2);
+}
+
+app-button {
+  &:last-child {
+    margin-top: 16px;
+  }
+  // For the success state text "✓ Continuer"
+  &[text^="✓"] {
+    // Default app-button styling should handle this fine.
+    // If specific styling for the checkmark is needed, it can be added.
+    // For example, to ensure the checkmark and text align well:
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    // gap: 8px; // Space between checkmark and text
+  }
+}
+
+// Screen 2 specific styles
+.upload-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 24px 0; // Adjusted margin
+}
+
+.upload-option {
+  padding: 20px;
+  border: 2px dashed var(--ion-color-neutral-shade, #D1D5DB); // Using a general neutral shade
+  border-radius: 16px;
+  background: var(--ion-color-neutral-light, #F9FAFB);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+
+  &:hover {
+    border-color: var(--ion-color-primary-blue, #4F46E5);
+    background: var(--ion-color-neutral-background, #FFFFFF); // White background on hover
+    transform: translateY(-2px); // Slight lift
+  }
+}
+
+.upload-option-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  color: var(--ion-color-primary-blue, #4F46E5);
+}
+
+.upload-option-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--ion-color-text-dark, #1F2937);
+}
+
+.upload-option-desc {
+  font-size: 14px;
+  color: var(--ion-color-text-dark-tint, #6B7280);
+}
+
+ion-content {
+  --background: transparent;
+}

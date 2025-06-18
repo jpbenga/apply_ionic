@@ -1,0 +1,163 @@
+<ion-content>
+  <div class="signup-container"> <!-- Corresponds to prototype's .container -->
+    <!-- Left Side - Value Proposition -->
+    <div class="value-side">
+      <div class="logo-wrapper"> <!-- Renamed from logo-large for clarity -->
+        <app-logo size="large"></app-logo>
+      </div>
+
+      <div class="value-proposition">
+        <h1 class="main-headline">Votre copilote de carrière intelligent</h1>
+        <p class="sub-headline">Libérez-vous de la charge mentale de la recherche d'emploi. Apply postule pour vous, intelligemment.</p>
+      </div>
+
+      <ul class="benefits-list">
+        <li class="benefit-item">
+          <div class="benefit-icon"><ion-icon name="sparkles-outline"></ion-icon></div>
+          <div class="benefit-text">
+            <div class="benefit-title">IA personnalisée</div>
+            <div class="benefit-description">Analyse intelligente des offres et optimisation automatique de vos candidatures</div>
+          </div>
+        </li>
+        <li class="benefit-item">
+          <div class="benefit-icon"><ion-icon name="flash-outline"></ion-icon></div>
+          <div class="benefit-text">
+            <div class="benefit-title">Automatisation complète</div>
+            <div class="benefit-description">De la recherche d'offres à l'envoi des candidatures, tout est automatisé</div>
+          </div>
+        </li>
+        <li class="benefit-item">
+          <div class="benefit-icon"><ion-icon name="checkmark-done-outline"></ion-icon></div>
+          <div class="benefit-text">
+            <div class="benefit-title">Résultats prouvés</div>
+            <div class="benefit-description">+300% de taux de réponse grâce à nos algorithmes de matching</div>
+          </div>
+        </li>
+        <li class="benefit-item">
+          <div class="benefit-icon"><ion-icon name="hourglass-outline"></ion-icon></div>
+          <div class="benefit-text">
+            <div class="benefit-title">Gain de temps massif</div>
+            <div class="benefit-description">10h/semaine économisées sur votre recherche d'emploi</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Right Side - Sign Up Form -->
+    <div class="signup-side">
+      <a (click)="goToLogin()" class="back-button">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        Retour
+      </a>
+
+      <div class="signup-header">
+        <h2 class="signup-title">Créez votre compte</h2>
+        <p class="signup-subtitle">En 2 minutes, votre copilote IA sera prêt</p>
+      </div>
+
+      <div class="progress-indicator">
+        <div class="progress-step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1"></div>
+        <div class="progress-step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2"></div>
+        <div class="progress-step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3"></div>
+      </div>
+
+      <div class="form-wrapper"> <!-- Renamed from form-container to avoid conflict -->
+        <div [ngSwitch]="currentStep">
+
+          <!-- Step 1: Personal Info -->
+          <div *ngSwitchCase="1" class="form-step active">
+            <div class="step-header">
+              <h3 class="step-title">Vos informations</h3>
+              <p class="step-description">Commençons par faire connaissance.</p>
+            </div>
+            <app-input label="Nom complet" placeholder="Jean Dupont"
+                       [value]="formData.displayName"
+                       (valueChanged)="onDisplayNameChange($event)"
+                       [errorText]="fieldErrors.displayName">
+            </app-input>
+            <app-input type="email" label="Adresse email" placeholder="jean.dupont@email.com"
+                       [value]="formData.email"
+                       (valueChanged)="onEmailChange($event)"
+                       [errorText]="fieldErrors.email">
+            </app-input>
+            <app-button text="Continuer" (buttonClick)="nextStep()" [disabled]="!formStepValidity.step1" fullWidth="true">
+              <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </app-button>
+          </div>
+
+          <!-- Step 2: Security -->
+          <div *ngSwitchCase="2" class="form-step active">
+            <div class="step-header">
+              <h3 class="step-title">Sécurisez votre compte</h3>
+              <p class="step-description">Choisissez un mot de passe fort pour protéger vos données.</p>
+            </div>
+            <app-input type="password" label="Mot de passe" placeholder="••••••••"
+                       [value]="formData.password"
+                       (valueChanged)="onPasswordChange($event)"
+                       [errorText]="fieldErrors.password">
+            </app-input>
+            <div class="password-strength-meter" *ngIf="formData.password.length > 0">
+              <div class="strength-bar">
+                <div class="strength-fill" [style.width.%]="passwordStrength.progress" [style.background-color]="passwordStrength.color"></div>
+              </div>
+              <div class="strength-text" [style.color]="passwordStrength.color">{{ passwordStrength.text }}</div>
+            </div>
+            <app-input type="password" label="Confirmer le mot de passe" placeholder="••••••••"
+                       [value]="formData.confirmPassword"
+                       (valueChanged)="onConfirmPasswordChange($event)"
+                       [errorText]="fieldErrors.confirmPassword">
+            </app-input>
+            <app-button text="Continuer" (buttonClick)="nextStep()" [disabled]="!formStepValidity.step2" fullWidth="true">
+              <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </app-button>
+            <app-button text="Retour" styleType="outline" (buttonClick)="prevStep()" fullWidth="true"></app-button>
+          </div>
+
+          <!-- Step 3: Final -->
+          <div *ngSwitchCase="3" class="form-step active">
+            <div class="step-header">
+              <h3 class="step-title">Prêt à décoller ?</h3>
+              <p class="step-description">Votre copilote IA va révolutionner votre recherche d'emploi.</p>
+            </div>
+            <div class="summary-box">
+              <div class="summary-title">🚀 Ce qui vous attend :</div>
+              <ul>
+                <li><ion-icon name="checkmark-outline" class="summary-icon"></ion-icon> Configuration automatique de votre profil</li>
+                <li><ion-icon name="checkmark-outline" class="summary-icon"></ion-icon> Import intelligent de votre CV existant</li>
+                <li><ion-icon name="checkmark-outline" class="summary-icon"></ion-icon> Première analyse d'offres personnalisée</li>
+                <li><ion-icon name="checkmark-outline" class="summary-icon"></ion-icon> Génération de votre première candidature</li>
+              </ul>
+            </div>
+            <app-button text="🎯 Lancer mon copilote IA" styleType="secondary" (buttonClick)="createAccount()" [disabled]="isLoading" fullWidth="true">
+              <div *ngIf="isLoading" class="loading-spinner" slot="icon-only"></div>
+            </app-button>
+            <app-button text="Retour" styleType="outline" (buttonClick)="prevStep()" fullWidth="true"></app-button>
+          </div>
+
+          <!-- Step 4: Success State -->
+          <div *ngSwitchCase="4" class="form-step active success-state-container">
+            <div class="success-icon-wrapper"><ion-icon name="checkmark-circle-outline"></ion-icon></div>
+            <h2 class="success-title">Bienvenue dans Apply !</h2>
+            <p class="success-message">Votre compte a été créé avec succès. Votre copilote IA est en cours d'initialisation...</p>
+            <div class="next-steps-info">
+              <div class="next-steps-title">Prochaines étapes :</div>
+              <ul>
+                <li><ion-icon name="ellipse-outline" class="next-step-icon"></ion-icon> Configuration de votre profil professionnel</li>
+                <li><ion-icon name="ellipse-outline" class="next-step-icon"></ion-icon> Import et optimisation de votre CV</li>
+                <li><ion-icon name="ellipse-outline" class="next-step-icon"></ion-icon> Première recherche d'opportunités</li>
+              </ul>
+            </div>
+            <app-button text="Accéder à mon tableau de bord" styleType="primary" (buttonClick)="goToDashboard()" fullWidth="true">
+                <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </app-button>
+          </div>
+        </div>
+
+        <div class="signin-link-container"> <!-- Renamed from login-link -->
+          <p>Vous avez déjà un compte ?</p>
+          <a (click)="goToLogin()">Se connecter</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-content>

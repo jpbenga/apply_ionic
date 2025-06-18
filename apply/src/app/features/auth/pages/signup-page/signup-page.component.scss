@@ -1,0 +1,383 @@
+// Base variables from theme/variables.scss are available globally
+
+:host {
+  // Component host itself
+}
+
+ion-content {
+  // --background: linear-gradient(135deg, var(--ion-color-neutral-light, #F9FAFB) 0%, var(--ion-color-neutral-background, #FFFFFF) 100%);
+}
+
+.signup-container {
+  max-width: 1000px; // Max width for larger screens
+  margin: 0 auto;    // Center on larger screens
+  min-height: 100vh; // Full viewport height
+  display: grid;
+  grid-template-columns: 1fr 1fr; // Default for larger screens
+  align-items: stretch; // Make columns equal height
+  background: var(--ion-color-neutral-background, #FFFFFF);
+}
+
+/* Left Side - Value Proposition */
+.value-side {
+  background: linear-gradient(135deg, var(--ion-color-primary-blue, #4F46E5) 0%, var(--ion-color-secondary, #7C3AED) 100%); // Assuming secondary is defined
+  padding: 60px 40px;
+  color: var(--ion-color-primary-blue-contrast, white);
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  &::before { // Background pattern
+    content: '';
+    position: absolute;
+    top: -50%; right: -50%;
+    width: 200%; height: 200%;
+    background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></svg>') repeat;
+    animation: floatMotion 20s linear infinite; // Renamed animation
+    z-index: 0;
+  }
+}
+
+@keyframes floatMotion { // Renamed from float
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-60px, -60px); }
+}
+
+.logo-wrapper { // Renamed from .logo-large
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+  // app-logo with size="large" should provide necessary styling
+}
+
+.value-proposition {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 30px; // Adjusted
+}
+
+.main-headline {
+  font-size: 38px; // Adjusted
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.sub-headline {
+  font-size: 18px; // Adjusted
+  opacity: 0.9;
+  margin-bottom: 30px; // Adjusted
+  line-height: 1.5;
+}
+
+.benefits-list {
+  list-style: none;
+  position: relative;
+  z-index: 1;
+  padding-left: 0; // Remove default ul padding
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(255,255,255,0.15);
+    transform: translateX(8px);
+  }
+}
+
+.benefit-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--ion-color-accent-yellow, #FBBF24);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ion-color-text-dark, #1F2937);
+  flex-shrink: 0;
+  ion-icon { font-size: 24px; }
+}
+
+.benefit-text { flex: 1; }
+.benefit-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+.benefit-description {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Right Side - Sign Up Form */
+.signup-side {
+  padding: 40px 30px; // Adjusted
+  background: var(--ion-color-neutral-background, white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+.back-button {
+  // position: absolute; top: 24px; right: 24px; // If needed absolute
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ion-color-medium-shade, #6B7280); // Use theme var
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 12px; // Adjusted
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  z-index: 10;
+  margin-bottom: 16px; // Space if not absolute
+  align-self: flex-start; // Align to left if container is flex
+  cursor: pointer;
+
+  ion-icon { font-size: 20px; }
+  &:hover {
+    background: var(--ion-color-light-tint, #F3F4F6); // Use theme var
+    color: var(--ion-color-primary-blue, #4F46E5);
+  }
+}
+
+.signup-header {
+  text-align: center;
+  margin-bottom: 30px; // Adjusted
+}
+
+.signup-title {
+  font-size: 28px; // Adjusted
+  font-weight: 700;
+  color: var(--ion-color-text-dark, #1F2937);
+  margin-bottom: 12px;
+}
+
+.signup-subtitle {
+  color: var(--ion-color-text-dark-tint, #6B7280);
+  font-size: 16px;
+}
+
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 30px; // Adjusted
+}
+
+.progress-step {
+  width: 32px;
+  height: 4px;
+  background: var(--ion-color-neutral-shade, #E5E7EB); // Use theme var
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  &.active { background: var(--ion-color-primary-blue, #4F46E5); }
+  &.completed { background: var(--ion-color-success, #10B981); } // Use theme var
+}
+
+.form-wrapper { // Renamed from .form-container
+  max-width: 400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.form-step { // Handles visibility by ngSwitch, not direct class manipulation for display
+  // animation: fadeInUp 0.5s ease; // Angular animations can handle this
+  &.active { display: block; } // Ensure it's block
+}
+
+// @keyframes fadeInUp { // Can be done with Angular animations
+//   from { opacity: 0; transform: translateY(20px); }
+//   to { opacity: 1; transform: translateY(0); }
+// }
+
+.step-header { margin-bottom: 24px; } // Spacing for title/desc
+.step-title {
+  font-size: 22px; // Adjusted
+  font-weight: 700;
+  color: var(--ion-color-text-dark, #1F2937);
+  margin-bottom: 8px;
+}
+.step-description {
+  color: var(--ion-color-text-dark-tint, #6B7280);
+  margin-bottom: 24px; // Adjusted
+}
+
+// Styling for app-input instances and spacing
+app-input {
+  margin-bottom: 16px;
+  // app-input handles its own label, input, error/helper text styling
+}
+
+.password-strength-meter {
+  margin-top: -8px; // Pull closer to password input if app-input has large bottom margin
+  margin-bottom: 16px;
+}
+.strength-bar {
+  height: 4px;
+  background: var(--ion-color-neutral-shade, #E5E7EB);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 4px; // Adjusted
+}
+.strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+.strength-text {
+  font-size: 12px;
+  // Color is dynamically set in component via [style.color]
+}
+
+// Button spacing
+.form-step app-button {
+  margin-top: 8px; // Add some space if there are multiple buttons
+  &:first-of-type { // The primary action button in each step
+     margin-top: 24px; // Larger space before first button
+  }
+}
+
+.loading-spinner { // Copied from signin
+  width: 20px; height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spinAnimation 1s linear infinite; // Renamed
+}
+@keyframes spinAnimation { to { transform: rotate(360deg); } }
+
+
+.summary-box {
+  background: var(--ion-color-primary-blue-tint, #F0F9FF); // Use theme var
+  border: 1px solid var(--ion-color-primary-blue-shade, #E0F2FE); // Use theme var
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  .summary-title {
+    font-weight: 600;
+    color: var(--ion-color-text-dark, #0F172A);
+    margin-bottom: 12px;
+  }
+  ul {
+    list-style: none; padding: 0; margin: 0;
+    li {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px;
+      color: var(--ion-color-text-dark-tint, #475569);
+      font-size: 14px;
+      .summary-icon { color: var(--ion-color-success, #10B981); }
+    }
+  }
+}
+
+/* Success State */
+.success-state-container { // Renamed from .success-state
+  text-align: center;
+  padding: 20px 0; // Adjusted
+  // display: none; // Handled by ngSwitch
+  // &.show { display: block; animation: fadeInUp 0.5s ease; } // Angular animations
+}
+
+.success-icon-wrapper { // Renamed from .success-icon
+  width: 72px; height: 72px; // Adjusted
+  background: linear-gradient(135deg, var(--ion-color-success, #10B981), var(--ion-color-success-shade, #059669));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px; // Adjusted
+  color: var(--ion-color-success-contrast, white);
+  ion-icon { font-size: 40px; }
+}
+
+.success-title {
+  font-size: 26px; // Adjusted
+  font-weight: 700;
+  color: var(--ion-color-text-dark, #1F2937);
+  margin-bottom: 12px;
+}
+.success-message {
+  color: var(--ion-color-text-dark-tint, #6B7280);
+  margin-bottom: 24px; // Adjusted
+}
+
+.next-steps-info { // Renamed from .next-steps
+  background: var(--ion-color-primary-blue-tint, #F0F9FF);
+  border: 1px solid var(--ion-color-primary-blue-shade, #E0F2FE);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.next-steps-title {
+  font-weight: 600;
+  color: var(--ion-color-text-dark, #0F172A);
+  margin-bottom: 12px;
+}
+.next-steps-info ul { // Renamed from .next-steps-list
+  list-style: none; padding: 0; margin: 0;
+  li {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px;
+    color: var(--ion-color-text-dark-tint, #475569);
+    font-size: 14px;
+    .next-step-icon { color: var(--ion-color-primary-blue, #10B981); font-size: 12px; } // Used primary blue for consistency
+  }
+}
+
+.signin-link-container { // Renamed from .login-link
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--ion-color-neutral-shade, #E5E7EB);
+  p {
+    color: var(--ion-color-text-dark-tint, #6B7280);
+    margin-bottom: 8px;
+  }
+  a {
+    color: var(--ion-color-primary-blue, #4F46E5);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .signup-container {
+    grid-template-columns: 1fr; // Stack columns
+    grid-template-rows: auto 1fr;
+  }
+  .value-side {
+    min-height: auto;
+    padding: 40px 20px;
+    // Consider hiding some benefits on very small screens if too cluttered
+    .benefits-list li:nth-child(n+3) { display: none; } // Example: show only first 2
+  }
+  .main-headline { font-size: 28px; } // Adjusted
+  .signup-side {
+    padding: 30px 20px; // Adjusted
+    min-height: auto;
+  }
+  .back-button {
+    // position: static; // Already static from previous rules
+    align-self: flex-start;
+    margin-bottom: 20px;
+  }
+  .signup-title { font-size: 24px; } // Adjusted
+}

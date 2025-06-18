@@ -1,0 +1,45 @@
+ion-content {
+  // Ensure ion-content itself can be a flex container if needed,
+  // or provide a background for the entire page.
+  // For now, the step components have their own backgrounds.
+  // --background: var(--ion-color-light-gray, #f4f5f8); // Example global page background
+}
+
+.onboarding-container {
+  height: 100%; // Ensure the switch container takes full height of ion-content
+  position: relative; // Needed if child elements are positioned absolutely for transitions
+  overflow: hidden; // Hide steps that are outside the viewport during transitions
+}
+
+// Basic transition example (can be expanded)
+// Each step component (app-onboarding-step-one, etc.) would need a common class like '.onboarding-step'
+// and specific classes for active/previous/next states.
+
+/*
+.onboarding-step {
+  width: 100%;
+  height: 100%;
+  position: absolute; // Position them on top of each other
+  top: 0;
+  left: 0;
+  transition: transform 0.5s ease-in-out;
+  background-color: var(--ion-color-neutral-background, #FFFFFF); // Ensure steps have background
+}
+
+.step-prev {
+  transform: translateX(-100%);
+}
+
+.step-active {
+  transform: translateX(0%);
+  z-index: 1; // Ensure active step is on top
+}
+
+.step-next {
+  transform: translateX(100%);
+}
+*/
+
+// If not using JS-driven transitions on direct children, but relying on Angular's own animation system
+// or simple ngIf/ngSwitch, then complex CSS might not be needed here initially.
+// The individual step components already manage their internal layout to fill height.
