@@ -190,7 +190,7 @@
           <div class="form-grid">
             <app-styled-input class="form-field" label="Prénom *" type="text" [(ngModel)]="editableProfileInModal.prenom" name="prenom" placeholder="Votre prénom"></app-styled-input>
             <app-styled-input class="form-field" label="Nom *" type="text" [(ngModel)]="editableProfileInModal.nom" name="nom" placeholder="Votre nom"></app-styled-input>
-            <app-styled-input class="form-field" label="Email" type="email" [value]="editableProfileInModal.email" name="email" placeholder="Email (non modifiable)" [readonly]="true"></app-styled-input>
+            <app-styled-input class="form-field" label="Email" type="email" [value]="editableProfileInModal.email || ''" name="email" placeholder="Email (non modifiable)" [readonly]="true"></app-styled-input>
             <app-styled-input class="form-field" label="Téléphone" type="tel" [(ngModel)]="editableProfileInModal.telephone" name="telephone" placeholder="Numéro de téléphone"></app-styled-input>
           </div>
         </div>

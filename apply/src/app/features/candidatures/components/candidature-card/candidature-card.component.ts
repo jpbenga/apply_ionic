@@ -127,8 +127,10 @@ export class CandidatureCardComponent implements OnInit, OnChanges {
       case 'refusee_entreprise':
       case 'refusee_candidat':
         return 'rejected';
-      case 'en_attente_reponse':
-      case 'envoyee': // 'envoyee' is from the model, maps to 'applied' style
+      // 'en_attente_reponse' is not a valid StatutCandidature type literal.
+      // 'envoyee' and 'en_cours_rh' correctly map to 'applied'.
+      case 'envoyee':
+      case 'en_cours_rh': // Already correctly maps to 'applied'
          return 'applied';
       case 'archivee': return 'archived';
       case 'standby': return 'standby';
@@ -152,11 +154,12 @@ export class CandidatureCardComponent implements OnInit, OnChanges {
       case 'refusee_entreprise':
       case 'refusee_candidat':
         return 'var(--ion-color-danger)';
-      case 'envoyee': // 'envoyee' is from the model
-      case 'en_attente_reponse':
-      case 'en_cours_rh': // Grouping en_cours_rh with applied/primary color
+      // 'en_attente_reponse' is not a valid StatutCandidature type literal.
+      // 'envoyee' and 'en_cours_rh' correctly map to primary color.
+      case 'envoyee':
+      case 'en_cours_rh':
         return 'var(--ion-color-primary)';
-      case 'standby': return 'var(--ion-color-warning)'; // Standby could also be warning or medium
+      case 'standby': return 'var(--ion-color-warning)';
       case 'brouillon': return 'var(--ion-color-medium)'; // Brouillon is likely medium
       case 'archivee': return 'var(--ion-color-dark)'; // Archivee could be dark or medium
       default: return 'var(--ion-color-medium)';

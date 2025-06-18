@@ -526,20 +526,24 @@
 
 </ion-content>
 
-<div class="validation-buttons">
-  <ion-button 
-    expand="block" 
-    fill="outline" 
-    color="medium"
-    (click)="cancel()">
-    Annuler
-  </ion-button>
-  <ion-button 
-    expand="block" 
-    color="primary"
-    [disabled]="selectedCount === 0"
-    (click)="confirm()">
-    <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-    Ajouter {{ selectedCount }} élément(s)
-  </ion-button>
-</div>
+<ion-footer class="validation-footer"> <!-- Changed div to ion-footer and added a class -->
+  <ion-toolbar> <!-- ion-toolbar is common in ion-footer for proper padding/alignment -->
+    <ion-button
+      expand="block"
+      fill="outline"
+      color="medium"
+      (click)="cancel()"
+      class="footer-button cancel-button"> <!-- Added classes for specific styling if needed -->
+      Annuler
+    </ion-button>
+    <ion-button
+      expand="block"
+      color="primary"
+      [disabled]="selectedCount === 0"
+      (click)="confirm()"
+      class="footer-button confirm-button"> <!-- Added classes for specific styling if needed -->
+      <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+      Ajouter {{ selectedCount }} élément(s)
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

@@ -131,13 +131,23 @@ export class DashboardPage implements OnInit, OnDestroy {
 
     // Ensure the FilterService has the initial default sort order from the component's filterOptions
     this.filterService.setSortByDate(this.filterOptions.sortByDate);
-    this.filterService.setSearchTerm(this.filterOptions.searchText); // Corrected: setSearchText -> setSearchTerm
-    // For initializing statuses, assuming FilterService starts empty or with its own defaults.
-    // If dashboard needs to push an initial state for statuses:
-    this.filterService.clearSelectedStatuts(); // Clear any existing
-    this.filterOptions.selectedStatuts.forEach(statut => { // Add from component's initial config
-      this.filterService.addSelectedStatut(statut);
-    });
+    this.filterService.setSearchTerm(this.filterOptions.searchText || '');
+
+    // Initialize statuses using the new FilterService API
+    // The setCustomStatuts call will internally set the group to 'custom' if statuts is not empty,
+    // or 'all' if statuts is empty.
+    this.filterService.setCustomStatuts(this.filterOptions.selectedStatuts || []);
+
+    // If a specific group was intended and no custom statuts were set, apply that group.
+    // Otherwise, setCustomStatuts would have handled it or defaulted to 'all'.
+    const initialSelectedGroup = (this.filterOptions as any).selectedGroup; // Check if selectedGroup exists
+    if (initialSelectedGroup && (!this.filterOptions.selectedStatuts || this.filterOptions.selectedStatuts.length === 0)) {
+      this.filterService.setActiveGroup(initialSelectedGroup);
+    } else if ((!this.filterOptions.selectedStatuts || this.filterOptions.selectedStatuts.length === 0) && !initialSelectedGroup) {
+      // Default case if neither custom statuses nor a group is specified in initial filterOptions
+      this.filterService.setActiveGroup('all');
+    }
+    // The activeFilterChip will be updated by the filterOptions$ subscription
   }
 
   /**
@@ -445,21 +455,56 @@ export class DashboardPage implements OnInit, OnDestroy {
   }
 
   onSearchTextChanged(): void {
-    this.filterService.setSearchTerm(this.searchText); // Corrected: setSearchText -> setSearchTerm
+    this.filterService.setSearchTerm(this.searchText || '');
   }
 
-  applyFilter(statusFilter: string): void {
-    this.activeFilterChip = statusFilter;
-    console.log('Applying filter:', statusFilter);
+  applyFilter(statusFilterKey: string): void {
+    this.activeFilterChip = statusFilterKey; // statusFilterKey is 'all', 'interview', 'offer', etc.
+    console.log('Applying filter key:', statusFilterKey);
 
-    this.filterService.clearSelectedStatuts(); // Clear previous statuses
-    if (statusFilter !== 'all') {
-      // Assuming statusFilter is a string that can be cast or matches StatutCandidature values
-      // The toUpperCase() and cast might need adjustment if statusFilter values from HTML
-      // don't directly map to StatutCandidature enum/type values.
-      this.filterService.addSelectedStatut(statusFilter.toUpperCase() as Candidature['statut']);
+    if (statusFilterKey === 'all') {
+      this.filterService.setActiveGroup('all');
+    } else if (statusFilterKey === 'ai-generated') {
+      // TODO: Implement specific logic for 'ai-generated' if FilterService supports it.
+      // This might involve a different method or a special custom status.
+      // For now, we'll treat it as a custom filter that might not directly map to a single status.
+      // Example: this.filterService.setAiGeneratedFilter(true);
+      // Or, if it's a meta-status, it might clear other statuses and set a flag.
+      console.warn("Filter for 'ai-generated' needs specific implementation in FilterService.");
+      // As a placeholder, we can set it as a custom status if the model supports it, or clear others.
+      this.filterService.setCustomStatuts(['ai-generated' as any]); // This will likely not work unless 'ai-generated' is a StatutCandidature
+    } else {
+      // Map UI filter keys to actual StatutCandidature values
+      let statutsToSet: Candidature['statut'][] = [];
+      switch (statusFilterKey) {
+        case 'interview':
+          statutsToSet = ['entretien_planifie', 'entretien_final', 'test_technique'];
+          break;
+        case 'offer':
+          statutsToSet = ['offre_recue'];
+          break;
+        case 'applied': // This chip label from prototype was "En attente"
+          statutsToSet = ['envoyee', 'en_cours_rh', 'en_attente_reponse' as any]; // 'en_attente_reponse' is not in model, remove
+          break;
+        // Add other mappings as needed based on UI chips
+        default:
+          // If statusFilterKey is a direct StatutCandidature value (e.g. from a more dynamic UI)
+          // This path might not be hit with the current hardcoded chips if they don't match StatutCandidature values.
+          statutsToSet = [statusFilterKey as Candidature['statut']];
+      }
+      // Correcting the 'applied' case based on valid StatutCandidature values
+      if (statusFilterKey === 'applied') {
+        statutsToSet = ['envoyee', 'en_cours_rh'];
+      }
+
+      if (statutsToSet.length > 0) {
+        this.filterService.setCustomStatuts(statutsToSet);
+      } else if (statusFilterKey !== 'ai-generated') {
+        // If no mapping found and not 'ai-generated', default to showing all (or handle error)
+        console.warn(`No specific StatutCandidature mapping for filter key: ${statusFilterKey}. Defaulting to 'all'.`);
+        this.filterService.setActiveGroup('all');
+      }
     }
-    // The reactive stream from filterService.filterOptions$ will trigger data reload.
   }
 
   setSortByDate(sortOrder: 'asc' | 'desc'): void {
