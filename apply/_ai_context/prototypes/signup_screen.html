@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rejoignez Apply - Votre Copilote de Carrière</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%);
+            color: #1F2937;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+        }
+
+        /* Left Side - Value Proposition */
+        .value-side {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            padding: 60px 40px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .value-side::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></svg>') repeat;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-60px, -60px); }
+        }
+
+        .logo-large {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-icon-large {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 32px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-icon-large::after {
+            content: '✓';
+            position: absolute;
+            bottom: -4px;
+            right: -4px;
+            background: #FBBF24;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #1F2937;
+        }
+
+        .logo-text-large {
+            font-size: 36px;
+            font-weight: 800;
+        }
+
+        .value-proposition {
+            position: relative;
+            z-index: 2;
+            margin-bottom: 40px;
+        }
+
+        .main-headline {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+
+        .sub-headline {
+            font-size: 20px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            line-height: 1.4;
+        }
+
+        .benefits-list {
+            list-style: none;
+            position: relative;
+            z-index: 2;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateX(8px);
+        }
+
+        .benefit-icon {
+            width: 48px;
+            height: 48px;
+            background: #FBBF24;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1F2937;
+            flex-shrink: 0;
+        }
+
+        .benefit-text {
+            flex: 1;
+        }
+
+        .benefit-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            font-size: 16px;
+        }
+
+        .benefit-description {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Right Side - Sign Up Form */
+        .signup-side {
+            padding: 60px 40px;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6B7280;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .back-button:hover {
+            background: #F3F4F6;
+            color: #4F46E5;
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .signup-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 12px;
+        }
+
+        .signup-subtitle {
+            color: #6B7280;
+            font-size: 16px;
+        }
+
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 40px;
+        }
+
+        .progress-step {
+            width: 32px;
+            height: 4px;
+            background: #E5E7EB;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active {
+            background: #4F46E5;
+        }
+
+        .progress-step.completed {
+            background: #10B981;
+        }
+
+        .form-container {
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-step {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+
+        .step-description {
+            color: #6B7280;
+            margin-bottom: 32px;
+        }
+
+        .form-field {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-input.error {
+            border-color: #EF4444;
+        }
+
+        .form-input.success {
+            border-color: #10B981;
+        }
+
+        .field-feedback {
+            margin-top: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .field-feedback.error {
+            color: #EF4444;
+        }
+
+        .field-feedback.success {
+            color: #10B981;
+        }
+
+        .password-strength {
+            margin-top: 12px;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: #E5E7EB;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .strength-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak { background: #EF4444; width: 25%; }
+        .strength-fair { background: #F59E0B; width: 50%; }
+        .strength-good { background: #10B981; width: 75%; }
+        .strength-strong { background: #059669; width: 100%; }
+
+        .strength-text {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            background: #4F46E5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338CA;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: #FBBF24;
+            color: #1F2937;
+        }
+
+        .btn-secondary:hover {
+            background: #F59E0B;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #E5E7EB;
+            color: #6B7280;
+        }
+
+        .btn-outline:hover {
+            border-color: #4F46E5;
+            color: #4F46E5;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .login-link p {
+            color: #6B7280;
+            margin-bottom: 8px;
+        }
+
+        .login-link a {
+            color: #4F46E5;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Success State */
+        .success-state {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .success-state.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10B981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            color: white;
+            font-size: 40px;
+        }
+
+        .success-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 12px;
+        }
+
+        .success-message {
+            color: #6B7280;
+            margin-bottom: 32px;
+        }
+
+        .next-steps {
+            background: #F0F9FF;
+            border: 1px solid #E0F2FE;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .next-steps-title {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 12px;
+        }
+
+        .next-steps-list {
+            list-style: none;
+            text-align: left;
+        }
+
+        .next-steps-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+
+            .value-side {
+                min-height: auto;
+                padding: 40px 20px;
+            }
+
+            .main-headline {
+                font-size: 32px;
+            }
+
+            .signup-side {
+                padding: 40px 20px;
+                min-height: auto;
+            }
+
+            .back-button {
+                position: static;
+                align-self: flex-start;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Side - Value Proposition -->
+        <div class="value-side">
+            <div class="logo-large">
+                <div class="logo-icon-large">A</div>
+                <div class="logo-text-large">Apply</div>
+            </div>
+
+            <div class="value-proposition">
+                <h1 class="main-headline">Votre copilote de carrière intelligent</h1>
+                <p class="sub-headline">Libérez-vous de la charge mentale de la recherche d'emploi. Apply postule pour vous, intelligemment.</p>
+            </div>
+
+            <ul class="benefits-list">
+                <li class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <div class="benefit-text">
+                        <div class="benefit-title">IA personnalisée</div>
+                        <div class="benefit-description">Analyse intelligente des offres et optimisation automatique de vos candidatures</div>
+                    </div>
+                </li>
+                <li class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                        </svg>
+                    </div>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Automatisation complète</div>
+                        <div class="benefit-description">De la recherche d'offres à l'envoi des candidatures, tout est automatisé</div>
+                    </div>
+                </li>
+                <li class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Résultats prouvés</div>
+                        <div class="benefit-description">+300% de taux de réponse grâce à nos algorithmes de matching</div>
+                    </div>
+                </li>
+                <li class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="benefit-text">
+                        <div class="benefit-title">Gain de temps massif</div>
+                        <div class="benefit-description">10h/semaine économisées sur votre recherche d'emploi</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Right Side - Sign Up Form -->
+        <div class="signup-side">
+            <a href="#" class="back-button">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 12H5m7-7l-7 7 7 7"/>
+                </svg>
+                Retour
+            </a>
+
+            <div class="signup-header">
+                <h2 class="signup-title">Créez votre compte</h2>
+                <p class="signup-subtitle">En 2 minutes, votre copilote IA sera prêt</p>
+            </div>
+
+            <div class="progress-indicator">
+                <div class="progress-step active" id="step1"></div>
+                <div class="progress-step" id="step2"></div>
+                <div class="progress-step" id="step3"></div>
+            </div>
+
+            <div class="form-container">
+                <!-- Step 1: Personal Info -->
+                <div class="form-step active" id="stepPersonal">
+                    <div class="step-title">Vos informations</div>
+                    <div class="step-description">Commençons par faire connaissance</div>
+
+                    <div class="form-field">
+                        <label class="form-label">Nom complet</label>
+                        <input type="text" class="form-input" id="displayName" placeholder="Jean Dupont">
+                        <div class="field-feedback" id="displayNameFeedback"></div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Adresse email</label>
+                        <input type="email" class="form-input" id="email" placeholder="jean.dupont@email.com">
+                        <div class="field-feedback" id="emailFeedback"></div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="nextStep(1)">
+                        Continuer
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M5 12h14m-7-7l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Step 2: Security -->
+                <div class="form-step" id="stepSecurity">
+                    <div class="step-title">Sécurisez votre compte</div>
+                    <div class="step-description">Choisissez un mot de passe fort pour protéger vos données</div>
+
+                    <div class="form-field">
+                        <label class="form-label">Mot de passe</label>
+                        <input type="password" class="form-input" id="password" placeholder="••••••••">
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <div class="strength-text" id="strengthText">Saisissez au moins 8 caractères</div>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-label">Confirmer le mot de passe</label>
+                        <input type="password" class="form-input" id="confirmPassword" placeholder="••••••••">
+                        <div class="field-feedback" id="confirmPasswordFeedback"></div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="nextStep(2)">
+                        Continuer
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M5 12h14m-7-7l7 7-7 7"/>
+                        </svg>
+                    </button>
+
+                    <button class="btn btn-outline" onclick="prevStep(1)">
+                        Retour
+                    </button>
+                </div>
+
+                <!-- Step 3: Final -->
+                <div class="form-step" id="stepFinal">
+                    <div class="step-title">Prêt à décoller ?</div>
+                    <div class="step-description">Votre copilote IA va révolutionner votre recherche d'emploi</div>
+
+                    <div style="background: #F0F9FF; border: 1px solid #E0F2FE; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <div style="font-weight: 600; color: #0F172A; margin-bottom: 12px;">🚀 Ce qui vous attend :</div>
+                        <ul style="list-style: none; margin: 0; padding: 0;">
+                            <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #475569; font-size: 14px;">
+                                <span style="color: #10B981;">✓</span> Configuration automatique de votre profil
+                            </li>
+                            <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #475569; font-size: 14px;">
+                                <span style="color: #10B981;">✓</span> Import intelligent de votre CV existant
+                            </li>
+                            <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #475569; font-size: 14px;">
+                                <span style="color: #10B981;">✓</span> Première analyse d'offres personnalisée
+                            </li>
+                            <li style="display: flex; align-items: center; gap: 8px; color: #475569; font-size: 14px;">
+                                <span style="color: #10B981;">✓</span> Génération de votre première candidature
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="createAccount()" id="finalBtn">
+                        <span id="btnText">🎯 Lancer mon copilote IA</span>
+                        <div class="loading-spinner" id="btnSpinner" style="display: none;"></div>
+                    </button>
+
+                    <button class="btn btn-outline" onclick="prevStep(2)">
+                        Retour
+                    </button>
+                </div>
+
+                <!-- Success State -->
+                <div class="success-state" id="successState">
+                    <div class="success-icon">✓</div>
+                    <div class="success-title">Bienvenue dans Apply !</div>
+                    <div class="success-message">Votre compte a été créé avec succès. Votre copilote IA est en cours d'initialisation...</div>
+                    
+                    <div class="next-steps">
+                        <div class="next-steps-title">Prochaines étapes</div>
+                        <ul class="next-steps-list">
+                            <li>
+                                <span style="color: #10B981;">●</span>
+                                Configuration de votre profil professionnel
+                            </li>
+                            <li>
+                                <span style="color: #10B981;">●</span>
+                                Import et optimisation de votre CV
+                            </li>
+                            <li>
+                                <span style="color: #10B981;">●</span>
+                                Première recherche d'opportunités
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="goToDashboard()">
+                        Accéder à mon tableau de bord
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M5 12h14m-7-7l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="login-link">
+                    <p>Vous avez déjà un compte ?</p>
+                    <a href="#" onclick="goToLogin()">Se connecter</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let formData = {};
+
+        function nextStep(step) {
+            // Validate current step
+            if (step === 1) {
+                if (!validatePersonalInfo()) return;
+            } else if (step === 2) {
+                if (!validateSecurity()) return;
+            }
+
+            // Update progress
+            updateProgressIndicator(step + 1);
+            
+            // Hide current step
+            document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+            
+            // Show next step
+            const nextStepId = step === 1 ? 'stepSecurity' : 'stepFinal';
+            document.getElementById(nextStepId).classList.add('active');
+            
+            currentStep = step + 1;
+        }
+
+        function prevStep(step) {
+            // Update progress
+            updateProgressIndicator(step);
+            
+            // Hide current step
+            document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+            
+            // Show previous step
+            const prevStepId = step === 1 ? 'stepPersonal' : 'stepSecurity';
+            document.getElementById(prevStepId).classList.add('active');
+            
+            currentStep = step;
+        }
+
+        function updateProgressIndicator(step) {
+            const steps = document.querySelectorAll('.progress-step');
+            steps.forEach((el, index) => {
+                el.classList.remove('active', 'completed');
+                if (index < step - 1) {
+                    el.classList.add('completed');
+                } else if (index === step - 1) {
+                    el.classList.add('active');
+                }
+            });
+        }
+
+        function validatePersonalInfo() {
+            const displayName = document.getElementById('displayName');
+            const email = document.getElementById('email');
+            let isValid = true;
+
+            // Validate display name
+            if (displayName.value.trim().length < 3) {
+                showFieldError('displayName', 'Votre nom doit contenir au moins 3 caractères');
+                isValid = false;
+            } else {
+                showFieldSuccess('displayName', 'Parfait !');
+                formData.displayName = displayName.value.trim();
+            }
+
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value)) {
+                showFieldError('email', 'Veuillez saisir une adresse email valide');
+                isValid = false;
+            } else {
+                showFieldSuccess('email', 'Email valide');
+                formData.email = email.value.trim();
+            }
+
+            return isValid;
+        }
+
+        function validateSecurity() {
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+            let isValid = true;
+
+            // Validate password strength
+            if (password.value.length < 8) {
+                showFieldError('confirmPassword', 'Le mot de passe doit contenir au moins 8 caractères');
+                isValid = false;
+            } else if (password.value !== confirmPassword.value) {
+                showFieldError('confirmPassword', 'Les mots de passe ne correspondent pas');
+                isValid = false;
+            } else {
+                showFieldSuccess('confirmPassword', 'Mots de passe identiques');
+                formData.password = password.value;
+            }
+
+            return isValid;
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const feedback = document.getElementById(fieldId + 'Feedback');
+            
+            field.classList.remove('success');
+            field.classList.add('error');
+            feedback.className = 'field-feedback error';
+            feedback.innerHTML = `
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                ${message}
+            `;
+        }
+
+        function showFieldSuccess(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const feedback = document.getElementById(fieldId + 'Feedback');
+            
+            field.classList.remove('error');
+            field.classList.add('success');
+            feedback.className = 'field-feedback success';
+            feedback.innerHTML = `
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                ${message}
+            `;
+        }
+
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            const strengthFill = document.getElementById('strengthFill');
+            const strengthText = document.getElementById('strengthText');
+            
+            let strength = 0;
+            let text = '';
+            let className = '';
+            
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            switch (strength) {
+                case 0:
+                case 1:
+                    text = 'Mot de passe faible';
+                    className = 'strength-weak';
+                    break;
+                case 2:
+                    text = 'Mot de passe moyen';
+                    className = 'strength-fair';
+                    break;
+                case 3:
+                    text = 'Bon mot de passe';
+                    className = 'strength-good';
+                    break;
+                case 4:
+                    text = 'Mot de passe excellent !';
+                    className = 'strength-strong';
+                    break;
+            }
+            
+            strengthFill.className = 'strength-fill ' + className;
+            strengthText.textContent = text;
+        });
+
+        function createAccount() {
+            const btn = document.getElementById('finalBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            
+            // Show loading state
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnSpinner.style.display = 'block';
+            
+            // Simulate account creation
+            setTimeout(() => {
+                // Hide form, show success
+                document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+                document.getElementById('successState').classList.add('show');
+                
+                // Auto-redirect after 3 seconds
+                setTimeout(() => {
+                    goToDashboard();
+                }, 3000);
+            }, 2000);
+        }
+
+        function goToDashboard() {
+            // Simulate navigation
+            alert('Redirection vers le tableau de bord...');
+        }
+
+        function goToLogin() {
+            // Simulate navigation
+            alert('Redirection vers la connexion...');
+        }
+
+        // Add some interactive feedback
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

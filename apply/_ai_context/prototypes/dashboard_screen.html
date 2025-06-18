@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply - Tableau de Bord Carrière</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%);
+            color: #1F2937;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid #E5E7EB;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: #4F46E5;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            position: relative;
+        }
+
+        .logo-icon::after {
+            content: '✓';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background: #FBBF24;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #1F2937;
+        }
+
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1F2937;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 24px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></svg>') repeat;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-60px, -60px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .hero-text {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .hero-greeting {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .hero-title {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 32px;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #FBBF24;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* AI Assistant */
+        .ai-assistant {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+            min-width: 280px;
+        }
+
+        .ai-avatar-large {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 32px;
+            animation: pulse 2s infinite;
+        }
+
+        .ai-message {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .ai-description {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .ai-action {
+            background: #FBBF24;
+            color: #1F2937;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .ai-action:hover {
+            background: #F59E0B;
+            transform: translateY(-2px);
+        }
+
+        /* Metrics Dashboard */
+        .metrics-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #E5E7EB;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .metric-icon.applications {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+        }
+
+        .metric-icon.interviews {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .metric-icon.success {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+        }
+
+        .metric-icon.pipeline {
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+        }
+
+        .metric-title {
+            font-weight: 600;
+            color: #1F2937;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+        }
+
+        .metric-change.positive {
+            color: #10B981;
+        }
+
+        .metric-change.neutral {
+            color: #6B7280;
+        }
+
+        .metric-trend {
+            margin-top: 12px;
+            height: 40px;
+            background: linear-gradient(90deg, #F0F9FF, #E0F2FE);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0369A1;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Smart Filters */
+        .smart-filters {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #E5E7EB;
+            margin-bottom: 32px;
+        }
+
+        .filters-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .filters-title {
+            font-weight: 700;
+            color: #1F2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .filter-chip {
+            background: #F3F4F6;
+            color: #374151;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-chip:hover {
+            background: #E5E7EB;
+        }
+
+        .filter-chip.active {
+            background: #F0F9FF;
+            border-color: #3B82F6;
+            color: #1E40AF;
+        }
+
+        .filter-chip .count {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1E40AF;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-left: 4px;
+        }
+
+        .search-bar {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6B7280;
+        }
+
+        /* Applications Grid */
+        .applications-section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .view-toggle {
+            display: flex;
+            background: #F3F4F6;
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #6B7280;
+        }
+
+        .view-btn.active {
+            background: white;
+            color: #4F46E5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+        }
+
+        /* Application Card Enhanced */
+        .application-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #E5E7EB;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .application-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--status-color);
+        }
+
+        .application-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .company-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .company-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 4px;
+        }
+
+        .job-title {
+            color: #6B7280;
+            margin-bottom: 12px;
+        }
+
+        .card-status {
+            align-self: flex-start;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .status-badge.applied {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .status-badge.interview {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .status-badge.offer {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .status-badge.accepted {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .status-badge.rejected {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        /* AI Insights in Cards */
+        .ai-insights {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .ai-score {
+            background: linear-gradient(135deg, #F0F9FF, #E0F2FE);
+            border: 1px solid #0EA5E9;
+            border-radius: 12px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #0C4A6E;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ai-icon-small {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+        }
+
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .keyword {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            color: #166534;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Card Footer */
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #F3F4F6;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .meta-highlight {
+            color: #4F46E5;
+            font-weight: 600;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .application-card:hover .card-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .action-btn.view {
+            background: #F0F9FF;
+            color: #0369A1;
+        }
+
+        .action-btn.view:hover {
+            background: #0369A1;
+            color: white;
+        }
+
+        .action-btn.edit {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .action-btn.edit:hover {
+            background: #D97706;
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #6B7280;
+        }
+
+        .empty-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 32px;
+            font-size: 48px;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 12px;
+        }
+
+        .empty-description {
+            font-size: 16px;
+            margin-bottom: 32px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .empty-action {
+            background: #4F46E5;
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .empty-action:hover {
+            background: #4338CA;
+            transform: translateY(-2px);
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(79, 70, 229, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .metrics-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .applications-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">A</div>
+                <div class="logo-text">Apply</div>
+            </div>
+            <div class="user-profile">
+                <div class="user-avatar">JD</div>
+                <span style="font-weight: 600;">John Doe</span>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero-section fade-in">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <div class="hero-greeting">👋 Salut John !</div>
+                    <h1 class="hero-title">Votre carrière décolle</h1>
+                    <p class="hero-subtitle">Votre copilote IA a travaillé pour vous cette semaine</p>
+                    
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <div class="stat-value">23</div>
+                            <div class="stat-label">Candidatures envoyées</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="stat-value">7</div>
+                            <div class="stat-label">Entretiens programmés</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="stat-value">2</div>
+                            <div class="stat-label">Offres reçues</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ai-assistant">
+                    <div class="ai-avatar-large">🤖</div>
+                    <div class="ai-message">3 nouvelles opportunités détectées</div>
+                    <div class="ai-description">Votre IA a trouvé des postes parfaitement adaptés à votre profil</div>
+                    <a href="#" class="ai-action" onclick="showOpportunities()">Voir les opportunités</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Metrics Dashboard -->
+        <section class="metrics-dashboard fade-in">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-icon applications">📧</div>
+                    <div class="metric-title">Candidatures actives</div>
+                </div>
+                <div class="metric-value">23</div>
+                <div class="metric-change positive">
+                    <span>↗️ +5 cette semaine</span>
+                </div>
+                <div class="metric-trend">Tendance excellente</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-icon interviews">🎯</div>
+                    <div class="metric-title">Taux de réponse</div>
+                </div>
+                <div class="metric-value">34%</div>
+                <div class="metric-change positive">
+                    <span>↗️ +8% vs mois dernier</span>
+                </div>
+                <div class="metric-trend">Au-dessus de la moyenne</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-icon success">🏆</div>
+                    <div class="metric-title">Entretiens convertis</div>
+                </div>
+                <div class="metric-value">71%</div>
+                <div class="metric-change positive">
+                    <span>↗️ Excellent taux</span>
+                </div>
+                <div class="metric-trend">Performance top 10%</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-icon pipeline">⚡</div>
+                    <div class="metric-title">Pipeline IA</div>
+                </div>
+                <div class="metric-value">12</div>
+                <div class="metric-change neutral">
+                    <span>🔄 En cours d'analyse</span>
+                </div>
+                <div class="metric-trend">Nouvelles offres détectées</div>
+            </div>
+        </section>
+
+        <!-- Smart Filters -->
+        <section class="smart-filters fade-in">
+            <div class="filters-header">
+                <div class="filters-title">
+                    🔍 Vos candidatures
+                    <span style="color: #6B7280; font-weight: 400; margin-left: 8px;">(23 total)</span>
+                </div>
+                <div class="search-bar">
+                    <div class="search-icon">🔎</div>
+                    <input type="text" class="search-input" placeholder="Rechercher par entreprise, poste..." id="searchInput">
+                </div>
+            </div>
+            
+            <div class="quick-filters">
+                <div class="filter-chip active" onclick="filterByStatus('all')">
+                    Toutes <span class="count">23</span>
+                </div>
+                <div class="filter-chip" onclick="filterByStatus('interview')">
+                    🎯 Entretiens <span class="count">7</span>
+                </div>
+                <div class="filter-chip" onclick="filterByStatus('offer')">
+                    🎉 Offres reçues <span class="count">2</span>
+                </div>
+                <div class="filter-chip" onclick="filterByStatus('applied')">
+                    📧 En attente <span class="count">12</span>
+                </div>
+                <div class="filter-chip" onclick="filterByStatus('ai-generated')">
+                    🤖 Générées par IA <span class="count">18</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Applications Section -->
+        <section class="applications-section fade-in">
+            <div class="section-header">
+                <h2 class="section-title">Mes candidatures</h2>
+                <div class="view-toggle">
+                    <button class="view-btn active">📊 Cartes</button>
+                    <button class="view-btn">📋 Liste</button>
+                </div>
+            </div>
+
+            <div class="applications-grid" id="applicationsGrid">
+                <!-- Application 1 - Interview Scheduled -->
+                <div class="application-card" style="--status-color: #10B981" onclick="viewApplication('1')">
+                    <div class="card-header">
+                        <div class="company-logo" style="background: linear-gradient(135deg, #1E40AF, #3B82F6);">TC</div>
+                        <div class="card-info">
+                            <div class="company-name">TechCorp</div>
+                            <div class="job-title">Product Manager Senior</div>
+                        </div>
+                        <div class="card-status">
+                            <div class="status-badge interview">Entretien planifié</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-insights">
+                        <div class="ai-score">
+                            <div class="ai-icon-small">AI</div>
+                            Match 92%
+                        </div>
+                        <div class="keywords">
+                            <span class="keyword">React</span>
+                            <span class="keyword">Product</span>
+                            <span class="keyword">Agile</span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-meta">
+                            <div class="meta-item">
+                                📅 Entretien <span class="meta-highlight">demain 14h</span>
+                            </div>
+                            <div class="meta-item">
+                                🤖 Générée par Apply
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn view" title="Voir les détails">👁</button>
+                            <button class="action-btn edit" title="Modifier">✏️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application 2 - Offer Received -->
+                <div class="application-card" style="--status-color: #F59E0B" onclick="viewApplication('2')">
+                    <div class="card-header">
+                        <div class="company-logo" style="background: linear-gradient(135deg, #059669, #10B981);">DS</div>
+                        <div class="card-info">
+                            <div class="company-name">DesignStudio</div>
+                            <div class="job-title">UX Designer Senior</div>
+                        </div>
+                        <div class="card-status">
+                            <div class="status-badge offer">Offre reçue</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-insights">
+                        <div class="ai-score">
+                            <div class="ai-icon-small">AI</div>
+                            Match 95%
+                        </div>
+                        <div class="keywords">
+                            <span class="keyword">Figma</span>
+                            <span class="keyword">Design System</span>
+                            <span class="keyword">UX Research</span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-meta">
+                            <div class="meta-item">
+                                🎉 <span class="meta-highlight">65k€/an</span> + avantages
+                            </div>
+                            <div class="meta-item">
+                                🤖 Générée par Apply
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn view" title="Voir l'offre">👁</button>
+                            <button class="action-btn edit" title="Négocier">💬</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application 3 - Applied -->
+                <div class="application-card" style="--status-color: #3B82F6" onclick="viewApplication('3')">
+                    <div class="card-header">
+                        <div class="company-logo" style="background: linear-gradient(135deg, #7C3AED, #8B5CF6);">SC</div>
+                        <div class="card-info">
+                            <div class="company-name">StartupCo</div>
+                            <div class="job-title">Lead Developer Full-Stack</div>
+                        </div>
+                        <div class="card-status">
+                            <div class="status-badge applied">En attente</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-insights">
+                        <div class="ai-score">
+                            <div class="ai-icon-small">AI</div>
+                            Match 78%
+                        </div>
+                        <div class="keywords">
+                            <span class="keyword">Node.js</span>
+                            <span class="keyword">Leadership</span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-meta">
+                            <div class="meta-item">
+                                ⏱ En attente depuis <span class="meta-highlight">3 jours</span>
+                            </div>
+                            <div class="meta-item">
+                                🤖 Générée par Apply
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn view" title="Voir les détails">👁</button>
+                            <button class="action-btn edit" title="Relancer">📧</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application 4 - Accepted -->
+                <div class="application-card" style="--status-color: #16A34A" onclick="viewApplication('4')">
+                    <div class="card-header">
+                        <div class="company-logo" style="background: linear-gradient(135deg, #DC2626, #EF4444);">IN</div>
+                        <div class="card-info">
+                            <div class="company-name">InnovateLab</div>
+                            <div class="job-title">Product Owner</div>
+                        </div>
+                        <div class="card-status">
+                            <div class="status-badge accepted">Acceptée</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-insights">
+                        <div class="ai-score">
+                            <div class="ai-icon-small">AI</div>
+                            Match 89%
+                        </div>
+                        <div class="keywords">
+                            <span class="keyword">Scrum</span>
+                            <span class="keyword">Roadmap</span>
+                            <span class="keyword">Analytics</span>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-meta">
+                            <div class="meta-item">
+                                ✅ <span class="meta-highlight">Poste démarré</span> le 15/11
+                            </div>
+                            <div class="meta-item">
+                                🤖 Générée par Apply
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn view" title="Voir les détails">👁</button>
+                            <button class="action-btn edit" title="Feedback">⭐</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Floating Action Button -->
+        <button class="fab" onclick="createNewApplication()" title="Nouvelle candidature">
+            ➕
+        </button>
+    </div>
+
+    <script>
+        function filterByStatus(status) {
+            // Update active filter
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Filter logic would go here
+            console.log('Filtering by:', status);
+        }
+
+        function viewApplication(id) {
+            const applications = {
+                '1': 'TechCorp - Product Manager Senior',
+                '2': 'DesignStudio - UX Designer Senior',
+                '3': 'StartupCo - Lead Developer Full-Stack',
+                '4': 'InnovateLab - Product Owner'
+            };
+            alert(`Ouverture des détails pour: ${applications[id]}`);
+        }
+
+        function createNewApplication() {
+            alert('Redirection vers la création de candidature...');
+        }
+
+        function showOpportunities() {
+            alert('Affichage des 3 nouvelles opportunités détectées par l\'IA...');
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            console.log('Searching for:', query);
+            // Search logic would filter the applications grid
+        });
+
+        // Add some interactive feedback
+        document.querySelectorAll('.application-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = '';
+            });
+        });
+
+        // Simulate real-time updates
+        function updateMetrics() {
+            // This would connect to real data
+            console.log('Updating real-time metrics...');
+        }
+
+        // Update every 30 seconds
+        setInterval(updateMetrics, 30000);
+    </script>
+</body>
+</html>

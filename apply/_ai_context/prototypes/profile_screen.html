@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply - Mon Profil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%);
+            color: #1F2937;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 1px solid #E5E7EB;
+            margin-bottom: 40px;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6B7280;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #F3F4F6;
+            color: #4F46E5;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #4F46E5;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            position: relative;
+        }
+
+        .logo-icon::after {
+            content: '✓';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background: #FBBF24;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #1F2937;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        /* Profile Hero */
+        .profile-hero {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 20px;
+            padding: 40px 32px;
+            color: white;
+            text-align: center;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></svg>') repeat;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-60px, -60px); }
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            position: relative;
+            z-index: 2;
+            border: 4px solid rgba(255,255,255,0.2);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            border-color: #FBBF24;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar.empty {
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .profile-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-title {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .profile-completion {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            background: rgba(255,255,255,0.1);
+            padding: 16px 24px;
+            border-radius: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .completion-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(#FBBF24 0deg 252deg, rgba(255,255,255,0.3) 252deg 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .completion-text {
+            text-align: left;
+        }
+
+        .completion-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .completion-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Impact Card */
+        .impact-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 1px solid #E5E7EB;
+            margin-bottom: 32px;
+        }
+
+        .impact-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .impact-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #FBBF24, #F59E0B);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .impact-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+        }
+
+        .impact-item {
+            text-align: center;
+            padding: 16px;
+            background: #F9FAFB;
+            border-radius: 12px;
+        }
+
+        .impact-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4F46E5;
+            margin-bottom: 4px;
+        }
+
+        .impact-label {
+            font-size: 12px;
+            color: #6B7280;
+            font-weight: 500;
+        }
+
+        /* Profile Sections */
+        .profile-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #E5E7EB;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+        }
+
+        .section-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            background: #F9FAFB;
+            border-bottom: 1px solid #E5E7EB;
+            cursor: pointer;
+        }
+
+        .section-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .section-icon.personal {
+            background: #3B82F6;
+        }
+
+        .section-icon.contact {
+            background: #10B981;
+        }
+
+        .section-icon.professional {
+            background: #8B5CF6;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #1F2937;
+        }
+
+        .section-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.complete {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-badge.incomplete {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .edit-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            background: #F3F4F6;
+            color: #6B7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn:hover {
+            background: #4F46E5;
+            color: white;
+        }
+
+        .section-content {
+            padding: 24px;
+        }
+
+        .field-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .field-value {
+            color: #1F2937;
+            padding: 12px 0;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .field-value.empty {
+            color: #9CA3AF;
+            font-style: italic;
+        }
+
+        .field-value.textarea {
+            line-height: 1.6;
+        }
+
+        /* Edit Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: between;
+            padding: 24px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1F2937;
+            flex: 1;
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            background: #F3F4F6;
+            color: #6B7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #EF4444;
+            color: white;
+        }
+
+        .modal-content {
+            padding: 24px;
+            max-height: calc(90vh - 140px);
+            overflow-y: auto;
+        }
+
+        .avatar-upload {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .avatar-upload-area {
+            width: 120px;
+            height: 120px;
+            border: 3px dashed #D1D5DB;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-upload-area:hover {
+            border-color: #4F46E5;
+            background: #F0F9FF;
+        }
+
+        .avatar-upload-area.has-image {
+            border-style: solid;
+            border-color: #4F46E5;
+        }
+
+        .avatar-upload-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-field.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-input, .form-textarea {
+            padding: 12px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #4F46E5;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #4F46E5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338CA;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #FBBF24;
+            color: #1F2937;
+        }
+
+        .btn-secondary:hover {
+            background: #F59E0B;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #E5E7EB;
+            color: #6B7280;
+        }
+
+        .btn-outline:hover {
+            border-color: #4F46E5;
+            color: #4F46E5;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            padding: 24px;
+            border-top: 1px solid #E5E7EB;
+            background: #F9FAFB;
+        }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 64px;
+            height: 64px;
+            background: #4F46E5;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(79, 70, 229, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .field-group {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .impact-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tips */
+        .tip-card {
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            border: 1px solid #F59E0B;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .tip-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .tip-title {
+            font-weight: 600;
+            color: #92400E;
+        }
+
+        .tip-content {
+            color: #B45309;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <a href="#" class="back-button">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 12H5m7-7l-7 7 7 7"/>
+                </svg>
+                Retour
+            </a>
+            <div class="logo">
+                <div class="logo-icon">A</div>
+                <div class="logo-text">Apply</div>
+            </div>
+        </header>
+
+        <!-- Profile Hero -->
+        <div class="profile-hero fade-in">
+            <div class="profile-avatar" onclick="openEditModal('personal')">
+                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&h=120&fit=crop&crop=face" alt="Profile Avatar">
+            </div>
+            <div class="profile-name">John Doe</div>
+            <div class="profile-title">Product Manager Senior</div>
+            <div class="profile-completion">
+                <div class="completion-circle">70%</div>
+                <div class="completion-text">
+                    <div class="completion-title">Profil presque complet</div>
+                    <div class="completion-subtitle">2 informations manquantes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Impact Card -->
+        <div class="impact-card fade-in">
+            <div class="impact-header">
+                <div class="impact-icon">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </div>
+                <div class="impact-title">Impact de votre profil sur Apply</div>
+            </div>
+            <div class="impact-grid">
+                <div class="impact-item">
+                    <div class="impact-value">85%</div>
+                    <div class="impact-label">Précision IA</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-value">12</div>
+                    <div class="impact-label">Candidatures générées</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-value">4</div>
+                    <div class="impact-label">Entretiens décrochés</div>
+                </div>
+                <div class="impact-item">
+                    <div class="impact-value">1</div>
+                    <div class="impact-label">Offre reçue</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tip Card -->
+        <div class="tip-card fade-in">
+            <div class="tip-header">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l.09 8.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+                <div class="tip-title">Conseil Apply</div>
+            </div>
+            <div class="tip-content">
+                Complétez votre résumé personnel pour améliorer la précision de l'IA de +15% et générer des lettres de motivation plus percutantes.
+            </div>
+        </div>
+
+        <!-- Profile Sections -->
+        <div class="profile-sections">
+            <!-- Personal Info -->
+            <div class="section-card fade-in">
+                <div class="section-header" onclick="toggleSection('personal')">
+                    <div class="section-info">
+                        <div class="section-icon personal">
+                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                        <div class="section-title">Informations personnelles</div>
+                    </div>
+                    <div class="section-status">
+                        <div class="status-badge complete">Complet</div>
+                        <button class="edit-btn" onclick="openEditModal('personal'); event.stopPropagation();">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="section-content" id="personalContent">
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="field-label">Prénom</div>
+                            <div class="field-value">John</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Nom</div>
+                            <div class="field-value">Doe</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Email</div>
+                            <div class="field-value">john.doe@email.com</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Téléphone</div>
+                            <div class="field-value">+33 6 12 34 56 78</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Info -->
+            <div class="section-card fade-in">
+                <div class="section-header" onclick="toggleSection('professional')">
+                    <div class="section-info">
+                        <div class="section-icon professional">
+                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                <line x1="8" y1="21" x2="16" y2="21"/>
+                                <line x1="12" y1="17" x2="12" y2="21"/>
+                            </svg>
+                        </div>
+                        <div class="section-title">Informations professionnelles</div>
+                    </div>
+                    <div class="section-status">
+                        <div class="status-badge incomplete">Incomplet</div>
+                        <button class="edit-btn" onclick="openEditModal('professional'); event.stopPropagation();">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="section-content" id="professionalContent" style="display: none;">
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="field-label">Titre de poste actuel/recherché</div>
+                            <div class="field-value">Product Manager Senior</div>
+                        </div>
+                        <div class="field">
+                            <div class="field-label">Résumé personnel / Objectif</div>
+                            <div class="field-value empty">Non renseigné - Recommandé pour l'IA</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="section-card fade-in">
+                <div class="section-header" onclick="toggleSection('contact')">
+                    <div class="section-info">
+                        <div class="section-icon contact">
+                            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                        </div>
+                        <div class="section-title">Adresse</div>
+                    </div>
+                    <div class="section-status">
+                        <div class="status-badge incomplete">Incomplet</div>
+                        <button class="edit-btn" onclick="openEditModal('contact'); event.stopPropagation();">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="section-content" id="contactContent" style="display: none;">
+                    <div class="field-group">
+                        <div class="field">
+                            <div class="field-label">Adresse complète</div>
+                            <div class="field-value empty">Non renseigné</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Action Button -->
+        <button class="fab" onclick="openEditModal('personal')">
+            <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Modifier mon profil</div>
+                <button class="close-btn" onclick="closeEditModal()">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-content">
+                <!-- Avatar Upload -->
+                <div class="avatar-upload">
+                    <div class="avatar-upload-area has-image" onclick="document.getElementById('avatarInput').click()">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&h=120&fit=crop&crop=face" alt="Avatar">
+                    </div>
+                    <div class="upload-text">Cliquez pour changer votre photo</div>
+                    <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                </div>
+
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        Informations personnelles
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label">Prénom *</label>
+                            <input type="text" class="form-input" value="John" required>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Nom *</label>
+                            <input type="text" class="form-input" value="Doe" required>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" value="john.doe@email.com" readonly>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Téléphone</label>
+                            <input type="tel" class="form-input" value="+33 6 12 34 56 78">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Information -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                        Informations professionnelles
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field full-width">
+                            <label class="form-label">Titre de poste actuel/recherché</label>
+                            <input type="text" class="form-input" value="Product Manager Senior">
+                        </div>
+                        <div class="form-field full-width">
+                            <label class="form-label">Résumé personnel / Objectif <span style="color: #FBBF24;">⭐ Recommandé pour l'IA</span></label>
+                            <textarea class="form-textarea" placeholder="Décrivez brièvement votre profil professionnel, vos aspirations et ce qui vous motive dans votre recherche d'emploi..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        Adresse
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field full-width">
+                            <label class="form-label">Adresse complète</label>
+                            <textarea class="form-textarea" rows="3" placeholder="123 Rue de la République, 69000 Lyon, France"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeEditModal()">Annuler</button>
+                <button class="btn btn-primary btn-full" onclick="saveProfile()">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Enregistrer les modifications
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEditSection = 'personal';
+
+        function toggleSection(sectionName) {
+            const content = document.getElementById(sectionName + 'Content');
+            const isVisible = content.style.display !== 'none';
+            
+            content.style.display = isVisible ? 'none' : 'block';
+        }
+
+        function openEditModal(section = 'personal') {
+            currentEditSection = section;
+            const modal = document.getElementById('editModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        function saveProfile() {
+            // Simulate save
+            setTimeout(() => {
+                closeEditModal();
+                
+                // Update completion percentage
+                const completionCircle = document.querySelector('.completion-circle');
+                const completionTitle = document.querySelector('.completion-title');
+                const completionSubtitle = document.querySelector('.completion-subtitle');
+                
+                completionCircle.textContent = '100%';
+                completionTitle.textContent = 'Profil complet !';
+                completionSubtitle.textContent = 'Toutes les informations sont renseignées';
+                
+                // Update impact stats
+                const precisionValue = document.querySelector('.impact-value');
+                precisionValue.textContent = '95%';
+                
+                // Show success message
+                showToast('Profil mis à jour avec succès ! La précision de l\'IA a été améliorée.', 'success');
+            }, 1000);
+        }
+
+        function showToast(message, type) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10B981' : '#EF4444'};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 2000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            `;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // Handle avatar upload
+        document.getElementById('avatarInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatarImages = document.querySelectorAll('.avatar-upload-area img, .profile-avatar img');
+                    avatarImages.forEach(img => {
+                        img.src = e.target.result;
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Close modal on overlay click
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+
+        // Initialize with personal section open
+        document.getElementById('personalContent').style.display = 'block';
+    </script>
+</body>
+</html>

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply - Onboarding Prototype</title>
+    <style>
+        /* Design System Tokens */
+        :root {
+            --primary-blue: #4F46E5;
+            --accent-yellow: #FBBF24;
+            --text-dark: #1F2937;
+            --text-medium: #6B7280;
+            --neutral-bg: #FFFFFF;
+            --neutral-light: #F9FAFB;
+            --success-green: #10B981;
+            --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-button: 0 4px 14px -2px rgba(79, 70, 229, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dark);
+        }
+
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            background: var(--neutral-bg);
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: var(--neutral-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .onboarding-screen {
+            height: calc(100% - 44px);
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute;
+            width: 100%;
+            background: var(--neutral-bg);
+        }
+
+        .onboarding-screen.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .onboarding-screen.prev {
+            transform: translateX(-100%);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 48px;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            position: relative;
+        }
+
+        .logo::before {
+            content: 'A';
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo::after {
+            content: '✓';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            background: var(--success-green);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border: 2px solid white;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .illustration {
+            width: 200px;
+            height: 160px;
+            margin: 0 auto 40px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .illustration::before {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle, var(--accent-yellow)20, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .illustration-icon {
+            font-size: 80px;
+            z-index: 2;
+            position: relative;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+        }
+
+        .slide-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+        }
+
+        .slide-subtitle {
+            font-size: 18px;
+            line-height: 1.5;
+            color: var(--text-medium);
+            margin-bottom: 48px;
+        }
+
+        .navigation-area {
+            margin-top: auto;
+        }
+
+        .dots-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: var(--primary-blue);
+            transform: scale(1.2);
+        }
+
+        .cta-button {
+            background: var(--accent-yellow);
+            color: var(--text-dark);
+            border: none;
+            padding: 18px 32px;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-button);
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -5px rgba(251, 191, 36, 0.4);
+        }
+
+        .cta-button:active {
+            transform: translateY(0);
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .skip-button {
+            background: none;
+            border: none;
+            color: var(--text-medium);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .skip-button:hover {
+            background: var(--neutral-light);
+            color: var(--text-dark);
+        }
+
+        /* Screen 2 specific styles */
+        .upload-options {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 32px 0;
+        }
+
+        .upload-option {
+            padding: 20px;
+            border: 2px dashed #D1D5DB;
+            border-radius: 16px;
+            background: var(--neutral-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .upload-option:hover {
+            border-color: var(--primary-blue);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .upload-option-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            color: var(--primary-blue);
+        }
+
+        .upload-option-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .upload-option-desc {
+            font-size: 14px;
+            color: var(--text-medium);
+        }
+
+        /* Screen 3 specific styles */
+        .form-group {
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .tags-input {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 14px;
+            color: var(--text-medium);
+            margin-top: 4px;
+        }
+
+        .success-checkmark {
+            color: var(--success-green);
+            font-size: 24px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>🔋 100%</span>
+        </div>
+
+        <!-- Screen 1: Value Proposition -->
+        <div class="onboarding-screen active" id="screen1">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <span class="brand-name">Apply</span>
+            </div>
+            
+            <div class="content-area">
+                <div class="illustration">
+                    <div class="illustration-icon">🚀</div>
+                </div>
+                
+                <h1 class="slide-title">Apply postule pour vous, intelligemment</h1>
+                <p class="slide-subtitle">Libérez-vous de la charge mentale de la recherche d'emploi et concentrez-vous sur la réussite de vos entretiens.</p>
+            </div>
+            
+            <div class="navigation-area">
+                <div class="dots-indicator">
+                    <div class="dot active" onclick="goToSlide(0)"></div>
+                    <div class="dot" onclick="goToSlide(1)"></div>
+                    <div class="dot" onclick="goToSlide(2)"></div>
+                </div>
+                
+                <button class="cta-button" onclick="nextSlide()">
+                    Commencer
+                </button>
+                <button class="skip-button" onclick="skipOnboarding()">
+                    Passer pour l'instant
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 2: CV Import -->
+        <div class="onboarding-screen" id="screen2">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <span class="brand-name">Apply</span>
+            </div>
+            
+            <div class="content-area">
+                <h1 class="slide-title">Importez votre CV principal</h1>
+                <p class="slide-subtitle">Laissez notre IA extraire vos informations pour gagner du temps.</p>
+                
+                <div class="upload-options">
+                    <div class="upload-option" onclick="uploadPDF()">
+                        <div class="upload-option-icon">📄</div>
+                        <div class="upload-option-title">Importer depuis un PDF</div>
+                        <div class="upload-option-desc">Glissez votre CV ou cliquez pour parcourir</div>
+                    </div>
+                    
+                    <div class="upload-option" onclick="importLinkedIn()">
+                        <div class="upload-option-icon">💼</div>
+                        <div class="upload-option-title">Importer depuis LinkedIn</div>
+                        <div class="upload-option-desc">Connexion sécurisée à votre profil</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation-area">
+                <div class="dots-indicator">
+                    <div class="dot" onclick="goToSlide(0)"></div>
+                    <div class="dot active" onclick="goToSlide(1)"></div>
+                    <div class="dot" onclick="goToSlide(2)"></div>
+                </div>
+                
+                <button class="cta-button" onclick="nextSlide()" id="continueBtn2" style="opacity: 0.5; cursor: not-allowed;" disabled>
+                    Continuer
+                </button>
+                <button class="skip-button" onclick="skipStep()">
+                    Passer cette étape
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Career Objectives -->
+        <div class="onboarding-screen" id="screen3">
+            <div class="logo-container">
+                <div class="logo"></div>
+                <span class="brand-name">Apply</span>
+            </div>
+            
+            <div class="content-area">
+                <h1 class="slide-title">Quels sont vos objectifs de carrière ?</h1>
+                <p class="slide-subtitle">Aidez-nous à personnaliser votre expérience et à trouver les meilleures opportunités.</p>
+                
+                <div class="form-group">
+                    <label class="form-label">Poste(s) Cible(s)</label>
+                    <input type="text" class="form-input" placeholder="Ex: Product Manager, UX Designer" oninput="validateForm()">
+                    <div class="form-hint">Plusieurs postes possibles, séparés par des virgules</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Secteur(s) d'Activité</label>
+                    <input type="text" class="form-input" placeholder="Ex: Tech, Finance, Santé" oninput="validateForm()">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Localisation(s) Préférée(s)</label>
+                    <input type="text" class="form-input" placeholder="Ex: Lyon, Paris, Télétravail" oninput="validateForm()">
+                </div>
+            </div>
+            
+            <div class="navigation-area">
+                <div class="dots-indicator">
+                    <div class="dot" onclick="goToSlide(0)"></div>
+                    <div class="dot" onclick="goToSlide(1)"></div>
+                    <div class="dot active" onclick="goToSlide(2)"></div>
+                </div>
+                
+                <button class="cta-button" onclick="completeOnboarding()" id="completeBtn" style="opacity: 0.5; cursor: not-allowed;" disabled>
+                    Terminer l'Onboarding
+                </button>
+                <button class="skip-button" onclick="skipStep()">
+                    Définir plus tard
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.onboarding-screen');
+        const dots = document.querySelectorAll('.dot');
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active', 'prev');
+                if (i === index) {
+                    slide.classList.add('active');
+                } else if (i < index) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            currentSlide = index;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+        }
+
+        function skipOnboarding() {
+            alert('🎯 Redirection vers le tableau de bord principal...\n\nDans l\'app réelle : navigation vers /tabs/dashboard');
+        }
+
+        function skipStep() {
+            if (currentSlide < slides.length - 1) {
+                nextSlide();
+            } else {
+                completeOnboarding();
+            }
+        }
+
+        function uploadPDF() {
+            // Simulation upload PDF
+            setTimeout(() => {
+                alert('✅ CV PDF analysé avec succès !\n\n📊 Données extraites :\n- Nom : Sarah Martin\n- Expérience : 8 ans Product Management\n- Compétences : Agile, Data Analysis, UX\n\nDans l\'app réelle : modal de validation des données');
+                enableContinue('continueBtn2');
+            }, 1500);
+        }
+
+        function importLinkedIn() {
+            // Simulation import LinkedIn
+            setTimeout(() => {
+                alert('💼 Profil LinkedIn importé !\n\n📋 Données récupérées :\n- Expériences : 3 postes\n- Formations : Master Management\n- Compétences : 15 validées\n\nDans l\'app réelle : OAuth2 LinkedIn + validation');
+                enableContinue('continueBtn2');
+            }, 2000);
+        }
+
+        function enableContinue(buttonId) {
+            const btn = document.getElementById(buttonId);
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.disabled = false;
+            btn.innerHTML = '<span class="success-checkmark">✓</span> Continuer';
+        }
+
+        function validateForm() {
+            const inputs = document.querySelectorAll('#screen3 .form-input');
+            const allFilled = Array.from(inputs).some(input => input.value.trim().length > 0);
+            
+            if (allFilled) {
+                enableContinue('completeBtn');
+                document.getElementById('completeBtn').innerHTML = 'Voir les offres';
+            }
+        }
+
+        function completeOnboarding() {
+            alert('🎉 Onboarding terminé !\n\n🚀 Redirection vers votre tableau de bord personnalisé...\n\nDans l\'app réelle :\n- Sauvegarde profil utilisateur\n- Navigation vers /tabs/postuler\n- Tracking événement "onboarding_completed"');
+        }
+
+        // Auto-advance demo (optional)
+        let autoAdvance = false;
+        if (autoAdvance) {
+            setInterval(() => {
+                if (currentSlide < slides.length - 1) {
+                    nextSlide();
+                } else {
+                    showSlide(0);
+                }
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
