@@ -1,20 +1,20 @@
 // functions/src/callOpenAi.ts
 import { HttpsOptions, onCall, HttpsError } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
-import { defineString } from "firebase-functions/params"; // Pour la clé API
-import fetch from "node-fetch"; // Ou fetch global si Node 20+ est stable dans ton env.
+import { defineSecret } from "firebase-functions/params"; // CHANGEMENT: defineSecret au lieu de defineString
 
-// Définition du paramètre pour la clé API OpenAI
-const openAIKeyParam = defineString("OPENAI_API_KEY");
+// CHANGEMENT: Utiliser defineSecret pour les données sensibles
+const openAIKeySecret = defineSecret("OPENAI_API_KEY");
 
 const functionOptions: HttpsOptions = {
-  region: "europe-west1", // Garde la même région que tes autres fonctions
+  region: "europe-west1",
   timeoutSeconds: 180,
   memory: "512MiB",
+  secrets: [openAIKeySecret], // AJOUT: Nécessaire pour les secrets
 };
 
 export const callOpenAi = onCall(functionOptions, async (request) => {
-  if (!request.auth) { // Vérification d'authentification
+  if (!request.auth) {
     logger.error("Appel non authentifié à callOpenAi.", { structuredData: true });
     throw new HttpsError(
       "unauthenticated",
@@ -28,17 +28,21 @@ export const callOpenAi = onCall(functionOptions, async (request) => {
     throw new HttpsError("invalid-argument", "La fonction doit être appelée avec un paramètre 'prompt' (chaîne de caractères).");
   }
 
-  // Récupère la valeur de la clé API depuis les paramètres configurés
-  const apiKey = openAIKeyParam.value();
+  // CHANGEMENT: Utiliser .value() pour les secrets
+  const apiKey = openAIKeySecret.value();
 
   if (!apiKey) {
-    logger.error("La clé API OpenAI n'est pas configurée dans les paramètres de la fonction.", { uid: request.auth.uid, structuredData: true });
+    logger.error("La clé API OpenAI n'est pas configurée dans les secrets de la fonction.", { uid: request.auth.uid, structuredData: true });
     throw new HttpsError("internal", "Configuration de la clé API OpenAI manquante.");
   }
 
+  // Debug log (à supprimer en production)
+  logger.info(`Clé API commencée par: ${apiKey.substring(0, 10)}...`, { uid: request.auth.uid, structuredData: true });
+  
   logger.info(`Appel à OpenAI API par utilisateur ${request.auth.uid} avec prompt (début): ${prompt.substring(0, 100)}...`, { structuredData: true });
 
   try {
+    // CHANGEMENT: Utiliser fetch global (Node.js 20) au lieu de node-fetch
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -46,10 +50,10 @@ export const callOpenAi = onCall(functionOptions, async (request) => {
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo", // Tu pourras changer de modèle plus tard si besoin
+        model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 2000, // Ajuste selon tes besoins
-        temperature: 0.7, // Ajuste pour plus ou moins de créativité
+        max_tokens: 2000,
+        temperature: 0.7,
       }),
     });
 
@@ -59,7 +63,7 @@ export const callOpenAi = onCall(functionOptions, async (request) => {
       throw new HttpsError("internal", `Erreur de l'API OpenAI: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json() as any; // Typage plus précis possible
+    const data = await response.json() as any;
 
     if (data.choices && data.choices.length > 0 && data.choices[0].message && data.choices[0].message.content) {
       logger.info("Réponse reçue d'OpenAI avec succès.", { uid: request.auth.uid, structuredData: true });
@@ -74,7 +78,7 @@ export const callOpenAi = onCall(functionOptions, async (request) => {
   } catch (error: any) {
     logger.error("Erreur lors de l'appel à OpenAI:", error, { uid: request.auth.uid, structuredData: true });
     let errorMessage = "Échec de l'appel à OpenAI.";
-    if (error instanceof HttpsError) throw error; // Ne pas ré-encapsuler une HttpsError
+    if (error instanceof HttpsError) throw error;
     if (error instanceof Error) errorMessage = error.message;
     throw new HttpsError("internal", errorMessage);
   }

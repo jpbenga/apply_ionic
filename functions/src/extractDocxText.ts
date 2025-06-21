@@ -16,7 +16,7 @@
 import { HttpsOptions, onCall, HttpsError } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import * as mammoth from "mammoth";
-import axios from "axios";
+import axios, { AxiosError } from "axios"; // Fix: Import AxiosError type
 
 const functionOptions: HttpsOptions = {
   region: "europe-west1",
@@ -48,7 +48,9 @@ export const extractDocxText = onCall(functionOptions, async (request) => {
     // 1. Télécharger le fichier DOCX depuis l'URL fournie
     logger.info(`Téléchargement du fichier DOCX depuis: ${docxUrl}`, { uid: request.auth.uid, structuredData: true });
     const response = await axios.get(docxUrl, { responseType: 'arraybuffer' });
-    const fileBuffer = Buffer.from(response.data);
+    
+    // Fix: Cast response.data to ArrayBuffer for Buffer.from()
+    const fileBuffer = Buffer.from(response.data as ArrayBuffer);
     logger.info(`Fichier DOCX téléchargé avec succès (taille: ${fileBuffer.length} bytes).`, { uid: request.auth.uid, structuredData: true });
 
     // 2. Extraire le texte brut du buffer avec Mammoth
@@ -74,7 +76,8 @@ export const extractDocxText = onCall(functionOptions, async (request) => {
       structuredData: true
     });
 
-    if (axios.isAxiosError(error)) {
+    // Fix: Use AxiosError instance check instead of axios.isAxiosError
+    if (error instanceof AxiosError) {
       throw new HttpsError("internal", `Erreur lors du téléchargement du fichier DOCX: ${error.message}`);
     } else if (error.name === 'UnsupportedFileTypeError') { // Erreur spécifique de Mammoth
        throw new HttpsError("invalid-argument", "Le fichier fourni n'est pas un type DOCX supporté.");
